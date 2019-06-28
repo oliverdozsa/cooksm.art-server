@@ -1,43 +1,26 @@
 package controllers;
 
-import com.github.database.rider.core.configuration.DataSetConfig;
-import com.github.database.rider.core.connection.ConnectionHolderImpl;
-import com.github.database.rider.core.dataset.DataSetExecutorImpl;
-import com.github.database.rider.core.util.EntityManagerProvider;
+import com.github.database.rider.core.api.dataset.DataSet;
 import models.entities.Ingredient;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import play.Application;
-import play.inject.guice.GuiceApplicationBuilder;
-import play.test.WithApplication;
+import rules.PlayApplicationWithGuiceDbRider;
 
 import java.util.List;
 
-import static com.github.database.rider.core.util.EntityManagerProvider.em;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class TryingDbRiderTest extends WithApplication {
-    private EntityManagerProvider emProvider;
-    private DataSetExecutorImpl executor;
-
-    @Before
-    public void before(){
-        emProvider = EntityManagerProvider.instance("openrecipesPU");
-        executor = DataSetExecutorImpl.instance(new ConnectionHolderImpl(emProvider.connection()));
-        DataSetConfig dataSetConfig = new DataSetConfig("datasets/yml/ingredients.yml");
-        executor.createDataSet(dataSetConfig);
-    }
+public class TryingDbRiderTest {
+    @Rule
+    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
     @Test
-    public void shouldListUsers() {
-        List<Ingredient> ingredients = em().createQuery("select i from Ingredient i").getResultList();
+    @DataSet(value = "datasets/yml/ingredients.yml")
+    public void shouldListIngredients() {
+        List<Ingredient> ingredients = application.getEmProvider().getEm().createQuery("select i from Ingredient i").getResultList();
         assertThat(ingredients, notNullValue());
+        assertThat(ingredients.size(), equalTo(2));
     }
-
-    @Override
-    protected Application provideApplication() {
-        return new GuiceApplicationBuilder().build();
-    }
-
 }
