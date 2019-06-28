@@ -1,0 +1,13 @@
+logs
+project/project
+project/target
+target
+tmp
+dist
+.cache
+.idea
+.g8
+*trace.db
+database/*
+*create-all.sql
+*drop-all.sql
