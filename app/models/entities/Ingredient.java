@@ -2,8 +2,11 @@ package models.entities;
 
 import javax.persistence.*;
 
-// Ingredient.
+/**
+ * Ingredient entity.
+ */
 @Entity
+@Table(name = "ingredient")
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

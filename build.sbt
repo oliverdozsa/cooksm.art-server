@@ -11,6 +11,7 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(javaJpa, "org.hibernate" % "hibernate-core" % "5.4.2.Final")
 libraryDependencies += "com.h2database" % "h2" % "1.4.192"
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8"
+libraryDependencies += "com.github.database-rider" % "rider-core" % "1.7.2" % "test"
 libraryDependencies ++= Seq(evolutions, jdbc)
 
 PlayKeys.externalizeResourcesExcludes += baseDirectory.value / "conf" / "META-INF" / "META-INF/persistence.xml"
