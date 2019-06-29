@@ -1,6 +1,9 @@
 package controllers.v1;
 
 import dto.IngredientNameDto;
+import dto.IngredientNamesDto;
+import lombok.Getter;
+import lombok.Setter;
 import models.entities.IngredientName;
 import models.repositories.IngredientNameRepository;
 import play.data.Form;
@@ -13,10 +16,14 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static play.libs.Json.toJson;
 
 public class IngredientNamesController extends Controller {
@@ -40,13 +47,24 @@ public class IngredientNamesController extends Controller {
             params.limit = params.limit == null ? 25 : params.limit;
             params.offset = params.offset == null ? 0 : params.offset;
 
-            return ingredientNameRepository
-                    .list(params.nameLike, params.languageId, params.limit, params.offset)
-                    .thenApplyAsync(s -> ok(toJson(s.map(this::toDto).collect(Collectors.toList()))), ec.current());
+            CompletionStage<Stream<IngredientName>> namesStage =
+                    ingredientNameRepository.list(params.nameLike, params.languageId, params.limit, params.offset);
+            CompletionStage<Long> countStage = ingredientNameRepository.count(params.nameLike, params.languageId);
+
+            return namesStage
+                    .thenCombineAsync(
+                            countStage,
+                            (n, c) -> {
+                                List<IngredientNameDto> names = Collections.unmodifiableList(n
+                                        .map(this::toDto)
+                                        .collect(Collectors.toList()));
+
+                                return ok(toJson(new IngredientNamesDto(names, c)));
+                            }, ec.current());
         }
     }
 
-    private IngredientNameDto toDto(IngredientName entity){
+    private IngredientNameDto toDto(IngredientName entity) {
         return new IngredientNameDto(entity.getIngredient().getId(), entity.getName());
     }
 
@@ -54,19 +72,21 @@ public class IngredientNamesController extends Controller {
      * Ingredient query parameters.
      */
     @Constraints.Validate
+    @Getter
+    @Setter
     public static class IngredientNameQueryParams implements Constraints.Validatable<ValidationError> {
         @Constraints.Required
-        public Long languageId;
+        private Long languageId;
 
         @Constraints.MinLength(2)
-        public String nameLike;
+        private String nameLike;
 
         @Constraints.Min(0)
-        public Integer offset;
+        private Integer offset;
 
         @Constraints.Min(1)
         @Constraints.Max(50)
-        public Integer limit;
+        private Integer limit;
 
         @Override
         public ValidationError validate() {

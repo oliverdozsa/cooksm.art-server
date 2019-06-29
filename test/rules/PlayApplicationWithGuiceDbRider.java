@@ -46,4 +46,8 @@ public class PlayApplicationWithGuiceDbRider implements TestRule {
     public EntityManagerProvider getEmProvider() {
         return emProvider;
     }
+
+    public Application getApplication() {
+        return application;
+    }
 }

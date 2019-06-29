@@ -25,17 +25,31 @@ public class JPAIngredientNameRepository extends RepositoryBase implements Ingre
 
     @Override
     public CompletionStage<Stream<IngredientName>> list(String nameLike, Long languageId, int limit, int offset) {
-        return supplyAsync(() -> wrap(em -> list(em, nameLike, languageId, limit, offset)));
+        return supplyAsync(() -> wrap(em -> list(em, nameLike, languageId, limit, offset)), dbExecutionContext);
+    }
+
+    @Override
+    public CompletionStage<Long> count(String nameLike, Long languageId) {
+        return supplyAsync(() -> wrap(em -> count(em, nameLike, languageId)), dbExecutionContext);
     }
 
     private Stream<IngredientName> list(EntityManager em, String nameLike, Long languageId, int limit, int offset) {
         TypedQuery<IngredientName> query =
                 em.createNamedQuery(IngredientName.NQ_LIST_INGREDIENT_NAMES, IngredientName.class);
-        query.setParameter("nameLike", nameLike);
+        query.setParameter("nameLike", "%" + nameLike + "%");
         query.setParameter("languageId", languageId);
         query.setMaxResults(limit);
         query.setFirstResult(offset);
 
         return query.getResultList().stream();
+    }
+
+    private Long count(EntityManager em, String nameLike, Long languageId){
+        TypedQuery<Long> query =
+                em.createNamedQuery(IngredientName.NQ_LIST_INGREDIENT_NAMES_COUNT, Long.class);
+        query.setParameter("nameLike", "%" + nameLike + "%");
+        query.setParameter("languageId", languageId);
+
+        return query.getSingleResult();
     }
 }

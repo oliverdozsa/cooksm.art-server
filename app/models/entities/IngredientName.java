@@ -9,10 +9,13 @@ import javax.persistence.*;
 @Table(name = "ingredient_name")
 @NamedQueries({
         @NamedQuery(name = IngredientName.NQ_LIST_INGREDIENT_NAMES,
-                query = "SELECT n FROM IngredientName n WHERE language.id = :languageId AND name LIKE '%:nameLike%'")
+                query = "SELECT n FROM IngredientName n WHERE language.id = :languageId AND name LIKE :nameLike"),
+        @NamedQuery(name = IngredientName.NQ_LIST_INGREDIENT_NAMES_COUNT,
+                query = "SELECT COUNT(n) FROM IngredientName n WHERE language.id = :languageId AND name LIKE :nameLike")
 })
 public class IngredientName {
     public static final String NQ_LIST_INGREDIENT_NAMES = "listIngredientNames";
+    public static final String NQ_LIST_INGREDIENT_NAMES_COUNT = "listIngredientNamesCount";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

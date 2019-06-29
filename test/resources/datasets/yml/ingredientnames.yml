@@ -1,0 +1,45 @@
+ingredient:
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  - id: 6
+
+language:
+  - id: 1
+    iso_name: hu
+
+  - id: 2
+    iso_name: en
+
+ingredient_name:
+  - id: 1
+    language_id: 1
+    ingredient_id: 1
+    name: hu_1
+
+  - id: 2
+    language_id: 1
+    ingredient_id: 2
+    name: hu_2
+
+  - id: 3
+    language_id: 1
+    ingredient_id: 3
+    name: hu_3
+
+  - id: 4
+    language_id: 1
+    ingredient_id: 4
+    name: hu_4
+
+  - id: 5
+    language_id: 1
+    ingredient_id: 5
+    name: hu_5
+
+  - id: 6
+    language_id: 2
+    ingredient_id: 6
+    name: en_6

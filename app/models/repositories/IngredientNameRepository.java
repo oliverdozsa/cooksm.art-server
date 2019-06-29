@@ -7,4 +7,5 @@ import java.util.stream.Stream;
 
 public interface IngredientNameRepository {
     CompletionStage<Stream<IngredientName>> list(String nameLike, Long languageId, int limit, int offset);
+    CompletionStage<Long> count(String nameLike, Long languageId);
 }
