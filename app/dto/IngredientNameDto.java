@@ -3,7 +3,7 @@ package dto;
 import lombok.Data;
 
 @Data
-public class IngredientDto {
-    private final Long id;
+public class IngredientNameDto {
+    private final Long ingredientId;
     private final String name;
 }

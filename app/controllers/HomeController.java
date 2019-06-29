@@ -1,6 +1,6 @@
 package controllers;
 
-import dto.IngredientDto;
+import dto.IngredientNameDto;
 import play.libs.Json;
 import play.mvc.*;
 
@@ -17,7 +17,7 @@ public class HomeController extends Controller {
      * <code>GET</code> request with a path of <code>/</code>.
      */
     public Result index() {
-        return ok(Json.toJson(new IngredientDto(1L, "something")));
+        return ok(Json.toJson(new IngredientNameDto(1L, "something")));
     }
 
 }

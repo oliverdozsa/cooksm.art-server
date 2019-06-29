@@ -7,7 +7,13 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "ingredient_name")
+@NamedQueries({
+        @NamedQuery(name = IngredientName.NQ_LIST_INGREDIENT_NAMES,
+                query = "SELECT n FROM IngredientName n WHERE language.id = :languageId AND name LIKE '%:nameLike%'")
+})
 public class IngredientName {
+    public static final String NQ_LIST_INGREDIENT_NAMES = "listIngredientNames";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

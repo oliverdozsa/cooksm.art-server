@@ -1,0 +1,1 @@
+GET    /ingredientnames               controllers.v1.IngredientNamesController.listNames(request: Request)
