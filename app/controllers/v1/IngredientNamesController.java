@@ -1,7 +1,7 @@
 package controllers.v1;
 
 import dto.IngredientNameDto;
-import dto.IngredientNamesDto;
+import dto.PageDto;
 import lombok.Getter;
 import lombok.Setter;
 import models.entities.IngredientName;
@@ -16,11 +16,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -47,20 +44,15 @@ public class IngredientNamesController extends Controller {
             params.limit = params.limit == null ? 25 : params.limit;
             params.offset = params.offset == null ? 0 : params.offset;
 
-            CompletionStage<Stream<IngredientName>> namesStage =
-                    ingredientNameRepository.list(params.nameLike, params.languageId, params.limit, params.offset);
-            CompletionStage<Long> countStage = ingredientNameRepository.count(params.nameLike, params.languageId);
+            return ingredientNameRepository.page(params.nameLike, params.languageId, params.limit, params.offset)
+                    .thenApplyAsync(p -> {
+                        PageDto<IngredientNameDto> result = new PageDto<>(
+                                p.getItems().stream().map(this::toDto).collect(Collectors.toList()),
+                                p.getTotalCount()
+                        );
 
-            return namesStage
-                    .thenCombineAsync(
-                            countStage,
-                            (n, c) -> {
-                                List<IngredientNameDto> names = Collections.unmodifiableList(n
-                                        .map(this::toDto)
-                                        .collect(Collectors.toList()));
-
-                                return ok(toJson(new IngredientNamesDto(names, c)));
-                            }, ec.current());
+                        return ok(toJson(result));
+                    });
         }
     }
 

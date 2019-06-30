@@ -5,10 +5,10 @@ import play.db.jpa.JPAApi;
 import javax.persistence.EntityManager;
 import java.util.function.Function;
 
-public abstract class RepositoryBase {
+public abstract class JPARepositoryBase {
     protected final JPAApi jpaApi;
 
-    public RepositoryBase(JPAApi jpaApi) {
+    public JPARepositoryBase(JPAApi jpaApi) {
         this.jpaApi = jpaApi;
     }
 

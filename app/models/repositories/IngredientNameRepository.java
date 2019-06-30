@@ -3,9 +3,7 @@ package models.repositories;
 import models.entities.IngredientName;
 
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Stream;
 
 public interface IngredientNameRepository {
-    CompletionStage<Stream<IngredientName>> list(String nameLike, Long languageId, int limit, int offset);
-    CompletionStage<Long> count(String nameLike, Long languageId);
+    CompletionStage<Page<IngredientName>> page(String nameLike, Long languageId, int limit, int offset);
 }

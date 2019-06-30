@@ -34,7 +34,7 @@ public class IngredientNamesControllerTest {
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
 
-        assertEquals(5, resultJson.get("ingredientNames").size());
+        assertEquals(5, resultJson.get("items").size());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class IngredientNamesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        JsonNode resultNamesJson = resultJson.get("ingredientNames");
+        JsonNode resultNamesJson = resultJson.get("items");
 
         assertEquals(2, resultNamesJson.size());
         assertEquals(5, resultJson.get("totalCount").asInt());
@@ -62,7 +62,7 @@ public class IngredientNamesControllerTest {
 
         resultContentStr = contentAsString(result);
         resultJson = Json.parse(resultContentStr);
-        resultNamesJson = resultJson.get("ingredientNames");
+        resultNamesJson = resultJson.get("items");
 
         assertEquals(3, resultNamesJson.size());
     }

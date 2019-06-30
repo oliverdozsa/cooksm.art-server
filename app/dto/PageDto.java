@@ -1,11 +1,12 @@
 package dto;
 
+
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class IngredientNamesDto {
-    private final List<IngredientNameDto> ingredientNames;
+public class PageDto <T> {
+    private final List<T> items;
     private final Long totalCount;
 }

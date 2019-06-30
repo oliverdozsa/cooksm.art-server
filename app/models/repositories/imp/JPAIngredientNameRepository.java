@@ -2,19 +2,23 @@ package models.repositories.imp;
 
 import models.DatabaseExecutionContext;
 import models.entities.IngredientName;
+import models.entities.Language;
 import models.repositories.IngredientNameRepository;
-import models.repositories.RepositoryBase;
+import models.repositories.Page;
+import models.repositories.JPARepositoryBase;
 import play.db.jpa.JPAApi;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-public class JPAIngredientNameRepository extends RepositoryBase implements IngredientNameRepository {
+public class JPAIngredientNameRepository extends JPARepositoryBase implements IngredientNameRepository {
     private final DatabaseExecutionContext dbExecutionContext;
 
     @Inject
@@ -24,32 +28,53 @@ public class JPAIngredientNameRepository extends RepositoryBase implements Ingre
     }
 
     @Override
-    public CompletionStage<Stream<IngredientName>> list(String nameLike, Long languageId, int limit, int offset) {
-        return supplyAsync(() -> wrap(em -> list(em, nameLike, languageId, limit, offset)), dbExecutionContext);
+    public CompletionStage<Page<IngredientName>> page(String nameLike, Long languageId, int limit, int offset) {
+        return supplyAsync(() -> wrap(em -> page(em, nameLike, languageId, limit, offset)), dbExecutionContext);
     }
 
-    @Override
-    public CompletionStage<Long> count(String nameLike, Long languageId) {
-        return supplyAsync(() -> wrap(em -> count(em, nameLike, languageId)), dbExecutionContext);
+    private Page<IngredientName> page(EntityManager em, String nameLike, Long languageId, int limit, int offset) {
+        List<IngredientName> ingredientNames = pageList(em, nameLike, languageId, limit, offset);
+        Long ingredientNamesCount = pageCount(em, nameLike, languageId);
+
+        return new Page<>(ingredientNames, ingredientNamesCount);
     }
 
-    private Stream<IngredientName> list(EntityManager em, String nameLike, Long languageId, int limit, int offset) {
-        TypedQuery<IngredientName> query =
-                em.createNamedQuery(IngredientName.NQ_LIST_INGREDIENT_NAMES, IngredientName.class);
-        query.setParameter("nameLike", "%" + nameLike + "%");
-        query.setParameter("languageId", languageId);
-        query.setMaxResults(limit);
-        query.setFirstResult(offset);
+    private List<IngredientName> pageList(EntityManager em, String nameLike, Long languageId, int limit, int offset) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<IngredientName> criteriaQuery = criteriaBuilder.createQuery(IngredientName.class);
+        Root<IngredientName> root = criteriaQuery.from(IngredientName.class);
 
-        return query.getResultList().stream();
+        criteriaQuery.select(root)
+                .where(pageCriteria(criteriaBuilder, root, nameLike, languageId));
+
+        TypedQuery<IngredientName> typedQuery = em.createQuery(criteriaQuery);
+
+        typedQuery.setFirstResult(offset);
+        typedQuery.setMaxResults(limit);
+
+        return typedQuery.getResultList();
     }
 
-    private Long count(EntityManager em, String nameLike, Long languageId){
-        TypedQuery<Long> query =
-                em.createNamedQuery(IngredientName.NQ_LIST_INGREDIENT_NAMES_COUNT, Long.class);
-        query.setParameter("nameLike", "%" + nameLike + "%");
-        query.setParameter("languageId", languageId);
+    private Long pageCount(EntityManager em, String nameLike, Long languageId) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+        Root<IngredientName> root = criteriaQuery.from(IngredientName.class);
 
-        return query.getSingleResult();
+        criteriaQuery.select(criteriaBuilder.count(root))
+                .where(pageCriteria(criteriaBuilder, root, nameLike, languageId));
+
+        TypedQuery<Long> typedQuery = em.createQuery(criteriaQuery);
+
+        return typedQuery.getSingleResult();
+    }
+
+    private <T> Predicate pageCriteria(
+            CriteriaBuilder criteriaBuilder, Root<T> root, String nameLike, Long languageId) {
+        Join<IngredientName, Language> join = root.join("language");
+
+        Predicate nameLikePredicate = criteriaBuilder.like(root.get("name"), "%" + nameLike + "%");
+        Predicate languageEqPredice = criteriaBuilder.equal(join.get("id"), languageId);
+
+        return criteriaBuilder.and(nameLikePredicate, languageEqPredice);
     }
 }
