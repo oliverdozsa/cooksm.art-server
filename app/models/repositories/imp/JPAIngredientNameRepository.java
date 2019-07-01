@@ -5,14 +5,12 @@ import models.entities.IngredientName;
 import models.entities.Language;
 import models.repositories.IngredientNameRepository;
 import models.repositories.Page;
-import models.repositories.JPARepositoryBase;
 import play.db.jpa.JPAApi;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
