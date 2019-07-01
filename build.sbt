@@ -3,18 +3,16 @@ organization := "com.openrecipes"
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
+lazy val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
 
-scalaVersion := "2.13.0"
+scalaVersion := "2.12.2"
 
 libraryDependencies += guice
-libraryDependencies ++= Seq(javaJpa, "org.hibernate" % "hibernate-core" % "5.4.2.Final")
 libraryDependencies += "com.h2database" % "h2" % "1.4.192"
 libraryDependencies += "org.projectlombok" % "lombok" % "1.18.8"
 libraryDependencies ++= Seq(evolutions, jdbc)
+libraryDependencies ++= Seq(javaJpa % "test", "org.hibernate" % "hibernate-core" % "5.4.2.Final" % "test")
 libraryDependencies += "com.github.database-rider" % "rider-core" % "1.7.2" % "test"
-
-PlayKeys.externalizeResourcesExcludes += baseDirectory.value / "conf" / "META-INF" / "META-INF/persistence.xml"
 
 lazy val isDisableTestFork = settingKey[Boolean]("true when disabletestfork is true; false otherwise")
 isDisableTestFork := System.getProperty("disabletestfork") == "true"

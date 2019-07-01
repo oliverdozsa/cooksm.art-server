@@ -1,5 +1,7 @@
 package models.entities;
 
+import io.ebean.Model;
+
 import javax.persistence.*;
 
 /**
