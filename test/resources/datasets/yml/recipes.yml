@@ -1,0 +1,325 @@
+language:
+  - id: 1
+    iso_name: hu
+
+  - id: 2
+    iso_name: en
+
+ingredient:
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  - id: 6
+  - id: 7
+  - id: 8
+  - id: 9
+  - id: 10
+  - id: 11
+
+ingredient_name:
+  - id: 1
+    name: ingredient_1_hu
+    ingredient_id: 1
+    language_id: 1
+
+  - id: 2
+    name: ingredient_1_en
+    ingredient_id: 1
+    language_id: 2
+
+  - id: 3
+    name: ingredient_2_hu
+    ingredient_id: 2
+    language_id: 1
+
+  - id: 4
+    name: ingredient_2_en
+    ingredient_id: 2
+    language_id: 2
+
+  - id: 5
+    name: ingredient_3_hu
+    ingredient_id: 3
+    language_id: 1
+
+  - id: 6
+    name: ingredient_3_en
+    ingredient_id: 3
+    language_id: 2
+
+  - id: 7
+    name: ingredient_4_hu
+    ingredient_id: 4
+    language_id: 1
+
+  - id: 8
+    name: ingredient_4_en
+    ingredient_id: 4
+    language_id: 2
+
+  - id: 9
+    name: ingredient_5_hu
+    ingredient_id: 5
+    language_id: 1
+
+  - id: 10
+    name: ingredient_5_en
+    ingredient_id: 5
+    language_id: 2
+
+  - id: 11
+    name: ingredient_6_hu
+    ingredient_id: 6
+    language_id: 1
+
+  - id: 12
+    name: ingredient_6_en
+    ingredient_id: 6
+    language_id: 2
+
+  - id: 13
+    name: ingredient_7_hu
+    ingredient_id: 7
+    language_id: 1
+
+  - id: 14
+    name: ingredient_7_en
+    ingredient_id: 7
+    language_id: 2
+
+  - id: 15
+    name: ingredient_8_hu
+    ingredient_id: 8
+    language_id: 1
+
+  - id: 16
+    name: ingredient_8_en
+    ingredient_id: 8
+    language_id: 2
+
+  - id: 17
+    name: ingredient_9_hu
+    ingredient_id: 9
+    language_id: 1
+
+  - id: 18
+    name: ingredient_9_en
+    ingredient_id: 9
+    language_id: 2
+
+  - id: 19
+    name: ingredient_10_hu
+    ingredient_id: 10
+    language_id: 1
+
+  - id: 20
+    name: ingredient_10_en
+    ingredient_id: 10
+    language_id: 2
+
+  - id: 21
+    name: ingredient_1_hu_alias
+    ingredient_id: 1
+    language_id: 1
+
+  - id: 22
+    name: ingredient_2_hu_alias
+    ingredient_id: 2
+    language_id: 1
+
+  - id: 23
+    name: ingredient_6_hu_alias
+    ingredient_id: 6
+    language_id: 1
+
+  - id: 24
+    name: ingredient_1_hu_notag
+    ingredient_id: 11
+    language_id: 1
+
+ingredient_tag:
+  - id: 1
+    name: ingredient_tag_1
+
+  - id: 2
+    name: ingredient_tag_2
+
+  - id: 3
+    name: ingredient_tag_3
+
+  - id: 4
+    name: ingredient_tag_4
+
+  - id: 5
+    name: ingredient_tag_5
+
+  - id: 6
+    name: ingredient_tag_6
+
+ingredient_tag_ingredient:
+  - ingredient_tag_id: 5
+    ingredient_id: 1
+
+  - ingredient_tag_id: 4
+    ingredient_id: 1
+
+  - ingredient_tag_id: 4
+    ingredient_id: 2
+
+  - ingredient_tag_id: 3
+    ingredient_id: 2
+
+  - ingredient_tag_id: 1
+    ingredient_id: 4
+
+  - ingredient_tag_id: 2
+    ingredient_id: 4
+
+  - ingredient_tag_id: 3
+    ingredient_id: 4
+
+  - ingredient_tag_id: 1
+    ingredient_id: 5
+
+  - ingredient_tag_id: 5
+    ingredient_id: 5
+
+  - ingredient_tag_id: 2
+    ingredient_id: 6
+
+  - ingredient_tag_id: 6
+    ingredient_id: 5
+
+source_page:
+  - id: 1
+    name: src_pg_1_hu
+    language_id: 1
+
+  - id: 2
+    name: src_pg_2_hu
+    language_id: 1
+
+  - id: 3
+    name: src_pg_3_en
+    language_id: 2
+
+  - id: 4
+    name: src_pg_4_en
+    language_id: 2
+
+recipe:
+  - id: 1
+    name: recipe_1
+    url: recipe_1_url
+    time: 10
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 1
+
+  - id: 2
+    name: recipe_2
+    url: recipe_2_url
+    time: 10
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 2
+
+  - id: 3
+    name: recipe_3
+    url: recipe_3_url
+    time: 10
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 3
+
+  - id: 4
+    name: recipe_4
+    url: recipe_4_url
+    time: 10
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 4
+
+recipe_description:
+  - id: 1
+    recipe_id: 1
+    language_id: 1
+    text: rec_1_desc_hu
+
+  - id: 2
+    recipe_id: 3
+    language_id: 1
+    text: rec_3_desc_hu
+
+  - id: 3
+    recipe_id: 3
+    language_id: 2
+    text: rec_3_desc_en
+
+  - id: 4
+    recipe_id: 4
+    language_id: 2
+    text: rec_4_desc_en
+
+recipe_ingredient:
+  - id: 1
+    ingredient_id: 1
+    recipe_id: 1
+
+  - id: 2
+    ingredient_id: 2
+    recipe_id: 1
+
+  - id: 3
+    ingredient_id: 3
+    recipe_id: 1
+
+  - id: 4
+    ingredient_id: 2
+    recipe_id: 2
+
+  - id: 5
+    ingredient_id: 3
+    recipe_id: 2
+
+  - id: 6
+    ingredient_id: 4
+    recipe_id: 2
+
+  - id: 7
+    ingredient_id: 4
+    recipe_id: 3
+
+  - id: 8
+    ingredient_id: 5
+    recipe_id: 3
+
+  - id: 9
+    ingredient_id: 6
+    recipe_id: 3
+
+  - id: 10
+    ingredient_id: 5
+    recipe_id: 4
+
+  - id: 11
+    ingredient_id: 6
+    recipe_id: 4
+
+  - id: 12
+    ingredient_id: 7
+    recipe_id: 4
+
+  - id: 14
+    ingredient_id: 9
+    recipe_id: 2
+
+  - id: 15
+    ingredient_id: 10
+    recipe_id: 3
+
+  - id: 16
+    ingredient_id: 1
+    recipe_id: 2

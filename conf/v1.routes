@@ -1,1 +1,2 @@
-GET    /ingredientnames               controllers.v1.IngredientNamesController.listNames(request: Request)
+GET    /ingredientnames               controllers.v1.IngredientNamesController.pageNames(request: Request)
+GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)

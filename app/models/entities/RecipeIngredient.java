@@ -18,6 +18,13 @@ public class RecipeIngredient {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
+    @Column(name = "amount")
+    private Integer amount;
+
+    @ManyToOne
+    @JoinColumn(name = "measure_id")
+    public Measure measure;
+
     public Long getId() {
         return id;
     }
@@ -40,5 +47,21 @@ public class RecipeIngredient {
 
     public void setRecipe(Recipe recipe) {
         this.recipe = recipe;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public Measure getMeasure() {
+        return measure;
+    }
+
+    public void setMeasure(Measure measure) {
+        this.measure = measure;
     }
 }

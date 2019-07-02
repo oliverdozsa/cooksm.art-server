@@ -19,7 +19,7 @@ public class IngredientTag {
     private String name;
 
     @ManyToMany
-    @JoinTable(name = "ingredienet_ingredient_tags",
+    @JoinTable(name = "ingredient_tag_ingredient",
             joinColumns = {
                     @JoinColumn(name = "ingredient_id", referencedColumnName = "id")
             },

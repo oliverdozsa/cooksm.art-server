@@ -20,7 +20,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static play.libs.Json.toJson;
 
 public class IngredientNamesController extends Controller {
@@ -33,7 +32,7 @@ public class IngredientNamesController extends Controller {
     @Inject
     private HttpExecutionContext ec;
 
-    public CompletionStage<Result> listNames(Http.Request request) {
+    public CompletionStage<Result> pageNames(Http.Request request) {
         Form<IngredientNameQueryParams> form =
                 formFactory.form(IngredientNameQueryParams.class).bindFromRequest(request);
 
@@ -47,17 +46,13 @@ public class IngredientNamesController extends Controller {
             return ingredientNameRepository.page(params.nameLike, params.languageId, params.limit, params.offset)
                     .thenApplyAsync(p -> {
                         PageDto<IngredientNameDto> result = new PageDto<>(
-                                p.getItems().stream().map(this::toDto).collect(Collectors.toList()),
+                                p.getItems().stream().map(DtoMapper::toDto).collect(Collectors.toList()),
                                 p.getTotalCount()
                         );
 
                         return ok(toJson(result));
                     });
         }
-    }
-
-    private IngredientNameDto toDto(IngredientName entity) {
-        return new IngredientNameDto(entity.getIngredient().getId(), entity.getName());
     }
 
     /**

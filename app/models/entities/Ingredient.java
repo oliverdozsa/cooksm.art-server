@@ -3,6 +3,7 @@ package models.entities;
 import io.ebean.Model;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Ingredient entity.
@@ -15,11 +16,22 @@ public class Ingredient {
     @Column(name = "id")
     private Long id;
 
+    @OneToMany(mappedBy = "ingredient")
+    private List<IngredientName> names;
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<IngredientName> getNames() {
+        return names;
+    }
+
+    public void setNames(List<IngredientName> names) {
+        this.names = names;
     }
 }
