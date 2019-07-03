@@ -78,7 +78,6 @@ public class RecipeRepositoryQueryParams {
         private Integer goodIngredients;
 
         @Builder
-
         public ByGoodIngredientsNumber(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Integer goodIngredients) {
             super(minimumNumberOfIngredients, maximumNumberOfIngredients, includedIngredients, excludedIngredients, includedIngredientTags, excludedIngredientTags, orderBy, orderBySort, unknownIngredients, unknownIngredientRelation, goodIngredientsRelation, offset, limit, nameLike, sourcePageIds);
             this.goodIngredients = goodIngredients;
@@ -90,7 +89,6 @@ public class RecipeRepositoryQueryParams {
         private Float goodIngredientsRatio;
 
         @Builder
-
         public ByGoodIngredientsRatio(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Float goodIngredientsRatio) {
             super(minimumNumberOfIngredients, maximumNumberOfIngredients, includedIngredients, excludedIngredients, includedIngredientTags, excludedIngredientTags, orderBy, orderBySort, unknownIngredients, unknownIngredientRelation, goodIngredientsRelation, offset, limit, nameLike, sourcePageIds);
             this.goodIngredientsRatio = goodIngredientsRatio;

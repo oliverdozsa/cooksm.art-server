@@ -55,7 +55,7 @@ public class RecipesController extends Controller {
     }
 
     private CompletionStage<Result> getRecipesByGoogIngredients(RecipesControllerQuery.Params params){
-        return recipeRepository.pageOfComposedOfIngredients(toRepositoryQueryParamsByGoodIngredientsNumber(params))
+        return recipeRepository.pageOfByGoodIngredientsRatio(toRepositoryQueryParamsByGoodIngredientsNumber(params))
                 .thenApplyAsync(page -> {
                     List<RecipeDto> dtos = page.getItems()
                             .stream()
