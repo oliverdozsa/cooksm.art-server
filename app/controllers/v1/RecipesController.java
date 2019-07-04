@@ -55,7 +55,7 @@ public class RecipesController extends Controller {
     }
 
     private CompletionStage<Result> getRecipesByGoogIngredients(RecipesControllerQuery.Params params){
-        return recipeRepository.pageOfByGoodIngredientsRatio(toRepositoryQueryParamsByGoodIngredientsNumber(params))
+        return recipeRepository.pageOfByGoodIngredientsRatio(toRepositoryQueryParams(params))
                 .thenApplyAsync(page -> {
                     List<RecipeDto> dtos = page.getItems()
                             .stream()
@@ -67,9 +67,9 @@ public class RecipesController extends Controller {
     }
 
     // Converts controller query params to repository query params builder.
-    private RecipeRepositoryQueryParams.ByGoodIngredientsNumber.ByGoodIngredientsNumberBuilder toRepositoryQueryParamsBuilder(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQueryParams.ByGoodIngredientsNumber.ByGoodIngredientsNumberBuilder builder =
-                RecipeRepositoryQueryParams.ByGoodIngredientsNumber.builder();
+    private RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder toBuilder(RecipesControllerQuery.Params params) {
+        RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder builder =
+                RecipeRepositoryQueryParams.OfGoodIngredientsNumber.builder();
 
         if (params.inIngs != null && params.inIngs.size() > 0) {
             builder.includedIngredients(params.inIngs);
@@ -101,9 +101,9 @@ public class RecipesController extends Controller {
 
 
     // Finalizes the repository query params builder for the specific query.
-    private RecipeRepositoryQueryParams.ByGoodIngredientsNumber toRepositoryQueryParamsByGoodIngredientsNumber(RecipesControllerQuery.Params params){
-        RecipeRepositoryQueryParams.ByGoodIngredientsNumber.ByGoodIngredientsNumberBuilder builder =
-                toRepositoryQueryParamsBuilder(params);
+    private RecipeRepositoryQueryParams.OfGoodIngredientsNumber toRepositoryQueryParams(RecipesControllerQuery.Params params){
+        RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder builder =
+                toBuilder(params);
 
         builder.goodIngredients(params.goodIngs);
         builder.goodIngredientsRelation(RecipeRepositoryQueryParams.Relation.fromString(params.goodIngsRel));

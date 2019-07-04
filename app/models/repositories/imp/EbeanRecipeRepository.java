@@ -31,7 +31,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQueryParams.ByGoodIngredientsNumber params) {
+    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQueryParams.OfGoodIngredientsNumber params) {
         return supplyAsync(() -> {
             String sqlString = RecipeQuerySql.createRecipesByGoodIngredientsNumberSql(
                     true,
@@ -51,7 +51,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQueryParams.ByGoodIngredientsRatio params) {
+    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQueryParams.OfGoodIngredientsRatio params) {
         return null;
     }
 
@@ -71,7 +71,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private String setBaseParamsByReplace(String sql, RecipeRepositoryQueryParams.Base params) {
         // These are not supported by query.setParameter(). All parameters are enum, or Integers, therefore it's safe to use replace()
         String result = sql.replace(":goodIngredientsRelation", params.getGoodIngredientsRelation().getStringRep());
-        result = result.replace(":unknownIngredientsRelation", params.getUnknownIngredientRelation().getStringRep());
+        result = result.replace(":unknownIngredientsRelation", params.getUnknownIngredientsRelation().getStringRep());
         result = result.replace(":unknownIngredients", params.getUnknownIngredients().toString());
         return result;
     }

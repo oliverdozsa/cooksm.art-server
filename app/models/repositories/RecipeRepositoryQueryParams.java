@@ -47,14 +47,14 @@ public class RecipeRepositoryQueryParams {
         private String orderBy;
         private String orderBySort;
         private Integer unknownIngredients;
-        private Relation unknownIngredientRelation;
+        private Relation unknownIngredientsRelation;
         private Relation goodIngredientsRelation;
         private Integer offset;
         private Integer limit;
         private String nameLike;
         private List<Long> sourcePageIds;
 
-        public Base(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
+        public Base(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientsRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
             this.minimumNumberOfIngredients = minimumNumberOfIngredients;
             this.maximumNumberOfIngredients = maximumNumberOfIngredients;
             this.includedIngredients = includedIngredients;
@@ -64,7 +64,7 @@ public class RecipeRepositoryQueryParams {
             this.orderBy = orderBy;
             this.orderBySort = orderBySort;
             this.unknownIngredients = unknownIngredients;
-            this.unknownIngredientRelation = unknownIngredientRelation;
+            this.unknownIngredientsRelation = unknownIngredientsRelation;
             this.goodIngredientsRelation = goodIngredientsRelation;
             this.offset = offset;
             this.limit = limit;
@@ -74,22 +74,22 @@ public class RecipeRepositoryQueryParams {
     }
 
     @Getter
-    public static class ByGoodIngredientsNumber extends Base {
+    public static class OfGoodIngredientsNumber extends Base {
         private Integer goodIngredients;
 
         @Builder
-        public ByGoodIngredientsNumber(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Integer goodIngredients) {
+        public OfGoodIngredientsNumber(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Integer goodIngredients) {
             super(minimumNumberOfIngredients, maximumNumberOfIngredients, includedIngredients, excludedIngredients, includedIngredientTags, excludedIngredientTags, orderBy, orderBySort, unknownIngredients, unknownIngredientRelation, goodIngredientsRelation, offset, limit, nameLike, sourcePageIds);
             this.goodIngredients = goodIngredients;
         }
     }
 
     @Getter
-    public static class ByGoodIngredientsRatio extends Base {
+    public static class OfGoodIngredientsRatio extends Base {
         private Float goodIngredientsRatio;
 
         @Builder
-        public ByGoodIngredientsRatio(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Float goodIngredientsRatio) {
+        public OfGoodIngredientsRatio(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Float goodIngredientsRatio) {
             super(minimumNumberOfIngredients, maximumNumberOfIngredients, includedIngredients, excludedIngredients, includedIngredientTags, excludedIngredientTags, orderBy, orderBySort, unknownIngredients, unknownIngredientRelation, goodIngredientsRelation, offset, limit, nameLike, sourcePageIds);
             this.goodIngredientsRatio = goodIngredientsRatio;
         }
