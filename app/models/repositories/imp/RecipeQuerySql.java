@@ -2,12 +2,14 @@ package models.repositories.imp;
 
 // Contains code for generating raw SQL strings for queries.
 class RecipeQuerySql {
-    public static String createRecipesByGoodIngredientsNumberSql(boolean selectOtherFields, boolean useExclude) {
+    public static String create(Configuration config) {
         String otherFields = ", recipe.name, recipe.url, recipe.date_added, recipe.numofings, recipe.time, recipe.source_page_id ";
-        otherFields = selectOtherFields ? otherFields : "";
+        otherFields = config.selectOtherFields ? otherFields : "";
 
-        String excludedJoin = useExclude ? createExcludedJoin() : "";
-        String excludedCondition = useExclude ? createExcludedCondition(true) : "";
+        String excludedJoin = config.useExclude ? createExcludedJoin() : "";
+        String excludedCondition = config.useExclude ? createExcludedCondition(true) : "";
+
+        String havingConditon = createHavingCondition(config);
 
         return "" +
                 "" +
@@ -24,11 +26,26 @@ class RecipeQuerySql {
                 "GROUP BY " +
                 "  recipe.id " +
                 "HAVING " +
-                "  COUNT(recipe_ingredient.ingredient_id) :goodIngredientsRelation :goodIngredients AND " +
-                "  (recipe.numofings - COUNT(recipe_ingredient.ingredient_id)) :unknownIngredientsRelation :unknownIngredients";
+                havingConditon;
     }
 
-    public static String createExcludedJoin() {
+    public static class Configuration {
+        public boolean selectOtherFields;
+        public boolean useExclude;
+        public QueryType queryType;
+
+        public Configuration(boolean selectOtherFields, boolean useExclude, QueryType queryType) {
+            this.selectOtherFields = selectOtherFields;
+            this.useExclude = useExclude;
+            this.queryType = queryType;
+        }
+    }
+
+    public enum QueryType {
+        RATIO, NUMBER
+    }
+
+    private static String createExcludedJoin() {
         return "" +
                 "LEFT JOIN " +
                 "  (SELECT " +
@@ -48,12 +65,31 @@ class RecipeQuerySql {
                 "ON recipe.id = req.id";
     }
 
-    public static String createExcludedCondition(boolean putAnd) {
+    private static String createExcludedCondition(boolean putAnd) {
         String result = " (badIngs IS NULL) ";
         if (putAnd) {
             result = " AND " + result;
         }
 
         return result;
+    }
+
+    private static String createHavingCondition(Configuration config) {
+        if (QueryType.NUMBER.equals(config.queryType)) {
+            return havingNumberCondition();
+        } else if (QueryType.RATIO.equals(config.queryType)) {
+            return havingRatioCondition();
+        }
+
+        throw new IllegalArgumentException("Query type is invalid!");
+    }
+
+    private static String havingRatioCondition() {
+        return " (COUNT(recipe_ingredient.ingredient_id) * 1.0) / (recipe.numofings * 1.0) >= :ratio";
+    }
+
+    private static String havingNumberCondition() {
+        return "  COUNT(recipe_ingredient.ingredient_id) :goodIngredientsRelation :goodIngredients AND " +
+                "  (recipe.numofings - COUNT(recipe_ingredient.ingredient_id)) :unknownIngredientsRelation :unknownIngredients";
     }
 }

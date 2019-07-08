@@ -23,9 +23,9 @@ create table ingredient_tag (
 );
 
 create table ingredient_tag_ingredient (
-  ingredient_id                 bigint not null,
   ingredient_tag_id             bigint not null,
-  constraint pk_ingredient_tag_ingredient primary key (ingredient_id,ingredient_tag_id)
+  ingredient_id                 bigint not null,
+  constraint pk_ingredient_tag_ingredient primary key (ingredient_tag_id,ingredient_id)
 );
 
 create table language (
@@ -81,11 +81,11 @@ alter table ingredient_name add constraint fk_ingredient_name_ingredient_id fore
 create index ix_ingredient_name_language_id on ingredient_name (language_id);
 alter table ingredient_name add constraint fk_ingredient_name_language_id foreign key (language_id) references language (id) on delete restrict on update restrict;
 
-create index ix_ingredient_tag_ingredient_ingredient_tag on ingredient_tag_ingredient (ingredient_id);
-alter table ingredient_tag_ingredient add constraint fk_ingredient_tag_ingredient_ingredient_tag foreign key (ingredient_id) references ingredient_tag (id) on delete restrict on update restrict;
+create index ix_ingredient_tag_ingredient_ingredient_tag on ingredient_tag_ingredient (ingredient_tag_id);
+alter table ingredient_tag_ingredient add constraint fk_ingredient_tag_ingredient_ingredient_tag foreign key (ingredient_tag_id) references ingredient_tag (id) on delete restrict on update restrict;
 
-create index ix_ingredient_tag_ingredient_ingredient on ingredient_tag_ingredient (ingredient_tag_id);
-alter table ingredient_tag_ingredient add constraint fk_ingredient_tag_ingredient_ingredient foreign key (ingredient_tag_id) references ingredient (id) on delete restrict on update restrict;
+create index ix_ingredient_tag_ingredient_ingredient on ingredient_tag_ingredient (ingredient_id);
+alter table ingredient_tag_ingredient add constraint fk_ingredient_tag_ingredient_ingredient foreign key (ingredient_id) references ingredient (id) on delete restrict on update restrict;
 
 create index ix_recipe_source_page_id on recipe (source_page_id);
 alter table recipe add constraint fk_recipe_source_page_id foreign key (source_page_id) references source_page (id) on delete restrict on update restrict;

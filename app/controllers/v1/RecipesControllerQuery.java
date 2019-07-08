@@ -1,7 +1,5 @@
 package controllers.v1;
 
-import lombok.Getter;
-import lombok.Setter;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -38,8 +36,9 @@ class RecipesControllerQuery {
 
     @Constraints.Validate
     public static class Params implements Constraints.Validatable<ValidationError> {
-        @Constraints.Min(1)
+        @Constraints.Min(0)
         @Constraints.Max(3)
+        @Constraints.Required(groups = {Default.class, VGRecSearchModeComposedOf.class, VGRecSearchModeComposedOfRatio.class, VGRecSearchModeGroup.class})
         public Integer searchMode;
 
         @Constraints.Min(0)

@@ -3,11 +3,15 @@ package controllers.v1;
 import dto.PageDto;
 import dto.RecipeDto;
 import models.DatabaseExecutionContext;
+import models.entities.Recipe;
+import models.repositories.Page;
 import models.repositories.RecipeRepository;
 import models.repositories.RecipeRepositoryQueryParams;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -16,6 +20,7 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -37,39 +42,64 @@ public class RecipesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 
     public CompletionStage<Result> pageRecipes(Http.Request request) {
+        // Get form without groups to access search mode.
         Form<RecipesControllerQuery.Params> form =
-                formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
+                formFactory.form(RecipesControllerQuery.Params.class)
                         .bindFromRequest(request);
 
         if (form.hasErrors()) {
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
-            RecipesControllerQuery.Params params = form.get();
-
-            if(RecipesControllerQuery.SearchMode.getByIntVal(params.searchMode) == RecipesControllerQuery.SearchMode.COMPOSED_OF){
-                return getRecipesByGoogIngredients(params);
-            } else {
-                return completedFuture(badRequest());
-            }
+            RecipesControllerQuery.SearchMode searchMode = RecipesControllerQuery.SearchMode.getByIntVal(form.get().searchMode);
+            return refineRequestBy(searchMode, request);
         }
     }
 
-    private CompletionStage<Result> getRecipesByGoogIngredients(RecipesControllerQuery.Params params){
-        return recipeRepository.pageOfByGoodIngredientsRatio(toRepositoryQueryParams(params))
-                .thenApplyAsync(page -> {
-                    List<RecipeDto> dtos = page.getItems()
-                            .stream()
-                            .map(entity -> DtoMapper.toDto(entity, params.languageId))
-                            .collect(Collectors.toList());
+    private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
+        return recipeRepository.pageOfByGoodIngredientsNumber(toGoodIngredeintsNumberQueryParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+                .exceptionally(mapException());
+    }
 
-                    return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
-                }, httpExecutionContext.current());
+    private CompletionStage<Result> getRecipesByGoodIngredientsRatio(RecipesControllerQuery.Params params) {
+        return recipeRepository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioQueryParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+                .exceptionally(mapException());
+    }
+
+
+    private RecipeRepositoryQueryParams.OfGoodIngredientsNumber toGoodIngredeintsNumberQueryParams(RecipesControllerQuery.Params params) {
+        RecipeRepositoryQueryParams.Base.BaseBuilder baseBuilder =
+                toBaseBuilder(params);
+
+        RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder ofGoodIngredientsNumberBuilder =
+                RecipeRepositoryQueryParams.OfGoodIngredientsNumber.builder();
+
+        ofGoodIngredientsNumberBuilder.base(baseBuilder.build());
+        ofGoodIngredientsNumberBuilder.goodIngredients(params.goodIngs);
+        ofGoodIngredientsNumberBuilder.goodIngredientsRelation(RecipeRepositoryQueryParams.Relation.fromString(params.goodIngsRel));
+        ofGoodIngredientsNumberBuilder.unknownIngredients(params.unknownIngs);
+        ofGoodIngredientsNumberBuilder.unknownIngredientsRelation(RecipeRepositoryQueryParams.Relation.fromString(params.unknownIngsRel));
+
+        return ofGoodIngredientsNumberBuilder.build();
+    }
+
+    private RecipeRepositoryQueryParams.OfGoodIngredientsRatio toGoodIngredientsRatioQueryParams(RecipesControllerQuery.Params params) {
+        RecipeRepositoryQueryParams.Base.BaseBuilder baseBuilder =
+                toBaseBuilder(params);
+
+        RecipeRepositoryQueryParams.OfGoodIngredientsRatio.OfGoodIngredientsRatioBuilder ofGoodIngredientsRatioBuilder =
+                RecipeRepositoryQueryParams.OfGoodIngredientsRatio.builder();
+
+        ofGoodIngredientsRatioBuilder.base(baseBuilder.build());
+        ofGoodIngredientsRatioBuilder.goodIngredientsRatio(params.goodIngsRatio);
+
+        return ofGoodIngredientsRatioBuilder.build();
     }
 
     // Converts controller query params to repository query params builder.
-    private RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder toBuilder(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder builder =
-                RecipeRepositoryQueryParams.OfGoodIngredientsNumber.builder();
+    private RecipeRepositoryQueryParams.Base.BaseBuilder toBaseBuilder(RecipesControllerQuery.Params params) {
+        RecipeRepositoryQueryParams.Base.BaseBuilder builder = RecipeRepositoryQueryParams.Base.builder();
 
         if (params.inIngs != null && params.inIngs.size() > 0) {
             builder.includedIngredients(params.inIngs);
@@ -99,17 +129,45 @@ public class RecipesController extends Controller {
         return builder;
     }
 
+    private Result toResult(Page<Recipe> page, Long languageId) {
+        List<RecipeDto> dtos = page.getItems()
+                .stream()
+                .map(entity -> DtoMapper.toDto(entity, languageId))
+                .collect(Collectors.toList());
 
-    // Finalizes the repository query params builder for the specific query.
-    private RecipeRepositoryQueryParams.OfGoodIngredientsNumber toRepositoryQueryParams(RecipesControllerQuery.Params params){
-        RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder builder =
-                toBuilder(params);
+        return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
+    }
 
-        builder.goodIngredients(params.goodIngs);
-        builder.goodIngredientsRelation(RecipeRepositoryQueryParams.Relation.fromString(params.goodIngsRel));
-        builder.unknownIngredients(params.unknownIngs);
-        builder.unknownIngredientRelation(RecipeRepositoryQueryParams.Relation.fromString(params.unknownIngsRel));
+    private Function<Throwable, Result> mapException() {
+        return t -> {
+            if (t.getCause() instanceof IllegalArgumentException) {
+                return badRequest(Json.toJson(new ValidationError("", t.getMessage()).messages()));
+            }
 
-        return builder.build();
+            return internalServerError();
+        };
+    }
+
+    private CompletionStage<Result> refineRequestBy(RecipesControllerQuery.SearchMode searchMode, Http.Request request) {
+        if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF) {
+            Form<RecipesControllerQuery.Params> params = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
+                    .bindFromRequest(request);
+            return pageOrBadRequest(params, this::getRecipesByGoodIngredientsNumber);
+        } else if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO) {
+            Form<RecipesControllerQuery.Params> params = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class)
+                    .bindFromRequest(request);
+            return pageOrBadRequest(params, this::getRecipesByGoodIngredientsRatio);
+        } else {
+            return completedFuture(badRequest());
+        }
+    }
+
+    private <T> CompletionStage<Result> pageOrBadRequest(Form<T> form, Function<T, CompletionStage<Result>> resultProducer) {
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        } else {
+            T formValue = form.get();
+            return resultProducer.apply(formValue);
+        }
     }
 }

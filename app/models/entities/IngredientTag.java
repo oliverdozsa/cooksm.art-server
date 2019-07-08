@@ -21,10 +21,10 @@ public class IngredientTag {
     @ManyToMany
     @JoinTable(name = "ingredient_tag_ingredient",
             joinColumns = {
-                    @JoinColumn(name = "ingredient_id", referencedColumnName = "id")
+                    @JoinColumn(name = "ingredient_tag_id", referencedColumnName = "id")
             },
             inverseJoinColumns = {
-                    @JoinColumn(name = "ingredient_tag_id", referencedColumnName = "id")
+                    @JoinColumn(name = "ingredient_id", referencedColumnName = "id")
             })
     private List<Ingredient> ingredients;
 

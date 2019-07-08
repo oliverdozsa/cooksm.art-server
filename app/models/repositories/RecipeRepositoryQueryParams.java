@@ -2,6 +2,7 @@ package models.repositories;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class RecipeRepositoryQueryParams {
     }
 
     @Getter
+    @ToString
     public static class Base {
         private Integer minimumNumberOfIngredients;
         private Integer maximumNumberOfIngredients;
@@ -46,15 +48,13 @@ public class RecipeRepositoryQueryParams {
         private List<Long> excludedIngredientTags;
         private String orderBy;
         private String orderBySort;
-        private Integer unknownIngredients;
-        private Relation unknownIngredientsRelation;
-        private Relation goodIngredientsRelation;
         private Integer offset;
         private Integer limit;
         private String nameLike;
         private List<Long> sourcePageIds;
 
-        public Base(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientsRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
+        @Builder
+        public Base(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
             this.minimumNumberOfIngredients = minimumNumberOfIngredients;
             this.maximumNumberOfIngredients = maximumNumberOfIngredients;
             this.includedIngredients = includedIngredients;
@@ -63,9 +63,6 @@ public class RecipeRepositoryQueryParams {
             this.excludedIngredientTags = excludedIngredientTags;
             this.orderBy = orderBy;
             this.orderBySort = orderBySort;
-            this.unknownIngredients = unknownIngredients;
-            this.unknownIngredientsRelation = unknownIngredientsRelation;
-            this.goodIngredientsRelation = goodIngredientsRelation;
             this.offset = offset;
             this.limit = limit;
             this.nameLike = nameLike;
@@ -74,24 +71,34 @@ public class RecipeRepositoryQueryParams {
     }
 
     @Getter
-    public static class OfGoodIngredientsNumber extends Base {
+    @ToString
+    public static class OfGoodIngredientsNumber {
         private Integer goodIngredients;
+        private Relation goodIngredientsRelation;
+        private Integer unknownIngredients;
+        private Relation unknownIngredientsRelation;
+        private Base base;
 
         @Builder
-        public OfGoodIngredientsNumber(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Integer goodIngredients) {
-            super(minimumNumberOfIngredients, maximumNumberOfIngredients, includedIngredients, excludedIngredients, includedIngredientTags, excludedIngredientTags, orderBy, orderBySort, unknownIngredients, unknownIngredientRelation, goodIngredientsRelation, offset, limit, nameLike, sourcePageIds);
+        public OfGoodIngredientsNumber(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, Base base) {
             this.goodIngredients = goodIngredients;
+            this.goodIngredientsRelation = goodIngredientsRelation;
+            this.unknownIngredients = unknownIngredients;
+            this.unknownIngredientsRelation = unknownIngredientsRelation;
+            this.base = base;
         }
     }
 
     @Getter
-    public static class OfGoodIngredientsRatio extends Base {
+    @ToString
+    public static class OfGoodIngredientsRatio{
         private Float goodIngredientsRatio;
+        private Base base;
 
         @Builder
-        public OfGoodIngredientsRatio(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer unknownIngredients, Relation unknownIngredientRelation, Relation goodIngredientsRelation, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds, Float goodIngredientsRatio) {
-            super(minimumNumberOfIngredients, maximumNumberOfIngredients, includedIngredients, excludedIngredients, includedIngredientTags, excludedIngredientTags, orderBy, orderBySort, unknownIngredients, unknownIngredientRelation, goodIngredientsRelation, offset, limit, nameLike, sourcePageIds);
+        public OfGoodIngredientsRatio(Float goodIngredientsRatio, Base base) {
             this.goodIngredientsRatio = goodIngredientsRatio;
+            this.base = base;
         }
     }
 }
