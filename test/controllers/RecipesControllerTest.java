@@ -26,7 +26,7 @@ public class RecipesControllerTest {
     public void before() {
         Ebean.createSqlUpdate("update recipe " +
                 "set numofings = (select count(*) from recipe_ingredient where recipe.id = recipe_ingredient.recipe_id)")
-        .execute();
+                .execute();
     }
 
     @Test
@@ -141,5 +141,81 @@ public class RecipesControllerTest {
 
         assertEquals(1, resultJson.size());
         assertEquals(3L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfAnyOf() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOf");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=4";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(1, resultJson.size());
+        assertEquals(3L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfAnyOfTagsOnly() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOfTagsOnly");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngTags[0]=5";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(OK, result.status());
+        assertEquals(4, resultJson.size());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfAnyOfTagsAndIngrs() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOfTagsAndIngrs");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngs[0]=4&inIngTags[0]=1";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(OK, result.status());
+        assertEquals(3, resultJson.size());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfExact() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfExact");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=le&goodIngs=3&goodIngsRel=eq&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&inIngs[2]=7";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(1, resultJson.size());
+        assertEquals(4L, resultJson.get(0).get("id").asLong());
     }
 }

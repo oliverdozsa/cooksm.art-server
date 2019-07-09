@@ -144,6 +144,7 @@ public class RecipesController extends Controller {
                 return badRequest(Json.toJson(new ValidationError("", t.getMessage()).messages()));
             }
 
+            logger.error("Internal Error!", t.getCause());
             return internalServerError();
         };
     }

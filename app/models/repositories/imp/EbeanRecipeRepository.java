@@ -115,11 +115,11 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     private void setNumberOfIngredientsCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Base params) {
-        if (params.getMaximumNumberOfIngredients() > 0) {
+        if (params.getMaximumNumberOfIngredients() != null && params.getMaximumNumberOfIngredients() > 0) {
             query.where().le("numofings", params.getMaximumNumberOfIngredients());
         }
 
-        if (params.getMinimumNumberOfIngredients() > 0) {
+        if (params.getMinimumNumberOfIngredients() != null && params.getMinimumNumberOfIngredients() > 0) {
             query.where().ge("numofings", params.getMinimumNumberOfIngredients());
         }
     }

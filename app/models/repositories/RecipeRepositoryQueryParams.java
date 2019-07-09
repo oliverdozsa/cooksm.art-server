@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeRepositoryQueryParams {
@@ -57,8 +58,11 @@ public class RecipeRepositoryQueryParams {
         public Base(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
             this.minimumNumberOfIngredients = minimumNumberOfIngredients;
             this.maximumNumberOfIngredients = maximumNumberOfIngredients;
-            this.includedIngredients = includedIngredients;
-            this.excludedIngredients = excludedIngredients;
+
+            // Make sure these two have non-null values as it is important when merging tags.
+            this.includedIngredients = includedIngredients == null ? new ArrayList<>() : includedIngredients;
+            this.excludedIngredients = excludedIngredients == null ? new ArrayList<>() : excludedIngredients;
+
             this.includedIngredientTags = includedIngredientTags;
             this.excludedIngredientTags = excludedIngredientTags;
             this.orderBy = orderBy;
