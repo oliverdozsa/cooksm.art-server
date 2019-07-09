@@ -92,8 +92,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
             RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
                     true,
                     useExclude(params),
-                    RecipeQuerySql.QueryType.ALL);
-            config.putExcludedAnd = false;
+                    RecipeQuerySql.QueryType.ALL,
+                    false);
 
             String sqlString = RecipeQuerySql.create(config);
 
