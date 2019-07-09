@@ -37,7 +37,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOf_ExcludedOverlaps");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&limit=50&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=5";
+        String reqParams = "searchMode=1&limit=50&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=5";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -56,7 +56,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_IncludedExcludedNotMutEx");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&unknownIngs=4&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=2";
+        String reqParams = "searchMode=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&unknownIngs=4&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=2";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -73,7 +73,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOf_Commons");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
+        String reqParams = "searchMode=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -93,7 +93,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOf_CommonsWithTags");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngTags[0]=6";
+        String reqParams = "searchMode=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngTags[0]=6";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -113,7 +113,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfStrict");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=3&languageId=1&goodIngsRatio=1.0&limit=50&offset=0&orderBy=name&orderBySort=asc&isAdditiveIngs=true&minIngs=1&maxIngs=4&inIngs[0]=1&inIngs[1]=2&inIngs[2]=3&inIngs[3]=4";
+        String reqParams = "searchMode=3&goodIngsRatio=1.0&limit=50&offset=0&orderBy=name&orderBySort=asc&isAdditiveIngs=true&minIngs=1&maxIngs=4&inIngs[0]=1&inIngs[1]=2&inIngs[2]=3&inIngs[3]=4";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -132,7 +132,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfStrictTags");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=3&languageId=1&goodIngsRatio=1.0&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=10&inIngTags[0]=1&inIngTags[1]=2";
+        String reqParams = "searchMode=3&goodIngsRatio=1.0&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=10&inIngTags[0]=1&inIngTags[1]=2";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -151,7 +151,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOf");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=4";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=4";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -170,7 +170,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOfTagsOnly");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngTags[0]=5";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngTags[0]=5";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -189,7 +189,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOfTagsAndIngrs");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngs[0]=4&inIngTags[0]=1";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngs[0]=4&inIngTags[0]=1";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -208,7 +208,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfExact");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=le&goodIngs=3&goodIngsRel=eq&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&inIngs[2]=7";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=le&goodIngs=3&goodIngsRel=eq&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&inIngs[2]=7";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -227,7 +227,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAtLeast");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -246,7 +246,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAtLeastWithExTags");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4&exIngTags[0]=3";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4&exIngTags[0]=3";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -264,7 +264,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_FilterbyNames");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&nameLike=e_3";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&nameLike=e_3";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH  + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -283,7 +283,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_FilterbySourcePages");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&sourcePages[0]=4";
+        String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&sourcePages[0]=4";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 

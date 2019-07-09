@@ -89,23 +89,23 @@ public class RecipesController extends Controller {
     }
 
     private CompletionStage<Result> getRecipesAll(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfAll(toBaseBuilder(params).build())
+        return recipeRepository.pageOfAll(toCommonBuilder(params).build())
                 .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
                 .exceptionally(mapException);
     }
 
 
     private RecipeRepositoryQueryParams.OfGoodIngredientsNumber toGoodIngredeintsNumberQueryParams(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQueryParams.OfBase.OfBaseBuilder baseBuilder =
-                toBaseBuilder(params);
+        RecipeRepositoryQueryParams.Common.CommonBuilder commonBuilder =
+                toCommonBuilder(params);
 
-        RecipeRepositoryQueryParams.OfRecipesWithIncludedIngredients.OfRecipesWithIncludedIngredientsBuilder
-                withIncludedIngredientsBuilder = toRecipeWithIncludedIngredientsBuilder(params);
+        RecipeRepositoryQueryParams.WithIncludedIngredients.WithIncludedIngredientsBuilder
+                withIncludedIngredientsBuilder = toWithIncludedIngredientsBuilder(params);
 
         RecipeRepositoryQueryParams.OfGoodIngredientsNumber.OfGoodIngredientsNumberBuilder ofGoodIngredientsNumberBuilder =
                 RecipeRepositoryQueryParams.OfGoodIngredientsNumber.builder();
 
-        ofGoodIngredientsNumberBuilder.base(baseBuilder.build());
+        ofGoodIngredientsNumberBuilder.common(commonBuilder.build());
         ofGoodIngredientsNumberBuilder.recipesWithIncludedIngredients(withIncludedIngredientsBuilder.build());
         ofGoodIngredientsNumberBuilder.goodIngredients(params.goodIngs);
         ofGoodIngredientsNumberBuilder.goodIngredientsRelation(RecipeRepositoryQueryParams.Relation.fromString(params.goodIngsRel));
@@ -116,16 +116,16 @@ public class RecipesController extends Controller {
     }
 
     private RecipeRepositoryQueryParams.OfGoodIngredientsRatio toGoodIngredientsRatioQueryParams(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQueryParams.OfBase.OfBaseBuilder baseBuilder =
-                toBaseBuilder(params);
+        RecipeRepositoryQueryParams.Common.CommonBuilder commonBuilder =
+                toCommonBuilder(params);
 
-        RecipeRepositoryQueryParams.OfRecipesWithIncludedIngredients.OfRecipesWithIncludedIngredientsBuilder
-                withIncludedIngredientsBuilder = toRecipeWithIncludedIngredientsBuilder(params);
+        RecipeRepositoryQueryParams.WithIncludedIngredients.WithIncludedIngredientsBuilder
+                withIncludedIngredientsBuilder = toWithIncludedIngredientsBuilder(params);
 
         RecipeRepositoryQueryParams.OfGoodIngredientsRatio.OfGoodIngredientsRatioBuilder ofGoodIngredientsRatioBuilder =
                 RecipeRepositoryQueryParams.OfGoodIngredientsRatio.builder();
 
-        ofGoodIngredientsRatioBuilder.base(baseBuilder.build());
+        ofGoodIngredientsRatioBuilder.common(commonBuilder.build());
         ofGoodIngredientsRatioBuilder.goodIngredientsRatio(params.goodIngsRatio);
         ofGoodIngredientsRatioBuilder.recipesWithIncludedIngredients(withIncludedIngredientsBuilder.build());
 
@@ -133,8 +133,8 @@ public class RecipesController extends Controller {
     }
 
     // Converts controller query params to repository query params builder.
-    private RecipeRepositoryQueryParams.OfBase.OfBaseBuilder toBaseBuilder(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQueryParams.OfBase.OfBaseBuilder builder = RecipeRepositoryQueryParams.OfBase.builder();
+    private RecipeRepositoryQueryParams.Common.CommonBuilder toCommonBuilder(RecipesControllerQuery.Params params) {
+        RecipeRepositoryQueryParams.Common.CommonBuilder builder = RecipeRepositoryQueryParams.Common.builder();
 
         if (params.exIngs != null && params.exIngs.size() > 0) {
             builder.excludedIngredients(params.exIngs);
@@ -156,10 +156,10 @@ public class RecipesController extends Controller {
         return builder;
     }
 
-    private RecipeRepositoryQueryParams.OfRecipesWithIncludedIngredients.OfRecipesWithIncludedIngredientsBuilder
-    toRecipeWithIncludedIngredientsBuilder(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQueryParams.OfRecipesWithIncludedIngredients.OfRecipesWithIncludedIngredientsBuilder
-                builder = RecipeRepositoryQueryParams.OfRecipesWithIncludedIngredients.builder();
+    private RecipeRepositoryQueryParams.WithIncludedIngredients.WithIncludedIngredientsBuilder
+    toWithIncludedIngredientsBuilder(RecipesControllerQuery.Params params) {
+        RecipeRepositoryQueryParams.WithIncludedIngredients.WithIncludedIngredientsBuilder
+                builder = RecipeRepositoryQueryParams.WithIncludedIngredients.builder();
 
         if (params.inIngs != null && params.inIngs.size() > 0) {
             builder.includedIngredients(params.inIngs);

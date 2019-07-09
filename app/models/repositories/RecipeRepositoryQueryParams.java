@@ -40,7 +40,7 @@ public class RecipeRepositoryQueryParams {
 
     @Getter
     @ToString
-    public static class OfBase {
+    public static class Common {
         private Integer minimumNumberOfIngredients;
         private Integer maximumNumberOfIngredients;
         private List<Long> excludedIngredients;
@@ -53,7 +53,7 @@ public class RecipeRepositoryQueryParams {
         private List<Long> sourcePageIds;
 
         @Builder
-        public OfBase(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> excludedIngredients, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
+        public Common(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> excludedIngredients, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
             this.minimumNumberOfIngredients = minimumNumberOfIngredients;
             this.maximumNumberOfIngredients = maximumNumberOfIngredients;
 
@@ -70,12 +70,12 @@ public class RecipeRepositoryQueryParams {
     }
 
     @Getter
-    public static class OfRecipesWithIncludedIngredients{
+    public static class WithIncludedIngredients {
         private List<Long> includedIngredients;
         private List<Long> includedIngredientTags;
 
         @Builder
-        public OfRecipesWithIncludedIngredients(List<Long> includedIngredients, List<Long> includedIngredientTags) {
+        public WithIncludedIngredients(List<Long> includedIngredients, List<Long> includedIngredientTags) {
             // Make sure this has non-null value as it is important when merging tags.
             this.includedIngredients = includedIngredients == null ? new ArrayList<>() : includedIngredients;
             this.includedIngredientTags = includedIngredientTags;
@@ -89,31 +89,31 @@ public class RecipeRepositoryQueryParams {
         private Relation goodIngredientsRelation;
         private Integer unknownIngredients;
         private Relation unknownIngredientsRelation;
-        private OfBase base;
-        private OfRecipesWithIncludedIngredients recipesWithIncludedIngredients;
+        private Common common;
+        private WithIncludedIngredients recipesWithIncludedIngredients;
 
         @Builder
-        public OfGoodIngredientsNumber(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, OfBase base, OfRecipesWithIncludedIngredients recipesWithIncludedIngredients) {
+        public OfGoodIngredientsNumber(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, Common common, WithIncludedIngredients recipesWithIncludedIngredients) {
             this.goodIngredients = goodIngredients;
             this.goodIngredientsRelation = goodIngredientsRelation;
             this.unknownIngredients = unknownIngredients;
             this.unknownIngredientsRelation = unknownIngredientsRelation;
-            this.base = base;
+            this.common = common;
             this.recipesWithIncludedIngredients = recipesWithIncludedIngredients;
         }
     }
 
     @Getter
     @ToString
-    public static class OfGoodIngredientsRatio{
+    public static class OfGoodIngredientsRatio {
         private Float goodIngredientsRatio;
-        private OfBase base;
-        private OfRecipesWithIncludedIngredients recipesWithIncludedIngredients;
+        private Common common;
+        private WithIncludedIngredients recipesWithIncludedIngredients;
 
         @Builder
-        public OfGoodIngredientsRatio(Float goodIngredientsRatio, OfBase base, OfRecipesWithIncludedIngredients recipesWithIncludedIngredients) {
+        public OfGoodIngredientsRatio(Float goodIngredientsRatio, Common common, WithIncludedIngredients recipesWithIncludedIngredients) {
             this.goodIngredientsRatio = goodIngredientsRatio;
-            this.base = base;
+            this.common = common;
             this.recipesWithIncludedIngredients = recipesWithIncludedIngredients;
         }
     }
