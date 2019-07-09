@@ -36,9 +36,8 @@ class RecipesControllerQuery {
 
     @Constraints.Validate
     public static class Params implements Constraints.Validatable<ValidationError> {
-        @Constraints.Min(0)
+        @Constraints.Min(1)
         @Constraints.Max(3)
-        @Constraints.Required(groups = {Default.class, VGRecSearchModeComposedOf.class, VGRecSearchModeComposedOfRatio.class, VGRecSearchModeGroup.class})
         public Integer searchMode;
 
         @Constraints.Min(0)
@@ -95,7 +94,6 @@ class RecipesControllerQuery {
         @Constraints.Required(groups = {VGRecSearchModeGroup.class})
         public List<List<Long>> inGrOfIngs;
 
-        @Constraints.Required(groups = {VGRecSearchModeComposedOf.class, VGRecSearchModeComposedOfRatio.class, VGRecSearchModeGroup.class})
         public Long languageId;
 
         @Override

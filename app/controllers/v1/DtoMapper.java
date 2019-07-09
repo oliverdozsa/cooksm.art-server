@@ -27,7 +27,7 @@ class DtoMapper {
                     return ingredientNames
                             .stream()
                             .filter(i -> i.getLanguage().getId().equals(languageId))
-                            .findFirst().orElseThrow(IllegalArgumentException::new);
+                            .findFirst().orElseThrow(() -> new IllegalArgumentException("Ingredient name with the given language not found!"));
                 })
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());

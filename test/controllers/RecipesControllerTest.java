@@ -13,6 +13,7 @@ import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static play.test.Helpers.*;
 
 public class RecipesControllerTest {
@@ -217,5 +218,114 @@ public class RecipesControllerTest {
 
         assertEquals(1, resultJson.size());
         assertEquals(4L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfAtLeast() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAtLeast");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(1, resultJson.size());
+        assertEquals(4L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfAtLeastWithExTags() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAtLeastWithExTags");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4&exIngTags[0]=3";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(1, resultJson.size());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_FilterbyNames() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_FilterbyNames");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&nameLike=e_3";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH  + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(1, resultJson.size());
+        assertEquals(3L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_FilterbySourcePages() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_FilterbySourcePages");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=1&languageId=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&sourcePages[0]=4";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(1, resultJson.size());
+        assertEquals(4L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesAll_WithExIngTagsOnly() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesAll_WithExIngTagsOnly");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?exIngTags[0]=6");
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals(2, resultJson.size());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesAll() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesAll");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertTrue(resultJson.size() >= 4);
     }
 }

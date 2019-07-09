@@ -7,9 +7,15 @@ class RecipeQuerySql {
         otherFields = config.selectOtherFields ? otherFields : "";
 
         String excludedJoin = config.useExclude ? createExcludedJoin() : "";
-        String excludedCondition = config.useExclude ? createExcludedCondition(true) : "";
+        String excludedCondition = config.useExclude ? createExcludedCondition(config.putExcludedAnd) : "";
 
         String havingConditon = createHavingCondition(config);
+        String includedIngredientsCondition = includedIngredientsCondition(config);
+        String includedIngredientsJoin = includedIngredientsJoin(config);
+        String where = "";
+        if(!"".equals(includedIngredientsCondition) || !"".equals(excludedCondition)){
+            where = "WHERE ";
+        }
 
         return "" +
                 "" +
@@ -18,31 +24,30 @@ class RecipeQuerySql {
                 otherFields +
                 "FROM " +
                 "  recipe " +
-                "  JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id " +
+                includedIngredientsJoin +
                 excludedJoin + " " +
-                "WHERE " +
-                "  recipe_ingredient.ingredient_id IN (:includedIngredients) " +
+                where +
+                includedIngredientsCondition +
                 excludedCondition + " " +
-                "GROUP BY " +
-                "  recipe.id " +
-                "HAVING " +
                 havingConditon;
     }
 
-    public static class Configuration {
+    static class Configuration {
         public boolean selectOtherFields;
         public boolean useExclude;
         public QueryType queryType;
+        public boolean putExcludedAnd;
 
         public Configuration(boolean selectOtherFields, boolean useExclude, QueryType queryType) {
             this.selectOtherFields = selectOtherFields;
             this.useExclude = useExclude;
             this.queryType = queryType;
+            this.putExcludedAnd = true;
         }
     }
 
     public enum QueryType {
-        RATIO, NUMBER
+        RATIO, NUMBER, ALL
     }
 
     private static String createExcludedJoin() {
@@ -75,10 +80,17 @@ class RecipeQuerySql {
     }
 
     private static String createHavingCondition(Configuration config) {
+        String prefix = "" +
+                "GROUP BY " +
+                "  recipe.id " +
+                "HAVING ";
+
         if (QueryType.NUMBER.equals(config.queryType)) {
-            return havingNumberCondition();
+            return prefix + havingNumberCondition();
         } else if (QueryType.RATIO.equals(config.queryType)) {
-            return havingRatioCondition();
+            return prefix + havingRatioCondition();
+        } else if (QueryType.ALL.equals(config.queryType)) {
+            return "";
         }
 
         throw new IllegalArgumentException("Query type is invalid!");
@@ -91,5 +103,26 @@ class RecipeQuerySql {
     private static String havingNumberCondition() {
         return "  COUNT(recipe_ingredient.ingredient_id) :goodIngredientsRelation :goodIngredients AND " +
                 "  (recipe.numofings - COUNT(recipe_ingredient.ingredient_id)) :unknownIngredientsRelation :unknownIngredients";
+    }
+
+    private static String includedIngredientsCondition(Configuration config) {
+        if (QueryType.RATIO.equals(config.queryType) || QueryType.NUMBER.equals(config.queryType)) {
+            return "" +
+                    "  recipe_ingredient.ingredient_id IN (:includedIngredients) ";
+        } else if (QueryType.ALL.equals(config.queryType)) {
+            return "";
+        }
+
+        throw new IllegalArgumentException("Query type is invalid!");
+    }
+
+    private static String includedIngredientsJoin(Configuration config) {
+        if (QueryType.RATIO.equals(config.queryType) || QueryType.NUMBER.equals(config.queryType)) {
+            return "  JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id ";
+        } else if (QueryType.ALL.equals(config.queryType)) {
+            return "";
+        }
+
+        throw new IllegalArgumentException("Query type is invalid!");
     }
 }

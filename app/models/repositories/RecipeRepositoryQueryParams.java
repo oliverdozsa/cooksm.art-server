@@ -40,12 +40,10 @@ public class RecipeRepositoryQueryParams {
 
     @Getter
     @ToString
-    public static class Base {
+    public static class OfBase {
         private Integer minimumNumberOfIngredients;
         private Integer maximumNumberOfIngredients;
-        private List<Long> includedIngredients;
         private List<Long> excludedIngredients;
-        private List<Long> includedIngredientTags;
         private List<Long> excludedIngredientTags;
         private String orderBy;
         private String orderBySort;
@@ -55,15 +53,12 @@ public class RecipeRepositoryQueryParams {
         private List<Long> sourcePageIds;
 
         @Builder
-        public Base(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> includedIngredients, List<Long> excludedIngredients, List<Long> includedIngredientTags, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
+        public OfBase(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> excludedIngredients, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
             this.minimumNumberOfIngredients = minimumNumberOfIngredients;
             this.maximumNumberOfIngredients = maximumNumberOfIngredients;
 
-            // Make sure these two have non-null values as it is important when merging tags.
-            this.includedIngredients = includedIngredients == null ? new ArrayList<>() : includedIngredients;
+            // Make sure this has non-null value as it is important when merging tags.
             this.excludedIngredients = excludedIngredients == null ? new ArrayList<>() : excludedIngredients;
-
-            this.includedIngredientTags = includedIngredientTags;
             this.excludedIngredientTags = excludedIngredientTags;
             this.orderBy = orderBy;
             this.orderBySort = orderBySort;
@@ -75,21 +70,36 @@ public class RecipeRepositoryQueryParams {
     }
 
     @Getter
+    public static class OfRecipesWithIncludedIngredients{
+        private List<Long> includedIngredients;
+        private List<Long> includedIngredientTags;
+
+        @Builder
+        public OfRecipesWithIncludedIngredients(List<Long> includedIngredients, List<Long> includedIngredientTags) {
+            // Make sure this has non-null value as it is important when merging tags.
+            this.includedIngredients = includedIngredients == null ? new ArrayList<>() : includedIngredients;
+            this.includedIngredientTags = includedIngredientTags;
+        }
+    }
+
+    @Getter
     @ToString
     public static class OfGoodIngredientsNumber {
         private Integer goodIngredients;
         private Relation goodIngredientsRelation;
         private Integer unknownIngredients;
         private Relation unknownIngredientsRelation;
-        private Base base;
+        private OfBase base;
+        private OfRecipesWithIncludedIngredients recipesWithIncludedIngredients;
 
         @Builder
-        public OfGoodIngredientsNumber(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, Base base) {
+        public OfGoodIngredientsNumber(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, OfBase base, OfRecipesWithIncludedIngredients recipesWithIncludedIngredients) {
             this.goodIngredients = goodIngredients;
             this.goodIngredientsRelation = goodIngredientsRelation;
             this.unknownIngredients = unknownIngredients;
             this.unknownIngredientsRelation = unknownIngredientsRelation;
             this.base = base;
+            this.recipesWithIncludedIngredients = recipesWithIncludedIngredients;
         }
     }
 
@@ -97,12 +107,14 @@ public class RecipeRepositoryQueryParams {
     @ToString
     public static class OfGoodIngredientsRatio{
         private Float goodIngredientsRatio;
-        private Base base;
+        private OfBase base;
+        private OfRecipesWithIncludedIngredients recipesWithIncludedIngredients;
 
         @Builder
-        public OfGoodIngredientsRatio(Float goodIngredientsRatio, Base base) {
+        public OfGoodIngredientsRatio(Float goodIngredientsRatio, OfBase base, OfRecipesWithIncludedIngredients recipesWithIncludedIngredients) {
             this.goodIngredientsRatio = goodIngredientsRatio;
             this.base = base;
+            this.recipesWithIncludedIngredients = recipesWithIncludedIngredients;
         }
     }
 }
