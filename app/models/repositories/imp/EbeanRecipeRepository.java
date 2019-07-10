@@ -5,7 +5,7 @@ import models.DatabaseExecutionContext;
 import models.entities.IngredientTag;
 import models.entities.Recipe;
 import models.repositories.Page;
-import models.repositories.RecipeRepositoryQueryParams;
+import models.repositories.RecipeRepositoryQuery;
 import models.repositories.RecipeRepository;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
@@ -33,19 +33,19 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsNumber(RecipeRepositoryQueryParams.OfGoodIngredientsNumber params) {
+    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsNumber(RecipeRepositoryQuery.WithGoodIngredientsNumberParams params) {
         return supplyAsync(() -> {
             String sqlString = RecipeQuerySql.create(
                     new RecipeQuerySql.Configuration(
                             true,
-                            useExclude(params.getCommon()),
+                            useExclude(params.getCommonParams()),
                             RecipeQuerySql.QueryType.NUMBER)
 
             );
 
             sqlString = replaceByGoodIngredientsNumberParameters(sqlString, params);
-            Query<Recipe> query = prepare(sqlString, params.getCommon());
-            setIncludedIngredientsConditions(query, params.getRecipesWithIncludedIngredients(), params.getCommon());
+            Query<Recipe> query = prepare(sqlString, params.getCommonParams());
+            setIncludedIngredientsConditions(query, params.getRecipesWithIncludedIngredientsParams(), params.getCommonParams());
 
             logger.info("pageOfByGoodIngredientsNumber(): params = {}", params.toString());
 
@@ -54,19 +54,19 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQueryParams.OfGoodIngredientsRatio params) {
+    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQuery.WithGoodIngredientsRatioParams params) {
         return supplyAsync(() -> {
             String sqlString = RecipeQuerySql.create(
                     new RecipeQuerySql.Configuration(
                             true,
-                            useExclude(params.getCommon()),
+                            useExclude(params.getCommonParams()),
                             RecipeQuerySql.QueryType.RATIO)
 
             );
 
             sqlString = replaceByGoodIngredientsRatioParameters(sqlString, params);
-            Query<Recipe> query = prepare(sqlString, params.getCommon());
-            setIncludedIngredientsConditions(query, params.getRecipesWithIncludedIngredients(), params.getCommon());
+            Query<Recipe> query = prepare(sqlString, params.getCommonParams());
+            setIncludedIngredientsConditions(query, params.getRecipesWithIncludedIngredientsParams(), params.getCommonParams());
 
             logger.info("pageOfByGoodIngredientsRatio(): params = {}", params.toString());
 
@@ -76,7 +76,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfAll(RecipeRepositoryQueryParams.Common params) {
+    public CompletionStage<Page<Recipe>> pageOfAll(RecipeRepositoryQuery.CommonParams params) {
         return supplyAsync(() -> {
             RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
                     true,
@@ -107,7 +107,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         return builder;
     }
 
-    private void setCommonConditions(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setCommonConditions(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         setNumberOfIngredientsCondition(query, params);
         setOrderByCondition(query, params);
         setSourcePagesCondition(query, params);
@@ -116,7 +116,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         setExcludedIngredientsCondition(query, params);
     }
 
-    private void setNumberOfIngredientsCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setNumberOfIngredientsCondition(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         if (params.getMaximumNumberOfIngredients() != null && params.getMaximumNumberOfIngredients() > 0) {
             query.where().le("numofings", params.getMaximumNumberOfIngredients());
         }
@@ -126,7 +126,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
-    private void setOrderByCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setOrderByCondition(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         /*
            Sorting by id is necessary to avoid occurring the same results across different pages.
            E.g. sorting by number of ingredient is not a unique sorting as many recipes have the same number
@@ -139,20 +139,20 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
-    private void setSourcePagesCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setSourcePagesCondition(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         if (params.getSourcePageIds() != null && params.getSourcePageIds().size() > 0) {
             query.where().in("sourcePage.id", params.getSourcePageIds());
         }
     }
 
-    private void setNameLikeCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setNameLikeCondition(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         // Name like
         if (params.getNameLike() != null) {
             query.where().ilike("name", "%" + params.getNameLike() + "%");
         }
     }
 
-    private void setPagingCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setPagingCondition(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         // Paging
         int offset = params.getOffset() == null ? DEFAULT_OFFSET : params.getOffset();
         int limit = params.getLimit() == null ? DEFAULT_LIMIT : params.getLimit();
@@ -163,8 +163,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
 
     private void setIncludedIngredientsConditions(
             Query<Recipe> query,
-            RecipeRepositoryQueryParams.WithIncludedIngredients params,
-            RecipeRepositoryQueryParams.Common baseParams) {
+            RecipeRepositoryQuery.WithIncludedIngredientsParams params,
+            RecipeRepositoryQuery.CommonParams baseParams) {
         // Merge tags
         if (params.getIncludedIngredientTags() != null) {
             mergeIngredientIds(params.getIncludedIngredients(), getIngredientIdsForTags(params.getIncludedIngredientTags()));
@@ -182,7 +182,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
-    private void setExcludedIngredientsCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
+    private void setExcludedIngredientsCondition(Query<Recipe> query, RecipeRepositoryQuery.CommonParams params) {
         if (params.getExcludedIngredients() != null) {
             if (params.getExcludedIngredientTags() != null) {
                 // Merge tags
@@ -214,12 +214,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
         target.addAll(ids);
     }
 
-    private static boolean useExclude(RecipeRepositoryQueryParams.Common params) {
+    private static boolean useExclude(RecipeRepositoryQuery.CommonParams params) {
         return (params.getExcludedIngredients() != null && params.getExcludedIngredients().size() > 0) ||
                 (params.getExcludedIngredientTags() != null && params.getExcludedIngredientTags().size() > 0);
     }
 
-    private Query<Recipe> prepare(String sql, RecipeRepositoryQueryParams.Common params) {
+    private Query<Recipe> prepare(String sql, RecipeRepositoryQuery.CommonParams params) {
         RawSql rawSql = setColumnMappings(RawSqlBuilder.parse(sql)).create();
         Query<Recipe> query = ebean.createQuery(Recipe.class).setRawSql(rawSql);
         setCommonConditions(query, params);
@@ -227,7 +227,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         return query;
     }
 
-    private String replaceByGoodIngredientsNumberParameters(String sql, RecipeRepositoryQueryParams.OfGoodIngredientsNumber params) {
+    private String replaceByGoodIngredientsNumberParameters(String sql, RecipeRepositoryQuery.WithGoodIngredientsNumberParams params) {
         // All parameters used are Integers, or Enums therefore it's safe to replace them.
         String replaced = sql;
         replaced = replaced.replace(":goodIngredientsRelation", params.getGoodIngredientsRelation().getStringRep());
@@ -238,7 +238,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         return replaced;
     }
 
-    private String replaceByGoodIngredientsRatioParameters(String sql, RecipeRepositoryQueryParams.OfGoodIngredientsRatio params) {
+    private String replaceByGoodIngredientsRatioParameters(String sql, RecipeRepositoryQuery.WithGoodIngredientsRatioParams params) {
         String replaced = sql;
 
         replaced = replaced.replace(":ratio", params.getGoodIngredientsRatio().toString());

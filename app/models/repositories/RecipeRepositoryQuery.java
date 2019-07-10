@@ -7,7 +7,7 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeRepositoryQueryParams {
+public class RecipeRepositoryQuery {
     public enum Relation {
         LT("<"),
         LE("<="),
@@ -15,18 +15,10 @@ public class RecipeRepositoryQueryParams {
         GT(">"),
         GE(">=");
 
-        /**
-         * Init with string rep.
-         *
-         * @param stringRep The string representation.
-         */
         Relation(String stringRep) {
             this.stringRep = stringRep;
         }
 
-        /**
-         * The string representation.
-         */
         private String stringRep;
 
         public String getStringRep() {
@@ -40,7 +32,7 @@ public class RecipeRepositoryQueryParams {
 
     @Getter
     @ToString
-    public static class Common {
+    public static class CommonParams {
         private Integer minimumNumberOfIngredients;
         private Integer maximumNumberOfIngredients;
         private List<Long> excludedIngredients;
@@ -53,7 +45,7 @@ public class RecipeRepositoryQueryParams {
         private List<Long> sourcePageIds;
 
         @Builder
-        public Common(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> excludedIngredients, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
+        public CommonParams(Integer minimumNumberOfIngredients, Integer maximumNumberOfIngredients, List<Long> excludedIngredients, List<Long> excludedIngredientTags, String orderBy, String orderBySort, Integer offset, Integer limit, String nameLike, List<Long> sourcePageIds) {
             this.minimumNumberOfIngredients = minimumNumberOfIngredients;
             this.maximumNumberOfIngredients = maximumNumberOfIngredients;
 
@@ -70,12 +62,12 @@ public class RecipeRepositoryQueryParams {
     }
 
     @Getter
-    public static class WithIncludedIngredients {
+    public static class WithIncludedIngredientsParams {
         private List<Long> includedIngredients;
         private List<Long> includedIngredientTags;
 
         @Builder
-        public WithIncludedIngredients(List<Long> includedIngredients, List<Long> includedIngredientTags) {
+        public WithIncludedIngredientsParams(List<Long> includedIngredients, List<Long> includedIngredientTags) {
             // Make sure this has non-null value as it is important when merging tags.
             this.includedIngredients = includedIngredients == null ? new ArrayList<>() : includedIngredients;
             this.includedIngredientTags = includedIngredientTags;
@@ -84,37 +76,37 @@ public class RecipeRepositoryQueryParams {
 
     @Getter
     @ToString
-    public static class OfGoodIngredientsNumber {
+    public static class WithGoodIngredientsNumberParams {
         private Integer goodIngredients;
         private Relation goodIngredientsRelation;
         private Integer unknownIngredients;
         private Relation unknownIngredientsRelation;
-        private Common common;
-        private WithIncludedIngredients recipesWithIncludedIngredients;
+        private CommonParams commonParams;
+        private WithIncludedIngredientsParams recipesWithIncludedIngredientsParams;
 
         @Builder
-        public OfGoodIngredientsNumber(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, Common common, WithIncludedIngredients recipesWithIncludedIngredients) {
+        public WithGoodIngredientsNumberParams(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, CommonParams commonParams, WithIncludedIngredientsParams recipesWithIncludedIngredientsParams) {
             this.goodIngredients = goodIngredients;
             this.goodIngredientsRelation = goodIngredientsRelation;
             this.unknownIngredients = unknownIngredients;
             this.unknownIngredientsRelation = unknownIngredientsRelation;
-            this.common = common;
-            this.recipesWithIncludedIngredients = recipesWithIncludedIngredients;
+            this.commonParams = commonParams;
+            this.recipesWithIncludedIngredientsParams = recipesWithIncludedIngredientsParams;
         }
     }
 
     @Getter
     @ToString
-    public static class OfGoodIngredientsRatio {
+    public static class WithGoodIngredientsRatioParams {
         private Float goodIngredientsRatio;
-        private Common common;
-        private WithIncludedIngredients recipesWithIncludedIngredients;
+        private CommonParams commonParams;
+        private WithIncludedIngredientsParams recipesWithIncludedIngredientsParams;
 
         @Builder
-        public OfGoodIngredientsRatio(Float goodIngredientsRatio, Common common, WithIncludedIngredients recipesWithIncludedIngredients) {
+        public WithGoodIngredientsRatioParams(Float goodIngredientsRatio, CommonParams commonParams, WithIncludedIngredientsParams recipesWithIncludedIngredientsParams) {
             this.goodIngredientsRatio = goodIngredientsRatio;
-            this.common = common;
-            this.recipesWithIncludedIngredients = recipesWithIncludedIngredients;
+            this.commonParams = commonParams;
+            this.recipesWithIncludedIngredientsParams = recipesWithIncludedIngredientsParams;
         }
     }
 }

@@ -74,19 +74,19 @@ public class RecipesController extends Controller {
     }
 
     private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberQueryParams(params))
+        return recipeRepository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberParams(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
                 .exceptionally(mapException);
     }
 
     private CompletionStage<Result> getRecipesByGoodIngredientsRatio(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioQueryParams(params))
+        return recipeRepository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioParams(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
                 .exceptionally(mapException);
     }
 
     private CompletionStage<Result> getRecipesAll(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfAll(toCommonQueryParams(params))
+        return recipeRepository.pageOfAll(toCommonParams(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
                 .exceptionally(mapException);
     }
