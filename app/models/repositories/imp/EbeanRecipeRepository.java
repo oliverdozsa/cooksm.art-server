@@ -185,6 +185,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private void setExcludedIngredientsCondition(Query<Recipe> query, RecipeRepositoryQueryParams.Common params) {
         if (params.getExcludedIngredients() != null) {
             if (params.getExcludedIngredientTags() != null) {
+                // Merge tags
                 mergeIngredientIds(params.getExcludedIngredients(), getIngredientIdsForTags(params.getExcludedIngredientTags()));
             }
 

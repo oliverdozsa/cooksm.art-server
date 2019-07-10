@@ -3,7 +3,6 @@ package controllers.v1;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
-import javax.validation.groups.Default;
 import java.util.List;
 
 class RecipesControllerQuery {
