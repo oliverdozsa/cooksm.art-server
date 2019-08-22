@@ -61,7 +61,7 @@ public class RecipesController extends Controller {
 
     public CompletionStage<Result> pageRecipes(Http.Request request) {
         Either<JsonNode, RecipesControllerQuery.SearchMode> jsonNodeOrSearchMode =
-                retreiveSearhMode(request);
+                retreiveSearchMode(request);
 
         if (jsonNodeOrSearchMode.isLeft()) {
             // Request has error
@@ -134,7 +134,7 @@ public class RecipesController extends Controller {
         return config.getLong("openrecipes.default.languageid");
     }
 
-    private Either<JsonNode, RecipesControllerQuery.SearchMode> retreiveSearhMode(Http.Request request) {
+    private Either<JsonNode, RecipesControllerQuery.SearchMode> retreiveSearchMode(Http.Request request) {
         // Get form without groups to access search mode.
         Form<RecipesControllerQuery.Params> form =
                 formFactory.form(RecipesControllerQuery.Params.class)
