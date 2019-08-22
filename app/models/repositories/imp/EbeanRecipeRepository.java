@@ -98,6 +98,11 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }, executionContext);
     }
 
+    @Override
+    public CompletionStage<Recipe> single(Long id) {
+        return supplyAsync(() -> ebean.find(Recipe.class, id), executionContext);
+    }
+
     private RawSqlBuilder setColumnMappings(RawSqlBuilder builder) {
         builder
                 .columnMapping("recipe.id", "id")

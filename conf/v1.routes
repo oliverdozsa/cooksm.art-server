@@ -1,2 +1,3 @@
 GET    /ingredientnames               controllers.v1.IngredientNamesController.pageNames(request: Request)
 GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
+GET    /recipe                        controllers.v1.RecipesController.singleRecipe(id: Long, language: Long)

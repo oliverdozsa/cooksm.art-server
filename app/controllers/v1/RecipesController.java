@@ -73,34 +73,9 @@ public class RecipesController extends Controller {
         }
     }
 
-    private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberParams(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+    public CompletionStage<Result> singleRecipe(Long id, Long languageId) {
+        return recipeRepository.single(id).thenApply(r -> toResult(r, languageId))
                 .exceptionally(mapException);
-    }
-
-    private CompletionStage<Result> getRecipesByGoodIngredientsRatio(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioParams(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
-                .exceptionally(mapException);
-    }
-
-    private CompletionStage<Result> getRecipesAll(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfAll(toCommonParams(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
-                .exceptionally(mapException);
-    }
-
-
-
-    private Result toResult(Page<Recipe> page, Long languageId) {
-        Long usedLanguageId = languageId == null ? getDefaultLanguageId() : languageId;
-        List<RecipeDto> dtos = page.getItems()
-                .stream()
-                .map(entity -> DtoMapper.toDto(entity, usedLanguageId))
-                .collect(Collectors.toList());
-
-        return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
     }
 
     private CompletionStage<Result> refineRequestBy(RecipesControllerQuery.SearchMode searchMode, Http.Request request) {
@@ -119,6 +94,40 @@ public class RecipesController extends Controller {
         } else {
             return completedFuture(badRequest());
         }
+    }
+
+    private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
+        return recipeRepository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+                .exceptionally(mapException);
+    }
+
+    private CompletionStage<Result> getRecipesByGoodIngredientsRatio(RecipesControllerQuery.Params params) {
+        return recipeRepository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+                .exceptionally(mapException);
+    }
+
+    private CompletionStage<Result> getRecipesAll(RecipesControllerQuery.Params params) {
+        return recipeRepository.pageOfAll(toCommonParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+                .exceptionally(mapException);
+    }
+
+    private Result toResult(Page<Recipe> page, Long languageId) {
+        Long usedLanguageId = languageId == null ? getDefaultLanguageId() : languageId;
+        List<RecipeDto> dtos = page.getItems()
+                .stream()
+                .map(entity -> DtoMapper.toDto(entity, usedLanguageId))
+                .collect(Collectors.toList());
+
+        return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
+    }
+
+    private Result toResult(Recipe recipe, Long languageId) {
+        Long usedLanguageId = languageId == null ? getDefaultLanguageId() : languageId;
+        RecipeDto dto = DtoMapper.toDto(recipe, usedLanguageId);
+        return ok(toJson(dto));
     }
 
     private <T> CompletionStage<Result> pageOrBadRequest(Form<T> form, Function<T, CompletionStage<Result>> resultProducer) {
@@ -153,6 +162,5 @@ public class RecipesController extends Controller {
 
             return new Right<>(searchMode);
         }
-
     }
 }
