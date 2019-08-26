@@ -115,7 +115,7 @@ public class RecipesController extends Controller {
     }
 
     private Result toResult(Page<Recipe> page, Long languageId) {
-        Long usedLanguageId = languageId == null ? getDefaultLanguageId() : languageId;
+        Long usedLanguageId = getLanguageIdOrDefault(languageId);
         List<RecipeDto> dtos = page.getItems()
                 .stream()
                 .map(entity -> DtoMapper.toDto(entity, usedLanguageId))
@@ -125,9 +125,14 @@ public class RecipesController extends Controller {
     }
 
     private Result toResult(Recipe recipe, Long languageId) {
-        Long usedLanguageId = languageId == null ? getDefaultLanguageId() : languageId;
-        RecipeDto dto = DtoMapper.toDto(recipe, usedLanguageId);
-        return ok(toJson(dto));
+        if(recipe == null) {
+            return notFound();
+
+        } else {
+            Long usedLanguageId = getLanguageIdOrDefault(languageId);
+            RecipeDto dto = DtoMapper.toDto(recipe, usedLanguageId);
+            return ok(toJson(dto));
+        }
     }
 
     private <T> CompletionStage<Result> pageOrBadRequest(Form<T> form, Function<T, CompletionStage<Result>> resultProducer) {
@@ -162,5 +167,17 @@ public class RecipesController extends Controller {
 
             return new Right<>(searchMode);
         }
+    }
+
+    private Long getLanguageIdOrDefault(Long id){
+        if(id == null){
+            return getDefaultLanguageId();
+        }
+
+        if(id == 0L){
+            return getDefaultLanguageId();
+        }
+
+        return  id;
     }
 }

@@ -15,20 +15,6 @@ public class PlayApplicationWithGuiceDbRider implements TestRule {
     private DBUnitRule dbUnitRule;
     private Application application;
 
-    private void startPlay() {
-        application = new GuiceApplicationBuilder().build();
-        Helpers.start(application);
-        emProvider = EntityManagerProvider.instance("openrecipesPU");
-        dbUnitRule = DBUnitRule.instance(emProvider.connection());
-    }
-
-    private void stopPlay() {
-        if (application != null) {
-            Helpers.stop(application);
-            application = null;
-        }
-    }
-
     @Override
     public Statement apply(Statement base, Description description) {
         return new Statement() {
@@ -43,11 +29,21 @@ public class PlayApplicationWithGuiceDbRider implements TestRule {
         };
     }
 
-    public EntityManagerProvider getEmProvider() {
-        return emProvider;
-    }
-
     public Application getApplication() {
         return application;
+    }
+
+    private void startPlay() {
+        application = new GuiceApplicationBuilder().build();
+        Helpers.start(application);
+        emProvider = EntityManagerProvider.instance("openrecipesPU");
+        dbUnitRule = DBUnitRule.instance(emProvider.connection());
+    }
+
+    private void stopPlay() {
+        if (application != null) {
+            Helpers.stop(application);
+            application = null;
+        }
     }
 }

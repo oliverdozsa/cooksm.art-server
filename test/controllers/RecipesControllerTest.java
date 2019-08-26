@@ -328,4 +328,33 @@ public class RecipesControllerTest {
 
         assertTrue(resultJson.size() >= 4);
     }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetSingleRecipe() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetSingleRecipe");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "/3");
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+
+        assertEquals(3, resultJson.get("id").asInt());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetSingleRecipe_NotFound() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetSingleRecipe_NotFound");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "/-4");
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals(NOT_FOUND, result.status());
+    }
 }
