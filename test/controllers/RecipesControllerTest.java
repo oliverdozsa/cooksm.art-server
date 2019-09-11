@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import io.ebean.Ebean;
+import models.entities.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,8 +13,10 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import java.time.Instant;
+import java.util.Date;
+
+import static junit.framework.TestCase.*;
 import static play.test.Helpers.*;
 
 public class RecipesControllerTest {
@@ -265,7 +268,7 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&nameLike=e_3";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH  + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -356,5 +359,121 @@ public class RecipesControllerTest {
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals(NOT_FOUND, result.status());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetSourcePages() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetSourcePages");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri("v1/sourcepages");
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals(OK, result.status());
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+
+        assertEquals(4, resultJson.size());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testPaging() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testPaging");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        for (int i = 0; i < 120; i++) {
+            Recipe recipe = new Recipe();
+            recipe.setName("testRecipe_" + i);
+            recipe.setDateAdded(Instant.now());
+            recipe.setNumofings(1);
+            recipe.setSourcePage(Ebean.createQuery(SourcePage.class).where().eq("id", 1).findOne());
+            Ebean.save(recipe);
+
+            RecipeIngredient recipeIngredient = new RecipeIngredient();
+            recipeIngredient.setRecipe(recipe);
+            recipeIngredient.setMeasure(Ebean.createQuery(Measure.class).findList().get(0));
+            recipeIngredient.setAmount(1);
+            recipeIngredient.setIngredient(Ebean.createQuery(Ingredient.class).findList().get(0));
+            Ebean.save(recipeIngredient);
+        }
+
+        String queryParams = "";
+
+        // Forward paging.
+        int i;
+        for (i = 0; i <= 4; i++) {
+            Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + queryParams);
+            Result result = route(application.getApplication(), httpRequest);
+
+            String resultContentStr = contentAsString(result);
+            JsonNode resultJson = Json.parse(resultContentStr);
+
+            assertNotNull(resultJson.get("items"));
+            assertNotNull(resultJson.get("totalCount"));
+
+            queryParams = "?limit=10&offset=" + (i * 10);
+        }
+
+        queryParams = "?offset=100";
+
+        // Backward paging.
+        for (i = 4; i >= 0; i--) {
+            Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + queryParams);
+            Result result = route(application.getApplication(), httpRequest);
+
+            String resultContentStr = contentAsString(result);
+            JsonNode resultJson = Json.parse(resultContentStr);
+
+            assertNotNull(resultJson.get("items"));
+            assertNotNull(resultJson.get("totalCount"));
+
+            queryParams = "?limit=10&offset=" + (i * 10);
+        }
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesRatio() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesRatio");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "?searchMode=3&goodIngsRatio=0.6&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=2&inIngs[1]=3";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("recipes");
+
+        assertEquals(1, resultJson.size());
+        assertEquals(1L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet("datasets/yml/recipes.yml")
+    public void testGetRecipesByIngredients_ComposedOfGroups() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfGroups");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "?searchMode=2&limit=50&offset=0&orderBy=name&orderBySort=asc&inGrOfIngs[0][0]=1&inGrOfIngs[0][1]=2&inGrOfIngs[1][0]=2&inGrOfIngs[1][1]=3";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("recipes");
+
+        assertEquals(2, resultJson.size());
+        assertEquals(1L, resultJson.get(0).get("id").asLong());
+        assertEquals(2L, resultJson.get(1).get("id").asLong());
+        assertEquals(0, resultJson.get(1).get("descriptions").size());
+        assertTrue(resultJson.get(0).get("ingredients").get(0).get("measure").get("name").asText().contains("meas"));
     }
 }

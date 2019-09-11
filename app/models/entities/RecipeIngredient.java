@@ -23,7 +23,7 @@ public class RecipeIngredient {
 
     @ManyToOne
     @JoinColumn(name = "measure_id")
-    public Measure measure;
+    private Measure measure;
 
     public Long getId() {
         return id;
