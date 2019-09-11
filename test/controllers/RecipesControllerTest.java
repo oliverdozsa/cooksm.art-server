@@ -386,6 +386,10 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testPaging");
         logger.info("------------------------------------------------------------------------------------------------");
 
+        Measure m = new Measure();
+        m.setName("kg");
+        Ebean.save(m);
+
         for (int i = 0; i < 120; i++) {
             Recipe recipe = new Recipe();
             recipe.setName("testRecipe_" + i);
@@ -449,7 +453,7 @@ public class RecipesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        resultJson = resultJson.get("recipes");
+        resultJson = resultJson.get("items");
 
         assertEquals(1, resultJson.size());
         assertEquals(1L, resultJson.get(0).get("id").asLong());
