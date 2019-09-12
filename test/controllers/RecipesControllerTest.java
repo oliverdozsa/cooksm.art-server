@@ -368,7 +368,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetSourcePages");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri("v1/sourcepages");
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri("/v1/sourcepages");
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals(OK, result.status());
