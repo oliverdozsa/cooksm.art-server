@@ -376,7 +376,8 @@ public class RecipesControllerTest {
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
 
-        assertEquals(4, resultJson.size());
+        assertEquals(4, resultJson.get("items").size());
+        assertEquals(4, resultJson.get("totalCount").asInt());
     }
 
     @Test

@@ -42,9 +42,6 @@ public class RecipesController extends Controller {
     private HttpExecutionContext httpExecutionContext;
 
     @Inject
-    private DatabaseExecutionContext dbExecutionContext;
-
-    @Inject
     private Config config;
 
     private Function<Throwable, Result> mapException = t -> {
