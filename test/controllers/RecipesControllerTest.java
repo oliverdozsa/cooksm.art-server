@@ -459,26 +459,4 @@ public class RecipesControllerTest {
         assertEquals(1, resultJson.size());
         assertEquals(1L, resultJson.get(0).get("id").asLong());
     }
-
-    @Test
-    @DataSet("datasets/yml/recipes.yml")
-    public void testGetRecipesByIngredients_ComposedOfGroups() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfGroups");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        String reqParams = "?searchMode=2&limit=50&offset=0&orderBy=name&orderBySort=asc&inGrOfIngs[0][0]=1&inGrOfIngs[0][1]=2&inGrOfIngs[1][0]=2&inGrOfIngs[1][1]=3";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + reqParams);
-        Result result = route(application.getApplication(), httpRequest);
-
-        String resultContentStr = contentAsString(result);
-        JsonNode resultJson = Json.parse(resultContentStr);
-        resultJson = resultJson.get("recipes");
-
-        assertEquals(2, resultJson.size());
-        assertEquals(1L, resultJson.get(0).get("id").asLong());
-        assertEquals(2L, resultJson.get(1).get("id").asLong());
-        assertEquals(0, resultJson.get(1).get("descriptions").size());
-        assertTrue(resultJson.get(0).get("ingredients").get(0).get("measure").get("name").asText().contains("meas"));
-    }
 }

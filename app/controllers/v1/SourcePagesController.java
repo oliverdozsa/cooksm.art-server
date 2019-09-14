@@ -23,12 +23,12 @@ public class SourcePagesController extends Controller {
     @Inject
     private SourcePageRepository repository;
 
-    public CompletionStage<Result> sourcePages(){
+    public CompletionStage<Result> sourcePages() {
         return repository.allSourcePages()
                 .thenApplyAsync(SourcePagesController::toResult, httpExecutionContext.current());
     }
 
-    private static Result toResult(Page<SourcePage> p){
+    private static Result toResult(Page<SourcePage> p) {
         List<SourcePageDto> l = p.getItems()
                 .stream()
                 .map(DtoMapper::toDto)
