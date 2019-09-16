@@ -34,7 +34,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOf_ExcludedOverlaps() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOf_ExcludedOverlaps");
@@ -53,7 +53,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_IncludedExcludedNotMutEx() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_IncludedExcludedNotMutEx");
@@ -70,7 +70,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOf_Commons() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOf_Commons");
@@ -90,7 +90,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOf_CommonsWithTags() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOf_CommonsWithTags");
@@ -110,7 +110,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfStrict() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfStrict");
@@ -129,7 +129,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfStrictTagsOnly() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfStrictTags");
@@ -148,7 +148,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfAnyOf() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOf");
@@ -167,7 +167,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfAnyOfTagsOnly() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOfTagsOnly");
@@ -186,7 +186,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfAnyOfTagsAndIngrs() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAnyOfTagsAndIngrs");
@@ -205,7 +205,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfExact() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfExact");
@@ -224,7 +224,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfAtLeast() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAtLeast");
@@ -243,7 +243,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_ComposedOfAtLeastWithExTags() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_ComposedOfAtLeastWithExTags");
@@ -261,7 +261,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_FilterbyNames() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_FilterbyNames");
@@ -280,7 +280,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesByIngredients_FilterbySourcePages() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesByIngredients_FilterbySourcePages");
@@ -299,7 +299,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesAll_WithExIngTagsOnly() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesAll_WithExIngTagsOnly");
@@ -316,7 +316,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesAll() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesAll");
@@ -333,7 +333,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetSingleRecipe() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetSingleRecipe");
@@ -349,7 +349,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetSingleRecipe_NotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetSingleRecipe_NotFound");
@@ -362,7 +362,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetSourcePages() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetSourcePages");
@@ -381,7 +381,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testPaging() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testPaging");
@@ -442,7 +442,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/recipes.yml")
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetRecipesRatio() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetRecipesRatio");

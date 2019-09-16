@@ -21,7 +21,7 @@ public class IngredientNamesControllerTest {
     private static final String RESOURCE_PATH = "/v1/ingredientnames";
 
     @Test
-    @DataSet("datasets/yml/ingredientnames.yml")
+    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
     public void testListNamesHu() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testListNamesHu");
@@ -38,7 +38,7 @@ public class IngredientNamesControllerTest {
     }
 
     @Test
-    @DataSet("datasets/yml/ingredientnames.yml")
+    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
     public void testPaging() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testPaging");
