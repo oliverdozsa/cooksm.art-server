@@ -1,5 +1,5 @@
-name := """openrecipes"""
-organization := "com.openrecipes"
+name := """receptnekem"""
+organization := "hu.receptnekem"
 
 version := "1.0-SNAPSHOT"
 
