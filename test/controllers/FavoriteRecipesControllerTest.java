@@ -2,7 +2,6 @@ package controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.database.rider.core.api.dataset.DataSet;
 import dto.FavoriteRecipeCreateDto;
 import dto.FavoriteRecipeDto;
@@ -23,7 +22,6 @@ import rules.PlayApplicationWithGuiceDbRider;
 import utils.JwtUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,7 +64,7 @@ public class FavoriteRecipesControllerTest {
         assertEquals(OK, result.status());
 
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertEquals(0, resultJson.size());
+        assertEquals(0, resultJson.get("items").size());
     }
 
     @Test
@@ -158,7 +156,7 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    public void testFavoriteRecipes_Create_Invalid_NoJson() throws UnsupportedEncodingException {
+    public void testFavoriteRecipes_Create_Invalid_NoJson() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Invalid_NoJson");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -181,7 +179,7 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    public void testFavoriteRecipes_Create_Invalid_RecipeNotExisting() throws IOException {
+    public void testFavoriteRecipes_Create_Invalid_RecipeNotExisting() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Invalid_RecipeNotExisting");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -206,7 +204,7 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    public void testFavoriteRecipes_Create_Invalid_MaxReached() throws IOException {
+    public void testFavoriteRecipes_Create_Invalid_MaxReached() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Invalid_MaxReached");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -245,7 +243,7 @@ public class FavoriteRecipesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testFavoriteRecipes_Create_Already_Existing() throws IOException {
+    public void testFavoriteRecipes_Create_Already_Existing() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Already_Existing");
         logger.info("------------------------------------------------------------------------------------------------");
