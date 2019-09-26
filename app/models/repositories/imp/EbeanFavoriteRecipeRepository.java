@@ -4,6 +4,8 @@ import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import models.DatabaseExecutionContext;
 import models.entities.FavoriteRecipe;
+import models.entities.Recipe;
+import models.entities.User;
 import models.repositories.FavoriteRecipeRepository;
 import models.repositories.Page;
 import play.Logger;
@@ -41,6 +43,18 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
                     .findList();
 
             return new Page<>(result, result.size());
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Long> create(Long userId, Long recipeId) {
+        return supplyAsync(() -> {
+            FavoriteRecipe fr = new FavoriteRecipe();
+            fr.setUser(Ebean.find(User.class, userId));
+            fr.setRecipe(Ebean.find(Recipe.class, recipeId));
+            Ebean.save(fr);
+
+            return fr.getId();
         }, executionContext);
     }
 }
