@@ -2,3 +2,9 @@ GET    /ingredientnames               controllers.v1.IngredientNamesController.p
 GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
 GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
+
+# Favorite recipes
+POST   /api/favoriterecipes           controllers.v1.FavoriteRecipesController.create(request: Request)
+GET    /api/favoriterecipes           controllers.v1.FavoriteRecipesController.allOfUser(request: Request)
+GET    /api/favoriterecipes/:id       controllers.v1.FavoriteRecipesController.single(id: Long)
+# DELETE /api/favoriterecipes/:id       controllers.receptnekem.ReceptNekemController.deleteFavoriteRecipe(id: Long)
