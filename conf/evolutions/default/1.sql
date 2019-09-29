@@ -3,6 +3,13 @@
 
 # --- !Ups
 
+create table favorite_recipe (
+  id                            bigint auto_increment not null,
+  recipe_id                     bigint not null,
+  user_id                       bigint not null,
+  constraint pk_favorite_recipe primary key (id)
+);
+
 create table ingredient (
   id                            bigint auto_increment not null,
   constraint pk_ingredient primary key (id)
@@ -75,6 +82,17 @@ create table source_page (
   constraint pk_source_page primary key (id)
 );
 
+create table user (
+  id                            bigint auto_increment not null,
+  constraint pk_user primary key (id)
+);
+
+create index ix_favorite_recipe_recipe_id on favorite_recipe (recipe_id);
+alter table favorite_recipe add constraint fk_favorite_recipe_recipe_id foreign key (recipe_id) references recipe (id) on delete restrict on update restrict;
+
+create index ix_favorite_recipe_user_id on favorite_recipe (user_id);
+alter table favorite_recipe add constraint fk_favorite_recipe_user_id foreign key (user_id) references user (id) on delete restrict on update restrict;
+
 create index ix_ingredient_name_ingredient_id on ingredient_name (ingredient_id);
 alter table ingredient_name add constraint fk_ingredient_name_ingredient_id foreign key (ingredient_id) references ingredient (id) on delete restrict on update restrict;
 
@@ -111,6 +129,12 @@ alter table source_page add constraint fk_source_page_language_id foreign key (l
 
 # --- !Downs
 
+alter table favorite_recipe drop constraint if exists fk_favorite_recipe_recipe_id;
+drop index if exists ix_favorite_recipe_recipe_id;
+
+alter table favorite_recipe drop constraint if exists fk_favorite_recipe_user_id;
+drop index if exists ix_favorite_recipe_user_id;
+
 alter table ingredient_name drop constraint if exists fk_ingredient_name_ingredient_id;
 drop index if exists ix_ingredient_name_ingredient_id;
 
@@ -144,6 +168,8 @@ drop index if exists ix_recipe_ingredient_measure_id;
 alter table source_page drop constraint if exists fk_source_page_language_id;
 drop index if exists ix_source_page_language_id;
 
+drop table if exists favorite_recipe;
+
 drop table if exists ingredient;
 
 drop table if exists ingredient_name;
@@ -163,4 +189,6 @@ drop table if exists recipe_description;
 drop table if exists recipe_ingredient;
 
 drop table if exists source_page;
+
+drop table if exists user;
 

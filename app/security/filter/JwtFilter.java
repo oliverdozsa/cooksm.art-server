@@ -49,9 +49,8 @@ public class JwtFilter extends Filter {
     private static Logger.ALogger logger = Logger.of(JwtFilter.class);
     private static final String ERR_AUTHORIZATION_HEADER = "ERR_AUTHORIZATION_HEADER";
     private JwtValidator jwtValidator;
-    private Config config;
 
-    private String noJwtFilterTag;
+    private String jwtFilterTag;
     private String headerAuthorization;
     private String bearer;
 
@@ -59,9 +58,8 @@ public class JwtFilter extends Filter {
     public JwtFilter(Materializer mat, JwtValidator jwtValidator, Config config) {
         super(mat);
         this.jwtValidator = jwtValidator;
-        this.config = config;
 
-        noJwtFilterTag = config.getString("receptnekem.jwt.nofiltertag");
+        jwtFilterTag = config.getString("receptnekem.jwt.filtertag");
         headerAuthorization = config.getString("receptnekem.jwt.header.authorization");
         bearer = config.getString("receptnekem.jwt.header.bearer");
     }
@@ -72,7 +70,7 @@ public class JwtFilter extends Filter {
             HandlerDef handler = requestHeader.attrs().get(Router.Attrs.HANDLER_DEF);
             List<String> modifiers = handler.getModifiers();
 
-            if (modifiers.contains(noJwtFilterTag)) {
+            if (!modifiers.contains(jwtFilterTag)) {
                 return nextFilter.apply(requestHeader);
             }
         }

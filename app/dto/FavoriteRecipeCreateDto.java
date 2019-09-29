@@ -4,5 +4,12 @@ import lombok.Data;
 
 @Data
 public class FavoriteRecipeCreateDto {
-    private final Long recipeId;
+    private Long recipeId;
+
+    public FavoriteRecipeCreateDto() {
+    }
+
+    public FavoriteRecipeCreateDto(Long recipeId) {
+        this.recipeId = recipeId;
+    }
 }

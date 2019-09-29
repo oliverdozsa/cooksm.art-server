@@ -4,7 +4,11 @@ GET    /recipes/:id                   controllers.v1.RecipesController.singleRec
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
 
 # Favorite recipes
-POST   /api/favoriterecipes           controllers.v1.FavoriteRecipesController.create(request: Request)
-GET    /api/favoriterecipes           controllers.v1.FavoriteRecipesController.allOfUser(request: Request)
-GET    /api/favoriterecipes/:id       controllers.v1.FavoriteRecipesController.single(id: Long)
-# DELETE /api/favoriterecipes/:id       controllers.receptnekem.ReceptNekemController.deleteFavoriteRecipe(id: Long)
++ jwtFilter
+POST   /favoriterecipes           controllers.v1.FavoriteRecipesController.create(request: Request)
++ jwtFilter
+GET    /favoriterecipes           controllers.v1.FavoriteRecipesController.allOfUser(request: Request)
++ jwtFilter
+GET    /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.single(id: Long, request: Request)
++ jwtFilter
+DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delete(id: Long, request: Request)

@@ -40,14 +40,19 @@ public class FavoriteRecipesController extends Controller {
     private FormFactory formFactory;
 
     private Function<Throwable, Result> mapException = t -> {
+        if (t instanceof IllegalArgumentException) {
+            return badRequest();
+        }
+
         logger.error("Internal Error!", t.getCause());
         return internalServerError();
     };
 
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 
-    public CompletionStage<Result> single(Long id) {
-        return repository.single(id)
+    public CompletionStage<Result> single(Long id, Http.Request request) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        return repository.single(id, jwt.getUserId())
                 .thenApplyAsync(f -> {
                     FavoriteRecipeDto dto = DtoMapper.toDto(f);
                     return ok(Json.toJson(dto));
@@ -82,7 +87,18 @@ public class FavoriteRecipesController extends Controller {
         }
     }
 
-    // TODO: delete!
+    public CompletionStage<Result> delete(Long id, Http.Request request) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        return repository.delete(id, jwt.getUserId())
+                .thenApplyAsync(r -> {
+                    if (r) {
+                        return (Result) noContent();
+                    } else {
+                        return badRequest();
+                    }
+                }, httpExecutionContext.current())
+                .exceptionally(mapException);
+    }
 
     private static Result toResult(Page<FavoriteRecipe> page) {
         List<FavoriteRecipeDto> favoriteRecipes = page.getItems()
