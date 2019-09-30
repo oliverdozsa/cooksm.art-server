@@ -51,10 +51,7 @@ public class FavoriteRecipesControllerTest {
         JwtUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
-
-        JsonNode resultJson = Json.parse(contentAsString(result));
-        assertEquals(0, resultJson.get("items").size());
+        assertEquals(NOT_FOUND, result.status());
     }
 
     @Test

@@ -6,6 +6,7 @@ import dto.FavoriteRecipeDto;
 import dto.PageDto;
 import models.entities.FavoriteRecipe;
 import models.repositories.FavoriteRecipeRepository;
+import models.repositories.NotFoundException;
 import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
@@ -40,8 +41,14 @@ public class FavoriteRecipesController extends Controller {
     private FormFactory formFactory;
 
     private Function<Throwable, Result> mapException = t -> {
-        if (t instanceof IllegalArgumentException) {
+        if (t.getCause() instanceof IllegalArgumentException) {
+            logger.warn("Bad Request!", t.getCause());
             return badRequest();
+        }
+
+        if (t.getCause() instanceof NotFoundException) {
+            logger.warn("Not Found!", t.getCause());
+            return notFound();
         }
 
         logger.error("Internal Error!", t.getCause());
@@ -54,6 +61,10 @@ public class FavoriteRecipesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         return repository.single(id, jwt.getUserId())
                 .thenApplyAsync(f -> {
+                    if (f == null) {
+                        return notFound();
+                    }
+
                     FavoriteRecipeDto dto = DtoMapper.toDto(f);
                     return ok(Json.toJson(dto));
                 }, httpExecutionContext.current())

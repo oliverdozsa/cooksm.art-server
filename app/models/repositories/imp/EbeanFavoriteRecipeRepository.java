@@ -32,17 +32,24 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
 
     @Override
     public CompletionStage<FavoriteRecipe> single(Long id, Long userId) {
-        return supplyAsync(() -> ebean.createQuery(FavoriteRecipe.class)
-                        .where()
-                        .eq("user.id", userId)
-                        .eq("id", id)
-                        .findOne(),
+        return supplyAsync(() -> {
+                    EbeanRepoUtils.checkEntity(ebean, FavoriteRecipe.class, id);
+                    EbeanRepoUtils.checkEntity(ebean, User.class, userId);
+
+                    return ebean.createQuery(FavoriteRecipe.class)
+                            .where()
+                            .eq("user.id", userId)
+                            .eq("id", id)
+                            .findOneOrEmpty().orElse(null);
+                },
                 executionContext);
     }
 
     @Override
     public CompletionStage<Page<FavoriteRecipe>> allOfUser(Long userId) {
         return supplyAsync(() -> {
+            EbeanRepoUtils.checkEntity(ebean, User.class, userId);
+
             List<FavoriteRecipe> result = ebean.createQuery(FavoriteRecipe.class)
                     .where()
                     .eq("user.id", userId)
@@ -55,6 +62,9 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Override
     public CompletionStage<Long> create(Long userId, Long recipeId) {
         return supplyAsync(() -> {
+            EbeanRepoUtils.checkEntity(ebean, User.class, userId);
+            EbeanRepoUtils.checkEntity(ebean, Recipe.class, recipeId);
+
             FavoriteRecipe fr = new FavoriteRecipe();
             fr.setUser(ebean.find(User.class, userId));
             fr.setRecipe(ebean.find(Recipe.class, recipeId));
@@ -67,14 +77,17 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Override
     public CompletionStage<Boolean> delete(Long id, Long userId) {
         return supplyAsync(() -> {
+            EbeanRepoUtils.checkEntity(ebean, FavoriteRecipe.class, id);
+            EbeanRepoUtils.checkEntity(ebean, User.class, userId);
+
             // To prevent deleting other users' entities, userId is needed.
-            int deletecCount = ebean.createQuery(FavoriteRecipe.class)
+            int deleteCount = ebean.createQuery(FavoriteRecipe.class)
                     .where()
                     .eq("user.id", userId)
                     .eq("id", id)
                     .delete();
 
-            return deletecCount == 1;
+            return deleteCount == 1;
         }, executionContext);
     }
 
