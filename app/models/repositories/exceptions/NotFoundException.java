@@ -1,4 +1,4 @@
-package models.repositories;
+package models.repositories.exceptions;
 
 public class NotFoundException extends RuntimeException {
     public NotFoundException(String message) {

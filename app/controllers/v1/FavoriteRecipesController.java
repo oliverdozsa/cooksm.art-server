@@ -6,7 +6,8 @@ import dto.FavoriteRecipeDto;
 import dto.PageDto;
 import models.entities.FavoriteRecipe;
 import models.repositories.FavoriteRecipeRepository;
-import models.repositories.NotFoundException;
+import models.repositories.exceptions.BusinessLogicViolationException;
+import models.repositories.exceptions.NotFoundException;
 import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
@@ -41,7 +42,8 @@ public class FavoriteRecipesController extends Controller {
     private FormFactory formFactory;
 
     private Function<Throwable, Result> mapException = t -> {
-        if (t.getCause() instanceof IllegalArgumentException) {
+        if (t.getCause() instanceof IllegalArgumentException ||
+                t.getCause() instanceof BusinessLogicViolationException) {
             logger.warn("Bad Request!", t.getCause());
             return badRequest();
         }

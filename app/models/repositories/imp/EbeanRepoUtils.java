@@ -1,7 +1,7 @@
 package models.repositories.imp;
 
 import io.ebean.EbeanServer;
-import models.repositories.NotFoundException;
+import models.repositories.exceptions.NotFoundException;
 
 class EbeanRepoUtils {
     public static <E> void checkEntity(EbeanServer ebean, Class<E> entityClass, Object id) {
