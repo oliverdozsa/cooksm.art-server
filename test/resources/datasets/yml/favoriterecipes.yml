@@ -1,0 +1,16 @@
+user:
+  - id: 1
+
+source_page:
+  - id: 1
+    name: src_pg_1_hu
+    language_id: 1
+
+recipe:
+  - id: 1
+    name: recipe_1
+    url: recipe_1_url
+    time: 10
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 1

@@ -40,6 +40,7 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testFavoriteRecipes_GetEmpty() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_GetEmpty");
@@ -51,10 +52,13 @@ public class FavoriteRecipesControllerTest {
         JwtUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals(OK, result.status());
+        JsonNode resultJson = Json.parse(contentAsString(result));
+        assertEquals(0, resultJson.get("totalCount").asInt());
     }
 
     @Test
+    @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testFavoriteRecipes_Create_Get() throws IOException {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Get");
@@ -93,16 +97,15 @@ public class FavoriteRecipesControllerTest {
         JwtUtils.addJwtTokenTo(httpRequestGet, token);
 
         result = route(application.getApplication(), httpRequestGet);
-        PageDto<FavoriteRecipeDto> favoriteRecipes = Json.mapper().readValue(
-                contentAsString(result), new TypeReference<PageDto<FavoriteRecipeDto>>(){});
+        JsonNode resultJson = Json.parse(contentAsString(result));
 
-        assertEquals(1, favoriteRecipes.getTotalCount());
-        assertEquals("recipe_1", favoriteRecipes.getItems().get(0).getName());
-        assertEquals("recipe_1_url", favoriteRecipes.getItems().get(0).getUrl());
+        assertEquals(1, resultJson.get("totalCount").asInt());
+        assertEquals("recipe_1", resultJson.get("items").get(0).get("name").asText());
+        assertEquals("recipe_1_url", resultJson.get("items").get(0).get("url").asText());
     }
 
     @Test
-    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testFavoriteRecipes_Delete() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Delete");
@@ -116,20 +119,13 @@ public class FavoriteRecipesControllerTest {
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
-                .uri(RESOURCE_PATH + "/1");
+                .uri(RESOURCE_PATH + "/" + favoriteRecipe.getId());
 
         String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
         JwtUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
-
-        httpRequest = new Http.RequestBuilder()
-                .uri(RESOURCE_PATH);
-        JwtUtils.addJwtTokenTo(httpRequest, token);
-        result = route(application.getApplication(), httpRequest);
-        JsonNode favoritesJson = Json.parse(contentAsString(result));
-        assertEquals(0, favoritesJson.get("items").size());
+        assertEquals(NO_CONTENT, result.status());
     }
 
     @Test
@@ -204,7 +200,7 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testFavoriteRecipes_Create_Already_Existing() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Already_Existing");
