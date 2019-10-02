@@ -3,7 +3,6 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import dto.FavoriteRecipeCreateDto;
-import dto.FavoriteRecipeDto;
 import io.ebean.Ebean;
 import models.entities.FavoriteRecipe;
 import models.entities.Recipe;
@@ -83,11 +82,9 @@ public class FavoriteRecipesControllerTest {
         JwtUtils.addJwtTokenTo(httpRequestGet, token);
         result = route(application.getApplication(), httpRequestGet);
         JsonNode favoriteRecipesJson = Json.parse(contentAsString(result));
-        FavoriteRecipeDto resultFavoriteRecipe =
-                Json.fromJson(favoriteRecipesJson, FavoriteRecipeDto.class);
 
-        assertEquals("recipe_1", resultFavoriteRecipe.getName());
-        assertEquals("recipe_1_url", resultFavoriteRecipe.getUrl());
+        assertEquals("recipe_1", favoriteRecipesJson.get("name").asText());
+        assertEquals("recipe_1_url", favoriteRecipesJson.get("url").asText());
 
         // Get all
         httpRequestGet = new Http.RequestBuilder()
@@ -161,7 +158,7 @@ public class FavoriteRecipesControllerTest {
         JwtUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals(NOT_FOUND, result.status());
     }
 
     @Test

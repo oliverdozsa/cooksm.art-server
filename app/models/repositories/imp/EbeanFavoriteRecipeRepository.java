@@ -67,7 +67,8 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
         return supplyAsync(() -> {
             EbeanRepoUtils.checkEntity(ebean, User.class, userId);
             EbeanRepoUtils.checkEntity(ebean, Recipe.class, recipeId);
-            checkCount(userId);
+            assertNotExists(userId, recipeId);
+            assertCount(userId);
 
             FavoriteRecipe fr = new FavoriteRecipe();
             fr.setUser(ebean.find(User.class, userId));
@@ -103,7 +104,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
         return executionContext;
     }
 
-    private void checkCount(Long userId) {
+    private void assertCount(Long userId) {
         int count = count(userId);
         if (count >= maxPerUser) {
             String msg = String.format("User with id %d has too many favorites!", userId);
@@ -114,7 +115,22 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     private int count(Long userId) {
         return ebean.createQuery(FavoriteRecipe.class)
                 .where()
-                .eq("user.id", userId)
                 .findCount();
+    }
+
+    private void assertNotExists(Long userId, Long recipeId) {
+        if (exist(userId, recipeId)) {
+            String msg = String.format("Favorite recipe with user id = %d, and recipe id = %d already exists!",
+                    userId, recipeId);
+            throw new BusinessLogicViolationException(msg);
+        }
+    }
+
+    private boolean exist(Long userId, Long recipeId) {
+        return ebean.createQuery(FavoriteRecipe.class)
+                .where()
+                .eq("user.id", userId)
+                .eq("recipe.id", recipeId)
+                .findOneOrEmpty().isPresent();
     }
 }
