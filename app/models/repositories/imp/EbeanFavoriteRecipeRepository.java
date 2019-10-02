@@ -115,6 +115,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     private int count(Long userId) {
         return ebean.createQuery(FavoriteRecipe.class)
                 .where()
+                .eq("user.id", userId)
                 .findCount();
     }
 
