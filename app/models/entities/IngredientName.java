@@ -1,6 +1,7 @@
 package models.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Ingredient name entity.
@@ -27,6 +28,9 @@ public class IngredientName {
     @JoinColumn(name = "language_id")
     @ManyToOne
     private Language language;
+
+    @OneToMany(mappedBy = "ingredientName")
+    private List<IngredientAltName> altNames;
 
     public Long getId() {
         return id;

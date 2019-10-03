@@ -29,7 +29,11 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
         return supplyAsync(() -> {
             Query<IngredientName> query = ebean.createQuery(IngredientName.class);
 
-            query.where().ilike("name", "%" + nameLike + "%");
+            query.where()
+                    .or()
+                    .ilike("name", "%" + nameLike + "%")
+                    .ilike("altNames.name", "%" + nameLike + "%")
+                    .endOr();
             query.where().eq("language.id", languageId);
 
             query.setFirstRow(offset);

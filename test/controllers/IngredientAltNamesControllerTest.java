@@ -15,6 +15,7 @@ import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.route;
 
 public class IngredientAltNamesControllerTest {
+    // TODO: Merge into IngredientNamesControllerTest
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
