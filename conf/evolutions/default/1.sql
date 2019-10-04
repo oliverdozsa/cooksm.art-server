@@ -15,6 +15,13 @@ create table ingredient (
   constraint pk_ingredient primary key (id)
 );
 
+create table ingredient_alt_name (
+  id                            bigint auto_increment not null,
+  name                          varchar(255),
+  ingredient_name_id            bigint not null,
+  constraint pk_ingredient_alt_name primary key (id)
+);
+
 create table ingredient_name (
   id                            bigint auto_increment not null,
   name                          varchar(255),
@@ -93,6 +100,9 @@ alter table favorite_recipe add constraint fk_favorite_recipe_recipe_id foreign 
 create index ix_favorite_recipe_user_id on favorite_recipe (user_id);
 alter table favorite_recipe add constraint fk_favorite_recipe_user_id foreign key (user_id) references user (id) on delete restrict on update restrict;
 
+create index ix_ingredient_alt_name_ingredient_name_id on ingredient_alt_name (ingredient_name_id);
+alter table ingredient_alt_name add constraint fk_ingredient_alt_name_ingredient_name_id foreign key (ingredient_name_id) references ingredient_name (id) on delete restrict on update restrict;
+
 create index ix_ingredient_name_ingredient_id on ingredient_name (ingredient_id);
 alter table ingredient_name add constraint fk_ingredient_name_ingredient_id foreign key (ingredient_id) references ingredient (id) on delete restrict on update restrict;
 
@@ -135,6 +145,9 @@ drop index if exists ix_favorite_recipe_recipe_id;
 alter table favorite_recipe drop constraint if exists fk_favorite_recipe_user_id;
 drop index if exists ix_favorite_recipe_user_id;
 
+alter table ingredient_alt_name drop constraint if exists fk_ingredient_alt_name_ingredient_name_id;
+drop index if exists ix_ingredient_alt_name_ingredient_name_id;
+
 alter table ingredient_name drop constraint if exists fk_ingredient_name_ingredient_id;
 drop index if exists ix_ingredient_name_ingredient_id;
 
@@ -171,6 +184,8 @@ drop index if exists ix_source_page_language_id;
 drop table if exists favorite_recipe;
 
 drop table if exists ingredient;
+
+drop table if exists ingredient_alt_name;
 
 drop table if exists ingredient_name;
 

@@ -11,6 +11,7 @@ import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
 import static junit.framework.TestCase.assertEquals;
+import static play.mvc.Http.HttpVerbs.GET;
 import static play.test.Helpers.*;
 
 public class IngredientNamesControllerTest {
@@ -65,5 +66,39 @@ public class IngredientNamesControllerTest {
         resultNamesJson = resultJson.get("items");
 
         assertEquals(3, resultNamesJson.size());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
+    public void testIngredientAltNames_hasAltNames() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testIngredientAltNames_hasAltNames");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "languageId=1&nameLike=hu_1&offset=0&limit=2";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        JsonNode resultAltNamesJson = resultJson.get("items").get(0).get("altNames");
+        assertEquals(3, resultAltNamesJson.size());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
+    public void testIngredientAltNames_noAltName() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testIngredientAltNames_noAltName");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "languageId=2&nameLike=en_6&offset=0&limit=2";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        JsonNode resultAltNamesJson = resultJson.get("items").get(0).get("altNames");
+        assertEquals(0, resultAltNamesJson.size());
     }
 }

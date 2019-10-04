@@ -63,4 +63,8 @@ public class IngredientName {
     public void setLanguage(Language language) {
         this.language = language;
     }
+
+    public List<IngredientAltName> getAltNames() {
+        return altNames;
+    }
 }

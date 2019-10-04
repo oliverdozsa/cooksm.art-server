@@ -9,12 +9,18 @@ import models.entities.IngredientName;
 import models.entities.Recipe;
 import models.entities.SourcePage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class DtoMapper {
     public static IngredientNameDto toDto(IngredientName entity) {
-        return new IngredientNameDto(entity.getIngredient().getId(), entity.getName());
+        List<String> altNames = entity.getAltNames()
+                .stream()
+                .map(a -> a.getName())
+                .collect(Collectors.toList());
+
+        return new IngredientNameDto(entity.getIngredient().getId(), entity.getName(), altNames);
     }
 
     public static SourcePageDto toDto(SourcePage entity) {

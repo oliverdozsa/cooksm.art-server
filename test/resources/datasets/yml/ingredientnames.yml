@@ -43,3 +43,28 @@ ingredient_name:
     language_id: 2
     ingredient_id: 6
     name: en_6
+
+ingredient_alt_name:
+  - id: 1
+    name: ingr_1_alt_1
+    ingredient_name_id: 1
+
+  - id: 2
+    name: ingr_1_alt_2
+    ingredient_name_id: 1
+
+  - id: 3
+    name: ingr_1_alt_3
+    ingredient_name_id: 1
+
+  - id: 4
+    name: ingr_2_alt_1
+    ingredient_name_id: 2
+
+  - id: 5
+    name: ingr_2_alt_2
+    ingredient_name_id: 2
+
+  - id: 6
+    name: ingr_3_alt_1
+    ingredient_name_id: 3
