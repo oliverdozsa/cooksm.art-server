@@ -7,7 +7,7 @@ import play.mvc.Http;
 
 import java.util.Date;
 
-public class JwtUtils {
+public class JwtTestUtils {
     public static String createToken(Long timeOffset, Long userId, Config config) {
         Date date = new Date(new Date().getTime() + timeOffset);
 

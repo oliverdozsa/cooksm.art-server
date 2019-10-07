@@ -16,7 +16,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
-import utils.JwtUtils;
+import utils.JwtTestUtils;
 
 import java.io.IOException;
 
@@ -45,8 +45,8 @@ public class FavoriteRecipesControllerTest {
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().uri(RESOURCE_PATH);
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequest, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(OK, result.status());
@@ -68,8 +68,8 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipe))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequestCreate, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
         assertEquals(CREATED, result.status());
@@ -79,7 +79,7 @@ public class FavoriteRecipesControllerTest {
         // Get by id
         Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
                 .uri(result.headers().get("Location"));
-        JwtUtils.addJwtTokenTo(httpRequestGet, token);
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, token);
         result = route(application.getApplication(), httpRequestGet);
         JsonNode favoriteRecipesJson = Json.parse(contentAsString(result));
 
@@ -89,7 +89,7 @@ public class FavoriteRecipesControllerTest {
         // Get all
         httpRequestGet = new Http.RequestBuilder()
                 .uri(RESOURCE_PATH);
-        JwtUtils.addJwtTokenTo(httpRequestGet, token);
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, token);
 
         result = route(application.getApplication(), httpRequestGet);
         JsonNode resultJson = Json.parse(contentAsString(result));
@@ -116,8 +116,8 @@ public class FavoriteRecipesControllerTest {
                 .method(DELETE)
                 .uri(RESOURCE_PATH + "/" + favoriteRecipe.getId());
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequest, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(NO_CONTENT, result.status());
@@ -134,8 +134,8 @@ public class FavoriteRecipesControllerTest {
                 .bodyText("{asd")
                 .uri(RESOURCE_PATH);
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequestCreate, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
         assertEquals(BAD_REQUEST, result.status());
@@ -154,8 +154,8 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipe))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequestCreate, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
         assertEquals(NOT_FOUND, result.status());
@@ -187,8 +187,8 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipe))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequestCreate, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
         assertEquals(BAD_REQUEST, result.status());
@@ -213,8 +213,8 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipeDTO))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtUtils.addJwtTokenTo(httpRequestCreate, token);
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
         assertEquals(BAD_REQUEST, result.status());
