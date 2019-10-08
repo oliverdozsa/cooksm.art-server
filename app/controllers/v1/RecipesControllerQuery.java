@@ -9,7 +9,6 @@ public class RecipesControllerQuery {
     public enum SearchMode {
         NONE(0),
         COMPOSED_OF(1),
-        GROUP(2),
         COMPOSED_OF_RATIO(3);
 
         SearchMode(int id) {
@@ -90,9 +89,6 @@ public class RecipesControllerQuery {
 
         public List<Long> sourcePages;
 
-        @Constraints.Required(groups = {VGRecSearchModeGroup.class})
-        public List<List<Long>> inGrOfIngs;
-
         public Long languageId;
 
         @Override
@@ -122,8 +118,5 @@ public class RecipesControllerQuery {
 
     // Validation group for composed of search
     public interface VGRecSearchModeComposedOf {
-    }
-
-    public interface VGRecSearchModeGroup {
     }
 }
