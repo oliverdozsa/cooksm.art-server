@@ -1,12 +1,6 @@
 import com.google.inject.AbstractModule;
-import models.repositories.FavoriteRecipeRepository;
-import models.repositories.IngredientNameRepository;
-import models.repositories.RecipeRepository;
-import models.repositories.SourcePageRepository;
-import models.repositories.imp.EbeanFavoriteRecipeRepository;
-import models.repositories.imp.EbeanIngredientNameRepository;
-import models.repositories.imp.EbeanRecipeRepository;
-import models.repositories.imp.EbeanSourcePageRepository;
+import models.repositories.*;
+import models.repositories.imp.*;
 import security.JwtValidator;
 import security.imp.JwtValidatorImp;
 
@@ -20,6 +14,7 @@ public class Module extends AbstractModule {
         bind(RecipeRepository.class).to(EbeanRecipeRepository.class).asEagerSingleton();
         bind(SourcePageRepository.class).to(EbeanSourcePageRepository.class).asEagerSingleton();
         bind(FavoriteRecipeRepository.class).to(EbeanFavoriteRecipeRepository.class).asEagerSingleton();
+        bind(RecipeSearchRepository.class).to(EbeanRecipeSearchRepository.class).asEagerSingleton();
         bind(JwtValidator.class).to(JwtValidatorImp.class).asEagerSingleton();
     }
 }

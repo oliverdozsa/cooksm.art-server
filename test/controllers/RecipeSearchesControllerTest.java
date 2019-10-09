@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import static junit.framework.TestCase.assertEquals;
 import static play.test.Helpers.*;
 
-public class SearchesControllerTest {
+public class RecipeSearchesControllerTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 

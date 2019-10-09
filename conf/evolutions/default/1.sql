@@ -82,6 +82,14 @@ create table recipe_ingredient (
   constraint pk_recipe_ingredient primary key (id)
 );
 
+create table recipe_search (
+  id                            bigint auto_increment not null,
+  name                          varchar(255),
+  user_id                       bigint,
+  query                         varchar(255),
+  constraint pk_recipe_search primary key (id)
+);
+
 create table source_page (
   id                            bigint auto_increment not null,
   name                          varchar(255),
@@ -133,6 +141,9 @@ alter table recipe_ingredient add constraint fk_recipe_ingredient_recipe_id fore
 create index ix_recipe_ingredient_measure_id on recipe_ingredient (measure_id);
 alter table recipe_ingredient add constraint fk_recipe_ingredient_measure_id foreign key (measure_id) references measure (id) on delete restrict on update restrict;
 
+create index ix_recipe_search_user_id on recipe_search (user_id);
+alter table recipe_search add constraint fk_recipe_search_user_id foreign key (user_id) references user (id) on delete restrict on update restrict;
+
 create index ix_source_page_language_id on source_page (language_id);
 alter table source_page add constraint fk_source_page_language_id foreign key (language_id) references language (id) on delete restrict on update restrict;
 
@@ -178,6 +189,9 @@ drop index if exists ix_recipe_ingredient_recipe_id;
 alter table recipe_ingredient drop constraint if exists fk_recipe_ingredient_measure_id;
 drop index if exists ix_recipe_ingredient_measure_id;
 
+alter table recipe_search drop constraint if exists fk_recipe_search_user_id;
+drop index if exists ix_recipe_search_user_id;
+
 alter table source_page drop constraint if exists fk_source_page_language_id;
 drop index if exists ix_source_page_language_id;
 
@@ -202,6 +216,8 @@ drop table if exists recipe;
 drop table if exists recipe_description;
 
 drop table if exists recipe_ingredient;
+
+drop table if exists recipe_search;
 
 drop table if exists source_page;
 

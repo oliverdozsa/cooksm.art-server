@@ -12,3 +12,6 @@ GET    /favoriterecipes           controllers.v1.FavoriteRecipesController.allOf
 GET    /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.single(id: Long, request: Request)
 + jwtFilter
 DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delete(id: Long, request: Request)
+
+# Recipe searches
+GET    /searches                  controllers.v1.RecipeSearchesController.globals()

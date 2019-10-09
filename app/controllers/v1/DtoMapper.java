@@ -1,13 +1,7 @@
 package controllers.v1;
 
-import dto.FavoriteRecipeDto;
-import dto.IngredientNameDto;
-import dto.RecipeDto;
-import dto.SourcePageDto;
-import models.entities.FavoriteRecipe;
-import models.entities.IngredientName;
-import models.entities.Recipe;
-import models.entities.SourcePage;
+import dto.*;
+import models.entities.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,12 +44,16 @@ class DtoMapper {
         );
     }
 
-    public static FavoriteRecipeDto toDto(FavoriteRecipe favoriteRecipe) {
+    public static FavoriteRecipeDto toDto(FavoriteRecipe entity) {
         return new FavoriteRecipeDto(
-                favoriteRecipe.getId(),
-                favoriteRecipe.getRecipe().getName(),
-                favoriteRecipe.getRecipe().getUrl(),
-                favoriteRecipe.getRecipe().getId()
+                entity.getId(),
+                entity.getRecipe().getName(),
+                entity.getRecipe().getUrl(),
+                entity.getRecipe().getId()
         );
+    }
+
+    public static RecipeSearchDto toDto(RecipeSearch entity) {
+        return new RecipeSearchDto(entity.getId(), entity.getName(), entity.getQuery());
     }
 }
