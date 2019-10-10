@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.RecipesControllerQuery;
 import dto.RecipeSearchCreateUpdateDto;
 import org.junit.Rule;
@@ -26,6 +27,7 @@ public class RecipeSearchesControllerTest {
     private static final String RESOURCE_PATH_USER = "/v1/usersearches";
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml")
     public void testGetGlobalSearches() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetGlobalSearches");
@@ -56,6 +58,19 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    public void testGetUserSearches_UserNotFound() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetUserSearches_UserNotFound");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH_USER);
+        String jwt = JwtTestUtils.createToken(1000L, 42L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(NOT_FOUND, result.status());
+    }
+
+    @Test
     public void testGetUserSearch() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetUserSearch");
@@ -68,9 +83,24 @@ public class RecipeSearchesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        assertEquals("user_1_recipesearch_1", resultJson.get("name").asText());
+        assertEquals("user 1 search 1", resultJson.get("name").asText());
     }
 
+    @Test
+    public void testGetUserSearch_UserNotFound() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetUserSearch");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH_USER + "/3");
+        String jwt = JwtTestUtils.createToken(1000L, 42L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals(NOT_FOUND, result.status());
+    }
+
+    /*
     @Test
     public void testGetUserSearchNotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
@@ -356,5 +386,5 @@ public class RecipeSearchesControllerTest {
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(NOT_FOUND, result.status());
-    }
+    }*/
 }

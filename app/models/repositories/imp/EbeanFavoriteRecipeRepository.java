@@ -43,7 +43,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
                             .where()
                             .eq("user.id", userId)
                             .eq("id", id)
-                            .findOneOrEmpty().orElse(null);
+                            .findOne();
                 },
                 executionContext);
     }
@@ -94,14 +94,6 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
 
             return deleteCount == 1;
         }, executionContext);
-    }
-
-    public EbeanServer getEbean() {
-        return ebean;
-    }
-
-    public DatabaseExecutionContext getExecutionContext() {
-        return executionContext;
     }
 
     private void assertCount(Long userId) {

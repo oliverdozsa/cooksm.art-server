@@ -41,21 +41,7 @@ public class FavoriteRecipesController extends Controller {
     @Inject
     private FormFactory formFactory;
 
-    private Function<Throwable, Result> mapException = t -> {
-        if (t.getCause() instanceof IllegalArgumentException ||
-                t.getCause() instanceof BusinessLogicViolationException) {
-            logger.warn("Bad Request!", t.getCause());
-            return badRequest();
-        }
-
-        if (t.getCause() instanceof NotFoundException) {
-            logger.warn("Not Found!", t.getCause());
-            return notFound();
-        }
-
-        logger.error("Internal Error!", t.getCause());
-        return internalServerError();
-    };
+    private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
 
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 

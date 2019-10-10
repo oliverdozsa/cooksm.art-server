@@ -15,3 +15,7 @@ DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delet
 
 # Recipe searches
 GET    /searches                  controllers.v1.RecipeSearchesController.globals()
++ jwtFilter
+GET    /usersearches              controllers.v1.RecipeSearchesController.userSearches(request: Request)
++ jwtFilter
+GET   /usersearches/:id           controllers.v1.RecipeSearchesController.userSearch(id: Long, request: Request)

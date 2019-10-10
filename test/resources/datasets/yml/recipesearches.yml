@@ -1,0 +1,35 @@
+user:
+  - id: 1
+
+  - id: 2
+
+recipe_search:
+  - id: 1
+    name: global search 1
+    user_id:
+    query: global search 1 params
+
+  - id: 2
+    name: global search 2
+    user_id:
+    query: global search 2 params
+
+  - id: 3
+    name: user 1 search 1
+    user_id: 1
+    query: user 1 search 1 params
+
+  - id: 4
+    name: user 1 search 2
+    user_id: 1
+    query: user 1 search 2 params
+
+  - id: 5
+    name: user 2 search 1
+    user_id: 2
+    query: user 2 search 1 params
+
+  - id: 6
+    name: user 2 search 2
+    user_id: 2
+    query: user 2 search 2 params
