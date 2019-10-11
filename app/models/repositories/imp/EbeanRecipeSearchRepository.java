@@ -7,7 +7,6 @@ import models.entities.RecipeSearch;
 import models.entities.User;
 import models.repositories.Page;
 import models.repositories.RecipeSearchRepository;
-import models.repositories.exceptions.NotFoundException;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
 
@@ -42,7 +41,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<Page<RecipeSearch>> userSearches(Long userId) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.checkEntity(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
 
             List<RecipeSearch> searches = ebean.createQuery(RecipeSearch.class)
                     .where()
@@ -55,14 +54,29 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<RecipeSearch> userSearch(Long userId, Long entityId) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.checkEntity(ebean, User.class, userId);
-            EbeanRepoUtils.checkEntity(ebean, RecipeSearch.class, entityId);
+            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntity(ebean, RecipeSearch.class, entityId);
 
             return ebean.createQuery(RecipeSearch.class)
                     .where()
                     .eq("user.id", userId)
                     .eq("id", entityId)
                     .findOne();
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Long> create(Long userId, String name, String query) {
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
+
+            RecipeSearch entity = new RecipeSearch();
+            entity.setUser(ebean.find(User.class, userId));
+            entity.setName(name);
+            entity.setQuery(query);
+            ebean.save(entity);
+
+            return entity.getId();
         }, executionContext);
     }
 }

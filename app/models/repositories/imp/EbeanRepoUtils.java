@@ -4,7 +4,7 @@ import io.ebean.EbeanServer;
 import models.repositories.exceptions.NotFoundException;
 
 class EbeanRepoUtils {
-    public static <E> void checkEntity(EbeanServer ebean, Class<E> entityClass, Object id) {
+    public static <E> void assertEntity(EbeanServer ebean, Class<E> entityClass, Object id) {
         if (id == null) {
             throw new IllegalArgumentException("id is null!");
         }

@@ -48,7 +48,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH_USER);
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -64,7 +64,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH_USER);
-        String jwt = JwtTestUtils.createToken(1000L, 42L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 42L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(NOT_FOUND, result.status());
@@ -77,7 +77,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH_USER + "/3");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
 
@@ -93,14 +93,14 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH_USER + "/3");
-        String jwt = JwtTestUtils.createToken(1000L, 42L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 42L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals(NOT_FOUND, result.status());
     }
 
-    /*
+
     @Test
     public void testGetUserSearchNotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
@@ -108,11 +108,12 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri("/api/usersearches/5");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(NOT_FOUND, result.status());
     }
+
 
     @Test
     public void testUserSearchCreate_NONE() {
@@ -129,13 +130,14 @@ public class RecipeSearchesControllerTest {
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER);
 
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(CREATED, result.status());
     }
 
+    /*
     @Test
     public void testUserSearchCreate_COMPOSED_OF() {
         logger.info("------------------------------------------------------------------------------------------------");
@@ -159,7 +161,7 @@ public class RecipeSearchesControllerTest {
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER);
 
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -186,7 +188,7 @@ public class RecipeSearchesControllerTest {
                 .method(POST)
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER);
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -210,7 +212,7 @@ public class RecipeSearchesControllerTest {
                 .method(POST)
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER);
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -234,7 +236,7 @@ public class RecipeSearchesControllerTest {
                 .method(PUT)
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER + "/3");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -269,7 +271,7 @@ public class RecipeSearchesControllerTest {
                 .method(PUT)
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER + "/3");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -294,7 +296,7 @@ public class RecipeSearchesControllerTest {
                 .method(PUT)
                 .bodyJson(Json.toJson(newSearch))
                 .uri(RESOURCE_PATH_USER + "/5");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -321,7 +323,7 @@ public class RecipeSearchesControllerTest {
                     .method(POST)
                     .bodyJson(Json.toJson(newSearch))
                     .uri(RESOURCE_PATH_USER);
-            String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+            String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
             JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
             result = route(application.getApplication(), httpRequest);
         }
@@ -339,7 +341,7 @@ public class RecipeSearchesControllerTest {
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
                 .uri(RESOURCE_PATH_USER + "/3");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -364,7 +366,7 @@ public class RecipeSearchesControllerTest {
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
                 .uri(RESOURCE_PATH_USER + "/5");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -381,7 +383,7 @@ public class RecipeSearchesControllerTest {
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
                 .uri(RESOURCE_PATH_USER + "/42");
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);

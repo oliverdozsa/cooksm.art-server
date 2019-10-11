@@ -45,7 +45,7 @@ public class FavoriteRecipesControllerTest {
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().uri(RESOURCE_PATH);
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -68,7 +68,7 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipe))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
@@ -116,7 +116,7 @@ public class FavoriteRecipesControllerTest {
                 .method(DELETE)
                 .uri(RESOURCE_PATH + "/" + favoriteRecipe.getId());
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
@@ -134,7 +134,7 @@ public class FavoriteRecipesControllerTest {
                 .bodyText("{asd")
                 .uri(RESOURCE_PATH);
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
@@ -154,7 +154,7 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipe))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
@@ -187,7 +187,7 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipe))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
@@ -213,7 +213,7 @@ public class FavoriteRecipesControllerTest {
                 .bodyJson(Json.toJson(favoriteRecipeDTO))
                 .uri(RESOURCE_PATH);
 
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
