@@ -4,7 +4,6 @@ import com.typesafe.config.Config;
 import dto.PageDto;
 import dto.RecipeSearchCreateUpdateDto;
 import dto.RecipeSearchDto;
-import models.entities.RecipeSearch;
 import models.repositories.RecipeSearchRepository;
 import models.repositories.exceptions.NotFoundException;
 import play.Logger;
@@ -15,7 +14,6 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.mvc.StatusHeader;
 import security.SecurityUtils;
 import security.VerifiedJwt;
 
