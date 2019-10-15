@@ -5,19 +5,30 @@ import models.repositories.exceptions.BusinessLogicViolationException;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.Json;
+import play.mvc.Http;
 
-public class RecipeSearchCreatorUpdater {
+/* Instances of this class is used only inside the appropriate controller in order to avoid
+ * leaking the managed form factory.
+ */
+class RecipeSearchCreatorUpdater {
     private FormFactory formFactory;
+    private RecipeSearchCreateUpdateDto dto;
 
-    public RecipeSearchCreatorUpdater(FormFactory formFactory) {
+    public RecipeSearchCreatorUpdater(FormFactory formFactory, Http.Request request) {
         this.formFactory = formFactory;
+        Form<RecipeSearchCreateUpdateDto> form = formFactory.form(RecipeSearchCreateUpdateDto.class).bindFromRequest(request);
+        if (form.hasErrors()) {
+            throw new BusinessLogicViolationException(form.errorsAsJson().toString());
+        }
+
+        dto = form.get();
     }
 
-    public RecipeSearchCreateUpdateDto create(String name, String query) {
-        validateName(name);
-        validateQuery(query);
+    public RecipeSearchCreateUpdateDto create() {
+        validateName(dto.getName());
+        validateQuery(dto.getQuery());
 
-        return new RecipeSearchCreateUpdateDto(name, query);
+        return dto;
     }
 
     private void validateName(String name) {

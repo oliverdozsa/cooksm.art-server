@@ -23,6 +23,9 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+
 public class RecipeSearchesController extends Controller {
     @Inject
     private RecipeSearchRepository repository;
@@ -70,29 +73,26 @@ public class RecipeSearchesController extends Controller {
         return repository.userSearch(jwt.getUserId(), entityId)
                 .thenApplyAsync(e -> {
                     RecipeSearchDto dto = DtoMapper.toDto(e);
-                    return ok(Json.toJson(e));
+                    return ok(Json.toJson(dto));
                 }, httpExecutionContext.current())
                 .exceptionally(mapException);
     }
 
     public CompletionStage<Result> create(Http.Request request) {
-        Form<RecipeSearchCreateUpdateDto> formDto = formFactory.form(RecipeSearchCreateUpdateDto.class)
-                .bindFromRequest(request); // TODO: validation
+        RecipeSearchCreateUpdateDto dto;
+        try {
+            dto = new RecipeSearchCreatorUpdater(formFactory, request).create();
+        } catch (Exception e) {
+            return completedFuture(mapException.apply(e));
+        }
 
-        // TODO:
-        RecipeSearchCreateUpdateDto dto = new RecipeSearchCreateUpdateDto("", ""); // TODO
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
 
         return repository.create(jwt.getUserId(), dto.getName(), dto.getQuery())
                 .thenApplyAsync(id -> {
-                    return ok("");
-                })
-                .exceptionally(e -> {
-                    if(e instanceof NotFoundException){
-                        return badRequest();
-                    } else {
-                        return mapException.apply(e);
-                    }
-                });
+                    String location = routes.RecipeSearchesController.userSearch(id).absoluteURL(request);
+                    return created().withHeader(LOCATION, location);
+                }, httpExecutionContext.current())
+                .exceptionally(mapException);
     }
 }
