@@ -16,6 +16,7 @@ import utils.JwtTestUtils;
 import java.util.ArrayList;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static play.test.Helpers.*;
 
 public class RecipeSearchesControllerTest {
@@ -135,6 +136,23 @@ public class RecipeSearchesControllerTest {
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(CREATED, result.status());
+        assertTrue(result.header(LOCATION).isPresent());
+
+        // Check newly created recipe search
+        httpRequest = new Http.RequestBuilder()
+                .method(GET)
+                .bodyJson(Json.toJson(newSearch))
+                .uri(RESOURCE_PATH_USER + "/" + result.header(LOCATION).get());
+
+        jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
+
+        result = route(application.getApplication(), httpRequest);
+        assertEquals(OK, result.status());
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        assertEquals("newSearchUser1", resultJson.get("name"));
     }
 
     /*

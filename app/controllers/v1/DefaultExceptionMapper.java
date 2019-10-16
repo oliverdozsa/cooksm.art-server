@@ -18,18 +18,18 @@ class DefaultExceptionMapper implements Function<Throwable, Result> {
 
     @Override
     public Result apply(Throwable input) {
-        if (input.getCause() instanceof IllegalArgumentException ||
-                input.getCause() instanceof BusinessLogicViolationException) {
-            logger.warn("Bad Request!", input.getCause());
+        if (input instanceof IllegalArgumentException ||
+                input instanceof BusinessLogicViolationException) {
+            logger.warn("Bad Request!", input);
             return badRequest();
         }
 
-        if (input.getCause() instanceof NotFoundException) {
-            logger.warn("Not Found!", input.getCause());
+        if (input instanceof NotFoundException) {
+            logger.warn("Not Found!", input);
             return notFound();
         }
 
-        logger.error("Internal Error!", input.getCause());
+        logger.error("Internal Error!", input);
         return internalServerError();
     }
 }

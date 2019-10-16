@@ -19,3 +19,5 @@ GET    /searches                  controllers.v1.RecipeSearchesController.global
 GET    /usersearches              controllers.v1.RecipeSearchesController.userSearches(request: Request)
 + jwtFilter
 GET   /usersearches/:id           controllers.v1.RecipeSearchesController.userSearch(id: Long, request: Request)
++ jwtFilter
+POST  /usersearches              controllers.v1.RecipeSearchesController.create(request: Request)

@@ -2,10 +2,15 @@ package controllers.v1;
 
 import dto.RecipeSearchCreateUpdateDto;
 import models.repositories.exceptions.BusinessLogicViolationException;
+import play.api.libs.json.JsValue;
 import play.data.Form;
 import play.data.FormFactory;
+import play.i18n.Lang;
 import play.libs.Json;
+import play.libs.typedmap.TypedMap;
 import play.mvc.Http;
+
+import java.util.Map;
 
 /* Instances of this class is used only inside the appropriate controller in order to avoid
  * leaking the managed form factory.
@@ -25,21 +30,14 @@ class RecipeSearchCreatorUpdater {
     }
 
     public RecipeSearchCreateUpdateDto create() {
-        validateName(dto.getName());
         validateQuery(dto.getQuery());
 
         return dto;
     }
 
-    private void validateName(String name) {
-        if (name == null || name.length() < 2) {
-            throw new BusinessLogicViolationException("Recipe search's name is invalid!");
-        }
-    }
-
     private void validateQuery(String query) {
         Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class);
-        form.bind(null, null, Json.parse(query));
+        form.bind(Lang.defaultLang().asJava(), TypedMap.empty(), Json.parse(query));
 
         if (form.hasErrors()) {
             throw new BusinessLogicViolationException("Recipe search to create is not valid!");
@@ -50,7 +48,7 @@ class RecipeSearchCreatorUpdater {
     }
 
     private void validateQueryBasedOnSearchMode(String query, Integer searchmode) {
-        if (searchmode == RecipesControllerQuery.SearchMode.NONE.id) {
+        if (searchmode == null || searchmode == RecipesControllerQuery.SearchMode.NONE.id) {
             return;
         }
 

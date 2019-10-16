@@ -5,9 +5,7 @@ import dto.PageDto;
 import dto.RecipeSearchCreateUpdateDto;
 import dto.RecipeSearchDto;
 import models.repositories.RecipeSearchRepository;
-import models.repositories.exceptions.NotFoundException;
 import play.Logger;
-import play.data.Form;
 import play.data.FormFactory;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
@@ -24,7 +22,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class RecipeSearchesController extends Controller {
     @Inject
@@ -40,6 +37,8 @@ public class RecipeSearchesController extends Controller {
     private Config config;
 
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
+    private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
+
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesController.class);
 
@@ -64,7 +63,7 @@ public class RecipeSearchesController extends Controller {
 
                     return ok(Json.toJson(new PageDto<>(searchDtos, p.getTotalCount())));
                 }, httpExecutionContext.current())
-                .exceptionally(mapException);
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> userSearch(Long entityId, Http.Request request) {
@@ -75,7 +74,7 @@ public class RecipeSearchesController extends Controller {
                     RecipeSearchDto dto = DtoMapper.toDto(e);
                     return ok(Json.toJson(dto));
                 }, httpExecutionContext.current())
-                .exceptionally(mapException);
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> create(Http.Request request) {
@@ -93,6 +92,6 @@ public class RecipeSearchesController extends Controller {
                     String location = routes.RecipeSearchesController.userSearch(id).absoluteURL(request);
                     return created().withHeader(LOCATION, location);
                 }, httpExecutionContext.current())
-                .exceptionally(mapException);
+                .exceptionally(mapExceptionWithUnpack);
     }
 }

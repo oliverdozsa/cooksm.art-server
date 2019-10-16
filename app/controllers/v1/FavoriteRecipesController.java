@@ -6,8 +6,6 @@ import dto.FavoriteRecipeDto;
 import dto.PageDto;
 import models.entities.FavoriteRecipe;
 import models.repositories.FavoriteRecipeRepository;
-import models.repositories.exceptions.BusinessLogicViolationException;
-import models.repositories.exceptions.NotFoundException;
 import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
@@ -42,6 +40,7 @@ public class FavoriteRecipesController extends Controller {
     private FormFactory formFactory;
 
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
+    private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 
@@ -56,14 +55,14 @@ public class FavoriteRecipesController extends Controller {
                     FavoriteRecipeDto dto = DtoMapper.toDto(f);
                     return ok(Json.toJson(dto));
                 }, httpExecutionContext.current())
-                .exceptionally(mapException);
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> allOfUser(Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         return repository.allOfUser(jwt.getUserId())
                 .thenApplyAsync(FavoriteRecipesController::toResult, httpExecutionContext.current())
-                .exceptionally(mapException);
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> create(Http.Request request) {
@@ -82,7 +81,7 @@ public class FavoriteRecipesController extends Controller {
                                 return created().withHeader(LOCATION, location);
                             },
                             httpExecutionContext.current())
-                    .exceptionally(mapException);
+                    .exceptionally(mapExceptionWithUnpack);
         }
     }
 
@@ -96,7 +95,7 @@ public class FavoriteRecipesController extends Controller {
                         return badRequest();
                     }
                 }, httpExecutionContext.current())
-                .exceptionally(mapException);
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     private static Result toResult(Page<FavoriteRecipe> page) {
