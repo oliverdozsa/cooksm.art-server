@@ -1,5 +1,6 @@
 package controllers.v1;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dto.RecipeSearchCreateUpdateDto;
 import models.repositories.exceptions.BusinessLogicViolationException;
 import play.api.libs.json.JsValue;
@@ -10,7 +11,12 @@ import play.libs.Json;
 import play.libs.typedmap.TypedMap;
 import play.mvc.Http;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /* Instances of this class is used only inside the appropriate controller in order to avoid
  * leaking the managed form factory.
@@ -18,9 +24,11 @@ import java.util.Map;
 class RecipeSearchCreatorUpdater {
     private FormFactory formFactory;
     private RecipeSearchCreateUpdateDto dto;
+    private Validator validator;
 
-    public RecipeSearchCreatorUpdater(FormFactory formFactory, Http.Request request) {
+    public RecipeSearchCreatorUpdater(FormFactory formFactory, Http.Request request, Validator validator) {
         this.formFactory = formFactory;
+        this.validator = validator;
         Form<RecipeSearchCreateUpdateDto> form = formFactory.form(RecipeSearchCreateUpdateDto.class).bindFromRequest(request);
         if (form.hasErrors()) {
             throw new BusinessLogicViolationException(form.errorsAsJson().toString());
@@ -31,39 +39,38 @@ class RecipeSearchCreatorUpdater {
 
     public RecipeSearchCreateUpdateDto create() {
         validateQuery(dto.getQuery());
-
         return dto;
     }
 
     private void validateQuery(String query) {
-        Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class);
-        form.bind(Lang.defaultLang().asJava(), TypedMap.empty(), Json.parse(query));
+        JsonNode queryJson = Json.parse(query);
+        RecipesControllerQuery.Params params = Json.fromJson(queryJson, RecipesControllerQuery.Params.class);
+        Set<ConstraintViolation<RecipesControllerQuery.Params>> violations = validator.validate(params);
 
-        if (form.hasErrors()) {
+        if (violations.size() > 0) {
+            System.out.println("violations = " + violations);
             throw new BusinessLogicViolationException("Recipe search to create is not valid!");
         }
 
-        Integer searchMode = form.get().searchMode;
-        validateQueryBasedOnSearchMode(query, searchMode);
+        validateQueryBasedOnSearchMode(params);
     }
 
-    private void validateQueryBasedOnSearchMode(String query, Integer searchmode) {
-        if (searchmode == null || searchmode == RecipesControllerQuery.SearchMode.NONE.id) {
+    private void validateQueryBasedOnSearchMode(RecipesControllerQuery.Params params) {
+        if (params.searchMode == null || params.searchMode == RecipesControllerQuery.SearchMode.NONE.id) {
             return;
         }
 
-        Form<RecipesControllerQuery.Params> form;
-        if (searchmode == RecipesControllerQuery.SearchMode.COMPOSED_OF.id) {
-            form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class);
-        } else if (searchmode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO.id) {
-            form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class);
+        Set<ConstraintViolation<RecipesControllerQuery.Params>> violations = Collections.EMPTY_SET;
+
+        if (params.searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF.id) {
+            violations = validator.validate(params, RecipesControllerQuery.VGRecSearchModeComposedOf.class);
+        } else if (params.searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO.id) {
+            violations = validator.validate(params, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class);
         } else {
             throw new RuntimeException("Unknown searchmode!");
         }
 
-        form.bind(null, null, Json.parse(query));
-
-        if (form.hasErrors()) {
+        if (violations.size() > 0) {
             throw new BusinessLogicViolationException("Recipe search to create based on search mode is not valid!");
         }
     }

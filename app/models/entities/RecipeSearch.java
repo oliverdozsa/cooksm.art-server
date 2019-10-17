@@ -18,6 +18,7 @@ public class RecipeSearch {
     private User user;
 
     @Column(name = "query")
+    @Lob
     private String query;
 
     public Long getId() {

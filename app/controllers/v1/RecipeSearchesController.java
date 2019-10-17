@@ -16,6 +16,7 @@ import security.SecurityUtils;
 import security.VerifiedJwt;
 
 import javax.inject.Inject;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -35,6 +36,9 @@ public class RecipeSearchesController extends Controller {
 
     @Inject
     private Config config;
+
+    @Inject
+    private ValidatorFactory validatorFactory;
 
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
@@ -80,7 +84,7 @@ public class RecipeSearchesController extends Controller {
     public CompletionStage<Result> create(Http.Request request) {
         RecipeSearchCreateUpdateDto dto;
         try {
-            dto = new RecipeSearchCreatorUpdater(formFactory, request).create();
+            dto = new RecipeSearchCreatorUpdater(formFactory, request, validatorFactory.getValidator()).create();
         } catch (Exception e) {
             return completedFuture(mapException.apply(e));
         }

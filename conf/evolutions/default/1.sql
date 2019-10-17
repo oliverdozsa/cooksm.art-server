@@ -86,7 +86,7 @@ create table recipe_search (
   id                            bigint auto_increment not null,
   name                          varchar(255),
   user_id                       bigint,
-  query                         varchar(255),
+  query                         clob,
   constraint pk_recipe_search primary key (id)
 );
 

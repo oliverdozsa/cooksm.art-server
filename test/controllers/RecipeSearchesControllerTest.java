@@ -28,7 +28,7 @@ public class RecipeSearchesControllerTest {
     private static final String RESOURCE_PATH_USER = "/v1/usersearches";
 
     @Test
-    @DataSet(value = "datasets/yml/recipesearches.yml")
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testGetGlobalSearches() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetGlobalSearches");
@@ -43,6 +43,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testGetUserSearches() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetUserSearches");
@@ -59,6 +60,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testGetUserSearches_UserNotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetUserSearches_UserNotFound");
@@ -72,6 +74,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testGetUserSearch() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetUserSearch");
@@ -88,6 +91,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testGetUserSearch_UserNotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetUserSearch");
@@ -103,6 +107,7 @@ public class RecipeSearchesControllerTest {
 
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testGetUserSearchNotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetUserSearchNotFound");
@@ -117,6 +122,7 @@ public class RecipeSearchesControllerTest {
 
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchCreate_NONE() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchCreate_NONE");
@@ -142,7 +148,7 @@ public class RecipeSearchesControllerTest {
         httpRequest = new Http.RequestBuilder()
                 .method(GET)
                 .bodyJson(Json.toJson(newSearch))
-                .uri(RESOURCE_PATH_USER + "/" + result.header(LOCATION).get());
+                .uri(result.header(LOCATION).get());
 
         jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
@@ -152,7 +158,7 @@ public class RecipeSearchesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        assertEquals("newSearchUser1", resultJson.get("name"));
+        assertEquals("newSearchUser1", resultJson.get("name").asText());
     }
 
     /*
