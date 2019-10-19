@@ -26,6 +26,7 @@ import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
 
 public class FavoriteRecipesControllerTest {
+    // TODO: Test for getFavorite recipe, where user doesn't own the favorite with the given id.
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 

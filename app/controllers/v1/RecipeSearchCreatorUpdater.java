@@ -3,31 +3,24 @@ package controllers.v1;
 import com.fasterxml.jackson.databind.JsonNode;
 import dto.RecipeSearchCreateUpdateDto;
 import models.repositories.exceptions.BusinessLogicViolationException;
-import play.api.libs.json.JsValue;
 import play.data.Form;
 import play.data.FormFactory;
-import play.i18n.Lang;
 import play.libs.Json;
-import play.libs.typedmap.TypedMap;
 import play.mvc.Http;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 /* Instances of this class is used only inside the appropriate controller in order to avoid
  * leaking the managed form factory.
  */
 class RecipeSearchCreatorUpdater {
-    private FormFactory formFactory;
     private RecipeSearchCreateUpdateDto dto;
     private Validator validator;
 
     public RecipeSearchCreatorUpdater(FormFactory formFactory, Http.Request request, Validator validator) {
-        this.formFactory = formFactory;
         this.validator = validator;
         Form<RecipeSearchCreateUpdateDto> form = formFactory.form(RecipeSearchCreateUpdateDto.class).bindFromRequest(request);
         if (form.hasErrors()) {
@@ -48,7 +41,6 @@ class RecipeSearchCreatorUpdater {
         Set<ConstraintViolation<RecipesControllerQuery.Params>> violations = validator.validate(params);
 
         if (violations.size() > 0) {
-            System.out.println("violations = " + violations);
             throw new BusinessLogicViolationException("Recipe search to create is not valid!");
         }
 

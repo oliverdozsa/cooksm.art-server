@@ -1,7 +1,12 @@
 user:
+  # User 1 has 2 searches
   - id: 1
 
+  # User 2 has 2 searches
   - id: 2
+
+ # User 3 has no searches
+  - id: 3
 
 recipe_search:
   - id: 1

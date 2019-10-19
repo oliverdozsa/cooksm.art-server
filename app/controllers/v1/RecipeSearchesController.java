@@ -98,4 +98,33 @@ public class RecipeSearchesController extends Controller {
                 }, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
     }
+
+    public CompletionStage<Result> update(Long id, Http.Request request) {
+        RecipeSearchCreateUpdateDto dto;
+        try {
+            dto = new RecipeSearchCreatorUpdater(formFactory, request, validatorFactory.getValidator()).create();
+        } catch (Exception e) {
+            return completedFuture(mapException.apply(e));
+        }
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return repository.update(jwt.getUserId(), id, dto.getName(), dto.getQuery())
+                .thenApplyAsync(v -> (Result) noContent(), httpExecutionContext.current())
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
+    public CompletionStage<Result> delete(Long id, Http.Request request) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return repository.delete(jwt.getUserId(), id)
+                .thenApplyAsync(success -> {
+                    if (success) {
+                        return (Result) noContent();
+                    } else {
+                        return badRequest();
+                    }
+                }, httpExecutionContext.current())
+                .exceptionally(mapExceptionWithUnpack);
+    }
 }

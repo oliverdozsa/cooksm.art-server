@@ -18,6 +18,10 @@ GET    /searches                  controllers.v1.RecipeSearchesController.global
 + jwtFilter
 GET    /usersearches              controllers.v1.RecipeSearchesController.userSearches(request: Request)
 + jwtFilter
-GET   /usersearches/:id           controllers.v1.RecipeSearchesController.userSearch(id: Long, request: Request)
+GET    /usersearches/:id          controllers.v1.RecipeSearchesController.userSearch(id: Long, request: Request)
 + jwtFilter
-POST  /usersearches              controllers.v1.RecipeSearchesController.create(request: Request)
+POST   /usersearches              controllers.v1.RecipeSearchesController.create(request: Request)
++ jwtFilter
+PUT    /usersearches/:id          controllers.v1.RecipeSearchesController.update(id: Long, request: Request)
++ jwtFilter
+DELETE /usersearches/:id          controllers.v1.RecipeSearchesController.delete(id: Long, request: Request)

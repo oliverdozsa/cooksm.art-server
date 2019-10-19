@@ -20,6 +20,7 @@ import static junit.framework.TestCase.assertTrue;
 import static play.test.Helpers.*;
 
 public class RecipeSearchesControllerTest {
+    // TODO: Test for getUserSearch, where user doesn't have the search with the given id.
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
@@ -161,8 +162,9 @@ public class RecipeSearchesControllerTest {
         assertEquals("newSearchUser1", resultJson.get("name").asText());
     }
 
-    /*
+
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchCreate_COMPOSED_OF() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchCreate_COMPOSED_OF");
@@ -194,6 +196,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchCreate_COMPOSED_OF_Invalid() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchCreate_COMPOSED_OF_Invalid");
@@ -220,6 +223,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchCreate_InvalidParams() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchCreate_InvalidParams");
@@ -244,6 +248,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchUpdate() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchUpdate");
@@ -264,12 +269,12 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals(NO_CONTENT, result.status());
 
         httpRequest = new Http.RequestBuilder()
                 .method(GET)
                 .bodyJson(Json.toJson(newSearch))
-                .uri("/api/usersearches/3");
+                .uri(RESOURCE_PATH_USER + "/3");
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         result = route(application.getApplication(), httpRequest);
@@ -277,7 +282,9 @@ public class RecipeSearchesControllerTest {
         assertEquals("newSearchUser1", resultJson.get("name").asText());
     }
 
+
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchUpdate_InvalidParams() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchUpdate_InvalidParams");
@@ -299,11 +306,12 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
         assertEquals(BAD_REQUEST, result.status());
     }
 
+
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchUpdate_OtherUser() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchUpdate_OtherUser");
@@ -324,10 +332,11 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals(BAD_REQUEST, result.status());
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchCreate_LimitReached() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchCreate_LimitReached");
@@ -340,28 +349,31 @@ public class RecipeSearchesControllerTest {
         Result result = null;
 
         int maxNumOfSearches = application.getApplication().config().getInt("receptnekem.usersearches.maxperuser");
-        for (int i = 0; i < maxNumOfSearches; i++) {
+        for (int i = 0; i < maxNumOfSearches + 1; i++) {
             RecipeSearchCreateUpdateDto newSearch =
-                    new RecipeSearchCreateUpdateDto("newSearchUser1" + i, paramsJson.toString());
+                    new RecipeSearchCreateUpdateDto("newSearchUser3_" + i, paramsJson.toString());
             Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                     .method(POST)
                     .bodyJson(Json.toJson(newSearch))
                     .uri(RESOURCE_PATH_USER);
-            String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+            String jwt = JwtTestUtils.createToken(10000L, 3L, application.getApplication().config());
             JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
             result = route(application.getApplication(), httpRequest);
+            if(i < maxNumOfSearches){
+                assertEquals(CREATED, result.status());
+            } else {
+                assertEquals(BAD_REQUEST, result.status());
+            }
         }
-
-        assertEquals(BAD_REQUEST, result.status());
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchDelete() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchDelete");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        // TODO: create first?
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
                 .uri(RESOURCE_PATH_USER + "/3");
@@ -369,7 +381,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals(NO_CONTENT, result.status());
 
         httpRequest = new Http.RequestBuilder()
                 .method(GET)
@@ -381,6 +393,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchDelete_Other() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchDelete_Other");
@@ -394,10 +407,11 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals(BAD_REQUEST, result.status());
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testUserSearchDelete_NotExisting() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUserSearchDelete_NotExisting");
@@ -412,5 +426,5 @@ public class RecipeSearchesControllerTest {
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(NOT_FOUND, result.status());
-    }*/
+    }
 }

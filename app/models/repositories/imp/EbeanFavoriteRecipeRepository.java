@@ -99,7 +99,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     private void assertCount(Long userId) {
         int count = count(userId);
         if (count >= maxPerUser) {
-            String msg = String.format("User with id %d has too many favorites!", userId);
+            String msg = String.format("User (%d) has too many favorites!", userId);
             throw new BusinessLogicViolationException(msg);
         }
     }

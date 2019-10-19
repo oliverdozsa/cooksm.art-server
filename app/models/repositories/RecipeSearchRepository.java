@@ -9,4 +9,6 @@ public interface RecipeSearchRepository {
     CompletionStage<Page<RecipeSearch>> userSearches(Long userId);
     CompletionStage<RecipeSearch> userSearch(Long userId, Long entityId);
     CompletionStage<Long> create(Long userId, String name, String query);
+    CompletionStage<Void> update(Long userId, Long entityId, String name, String query);
+    CompletionStage<Boolean> delete(Long userId, Long entityId);
 }
