@@ -45,7 +45,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<Page<RecipeSearch>> userSearches(Long userId) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
             List<RecipeSearch> searches = ebean.createQuery(RecipeSearch.class)
                     .where()
@@ -58,8 +58,8 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<RecipeSearch> userSearch(Long userId, Long entityId) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntity(ebean, RecipeSearch.class, entityId);
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, entityId);
 
             return ebean.createQuery(RecipeSearch.class)
                     .where()
@@ -72,7 +72,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<Long> create(Long userId, String name, String query) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             assertCount(userId);
 
             RecipeSearch entity = new RecipeSearch();
@@ -88,8 +88,8 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<Void> update(Long userId, Long entityId, String name, String query) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntity(ebean, RecipeSearch.class, entityId);
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, entityId);
 
             RecipeSearch entity = ebean.createQuery(RecipeSearch.class)
                     .where()
@@ -114,8 +114,8 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<Boolean> delete(Long userId, Long entityId) {
         return supplyAsync(() -> {
-            EbeanRepoUtils.assertEntity(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntity(ebean, RecipeSearch.class, entityId);
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, entityId);
 
             int deleteCount = ebean.createQuery(RecipeSearch.class)
                     .where()
