@@ -25,3 +25,5 @@ POST   /usersearches              controllers.v1.RecipeSearchesController.create
 PUT    /usersearches/:id          controllers.v1.RecipeSearchesController.update(id: Long, request: Request)
 + jwtFilter
 DELETE /usersearches/:id          controllers.v1.RecipeSearchesController.delete(id: Long, request: Request)
+
+# Security

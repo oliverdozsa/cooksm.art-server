@@ -16,5 +16,6 @@ public class Module extends AbstractModule {
         bind(FavoriteRecipeRepository.class).to(EbeanFavoriteRecipeRepository.class).asEagerSingleton();
         bind(RecipeSearchRepository.class).to(EbeanRecipeSearchRepository.class).asEagerSingleton();
         bind(JwtValidator.class).to(JwtValidatorImp.class).asEagerSingleton();
+        bind(UserRepository.class).to(EbeanUserRepository.class).asEagerSingleton();
     }
 }

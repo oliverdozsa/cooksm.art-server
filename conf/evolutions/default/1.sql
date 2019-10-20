@@ -99,6 +99,9 @@ create table source_page (
 
 create table user (
   id                            bigint auto_increment not null,
+  email                         varchar(255),
+  full_name                     varchar(255),
+  last_update                   timestamp,
   constraint pk_user primary key (id)
 );
 
