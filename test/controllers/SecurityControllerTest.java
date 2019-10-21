@@ -2,11 +2,20 @@ package controllers;
 
 import org.junit.Rule;
 import play.Logger;
+import play.inject.guice.GuiceApplicationBuilder;
 import rules.PlayApplicationWithGuiceDbRider;
+import security.SocialTokenVerifier;
+import utils.MockSocialTokenVerifier;
+
+import static play.inject.Bindings.bind;
 
 public class SecurityControllerTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider(
+            new GuiceApplicationBuilder()
+            .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
+            .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))
+    );
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
     private static final String RESOURCE_PATH = "/v1/security";
