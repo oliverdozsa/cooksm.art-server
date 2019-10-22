@@ -27,3 +27,5 @@ PUT    /usersearches/:id          controllers.v1.RecipeSearchesController.update
 DELETE /usersearches/:id          controllers.v1.RecipeSearchesController.delete(id: Long, request: Request)
 
 # Security
+POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
+POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)

@@ -1,78 +1,79 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.database.rider.core.api.dataset.DataSet;
+import dto.UserSocialLoginDto;
 import org.junit.Rule;
+import org.junit.Test;
 import play.Logger;
 import play.inject.guice.GuiceApplicationBuilder;
+import play.libs.Json;
+import play.mvc.Http;
+import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
+import security.JwtValidator;
 import security.SocialTokenVerifier;
+import security.imp.JwtValidatorImp;
 import utils.MockSocialTokenVerifier;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
 import static play.inject.Bindings.bind;
+import static play.mvc.Http.HttpVerbs.POST;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.contentAsString;
+import static play.test.Helpers.route;
 
 public class SecurityControllerTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider(
-            new GuiceApplicationBuilder()
-            .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
-            .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))
-    );
+    public PlayApplicationWithGuiceDbRider application;
+    private JwtValidator validator;
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
     private static final String RESOURCE_PATH = "/v1/security";
 
-    // TODO
+    public SecurityControllerTest() {
+        application = new PlayApplicationWithGuiceDbRider(
+                new GuiceApplicationBuilder()
+                        .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
+                        .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))
+        );
 
-    /*
-    private String testDbUrl;
-    private Application guiceApp;
-    private JwtValidator validator;
-
-    private static boolean recaptchaMockResult = true;
-    private static boolean socialTokenMockResult = true;
-
-    public SecurityControllerTests() throws UnsupportedEncodingException {
-        guiceApp = new GuiceApplicationBuilder()
-                .overrides(bind(RecaptchaTokenVerifier.class).to(MockRecaptchaTokenVerifier.class))
-                .overrides(bind(SocialTokenVerifier.class).qualifiedWith("GoogleSocialTokenVerifier").to(MockSocialTokeVerifier.class))
-                .build();
-
-        testDbUrl = guiceApp.config().getString("db.default.url");
-        validator = new JwtValidatorImpl(guiceApp.config());
+        validator = new JwtValidatorImp(application.getApplication().config());
     }
-
-    @Before
-    public void setUp() {
-        try {
-            logger.info("running test DB setup on " + testDbUrl + "...");
-            TestUtils.runSql(testDbUrl, "test/resources/test_db_create.sql");
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
 
 
     @Test
+    @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testLoginThroughGToken_OK_UserCreated() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testLoginThroughGToken_OK");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        SecurityController.UserData userData = new SecurityController.UserData();
-        userData.fullName = "Some, One";
-        userData.email = "bla@bal.bla";
-        userData.socialToken = "SomeRandomToken";
-        assertNull(User.findByEmail(userData.email));
+        UserSocialLoginDto dto = new UserSocialLoginDto(
+                "John Doe",
+                "mail@example.com",
+                "SomeRandomGoogleToken"
+        );
 
-        socialTokenMockResult = true;
-        Http.RequestBuilder httpRequest = fakeRequest(routes.SecurityController.loginThroughGToken()).bodyJson(Json.toJson(userData));
-        Result respResult = route(app, httpRequest);
-        assertEquals(OK, respResult.status());
+        // TODO: Check db for user not existing
 
-        JsonNode respJson = Json.parse(contentAsString(respResult));
-        assertNotNull(respJson.get(AUTH_TOKEN));
-        assertNotNull(User.findByEmail(userData.email));
+        MockSocialTokenVerifier.setMockResult(true);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(RESOURCE_PATH + "/logingoogle")
+                .bodyJson(Json.toJson(dto));
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(OK, result.status());
+
+        JsonNode resultJson = Json.parse(contentAsString(result));
+        assertNotNull(resultJson.get("token"));
+        // TODO: Check db for user
     }
+
+    /*
+    // TODO: test for login through facebook
+
 
     @Test
     public void testLoginThroughGToken_OK_UserExists() {
