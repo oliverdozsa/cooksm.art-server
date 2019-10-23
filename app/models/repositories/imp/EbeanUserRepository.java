@@ -35,7 +35,7 @@ public class EbeanUserRepository implements UserRepository {
     public CompletionStage<String> create(UserCreateUpdateDto dto) {
         return supplyAsync(() -> {
             Set<ConstraintViolation<UserCreateUpdateDto>> violations = validator.validate(dto);
-            if(violations.size() > 0){
+            if (violations.size() > 0) {
                 throw new BusinessLogicViolationException("User to create is invalid!");
             }
 
@@ -56,6 +56,16 @@ public class EbeanUserRepository implements UserRepository {
     public CompletionStage<Void> update(UserCreateUpdateDto dto) {
         return supplyAsync(() -> {
             return null;
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Boolean> doesExist(String email) {
+        return supplyAsync(() -> {
+            return ebean.createQuery(User.class)
+                    .where()
+                    .eq("email", email)
+                    .findOneOrEmpty().isPresent();
         }, executionContext);
     }
 }

@@ -2,7 +2,9 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
+import controllers.v1.routes;
 import dto.UserSocialLoginDto;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
@@ -30,7 +32,6 @@ public class SecurityControllerTest {
     private JwtValidator validator;
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
-    private static final String RESOURCE_PATH = "/v1/security";
 
     public SecurityControllerTest() {
         application = new PlayApplicationWithGuiceDbRider(
@@ -38,10 +39,12 @@ public class SecurityControllerTest {
                         .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
                         .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))
         );
-
-        validator = new JwtValidatorImp(application.getApplication().config());
     }
 
+    @Before
+    public void setup() {
+        validator = new JwtValidatorImp(application.getApplication().config());
+    }
 
     @Test
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
@@ -61,7 +64,7 @@ public class SecurityControllerTest {
         MockSocialTokenVerifier.setMockResult(true);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(POST)
-                .uri(RESOURCE_PATH + "/logingoogle")
+                .uri(routes.SecurityController.loginThroughGoogle().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
         assertEquals(OK, result.status());
@@ -73,6 +76,7 @@ public class SecurityControllerTest {
 
     /*
     // TODO: test for login through facebook
+    // TODO: test for login with updated data
 
 
     @Test
