@@ -29,3 +29,5 @@ DELETE /usersearches/:id          controllers.v1.RecipeSearchesController.delete
 # Security
 POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
 POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)
++ jwtFilter
+POST  /security/renew             controllers.v1.SecurityController.renew(request: Request)

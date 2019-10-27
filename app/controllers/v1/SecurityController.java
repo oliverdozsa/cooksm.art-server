@@ -14,7 +14,9 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import security.JwtValidator;
+import security.SecurityUtils;
 import security.SocialTokenVerifier;
+import security.VerifiedJwt;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -22,6 +24,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class SecurityController extends Controller {
     @Inject
@@ -66,6 +69,16 @@ public class SecurityController extends Controller {
 
     public CompletionStage<Result> loginThroughFacebook(Http.Request request) {
         return loginThroughSocial(facebookVerifier, request);
+    }
+
+    public CompletionStage<Result> renew(Http.Request request) {
+        VerifiedJwt verifiedJwt = SecurityUtils.getFromRequest(request);
+
+        return supplyAsync(() -> {
+            String token = jwt.create(verifiedJwt.getUserId());
+            // TODO: get user by id, then add rest of dto data.
+            return new Result(NOT_IMPLEMENTED);
+        }, httpExecutionContext.current());
     }
 
     private CompletionStage<Result> loginThroughSocial(SocialTokenVerifier verifier, Http.Request request) {

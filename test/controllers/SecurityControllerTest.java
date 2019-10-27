@@ -18,6 +18,7 @@ import rules.PlayApplicationWithGuiceDbRider;
 import security.JwtValidator;
 import security.SocialTokenVerifier;
 import security.imp.JwtValidatorImp;
+import utils.JwtTestUtils;
 import utils.MockSocialTokenVerifier;
 
 import java.util.Optional;
@@ -25,8 +26,7 @@ import java.util.Optional;
 import static junit.framework.TestCase.*;
 import static play.inject.Bindings.bind;
 import static play.mvc.Http.HttpVerbs.POST;
-import static play.mvc.Http.Status.OK;
-import static play.mvc.Http.Status.UNAUTHORIZED;
+import static play.mvc.Http.Status.*;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.route;
 
@@ -148,53 +148,68 @@ public class SecurityControllerTest {
         assertEquals(UNAUTHORIZED, result.status());
     }
 
-    /*
+
     @Test
-    public void testLoginThroughGToken_BadRequest() {
+    @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
+    public void testLoginThroughGoogle_BadRequest() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGToken_BadRequest");
+        logger.info("-- RUNNING TEST: testLoginThroughGoogle_BadRequest");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        SecurityController.UserData userData = new SecurityController.UserData();
-        userData.fullName = "Some, One";
-        userData.email = "bla@bal.bla";
-        userData.socialToken = null;
-        assertNull(User.findByEmail(userData.email));
+        UserSocialLoginDto dto = new UserSocialLoginDto(
+                "John Doe",
+                "mail@example.com",
+                null
+        );
 
-        socialTokenMockResult = true;
-        Http.RequestBuilder httpRequest = fakeRequest(routes.SecurityController.loginThroughGToken()).bodyJson(Json.toJson(userData));
-        Result respResult = route(app, httpRequest);
-        assertEquals(BAD_REQUEST, respResult.status());
+        MockSocialTokenVerifier.setMockResult(false);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(routes.SecurityController.loginThroughGoogle().url())
+                .bodyJson(Json.toJson(dto));
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(BAD_REQUEST, result.status());
     }
 
     @Test
+    @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testRenewToken_OK() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRenewToken_OK");
         logger.info("------------------------------------------------------------------------------------------------");
 
         // Get token
-        SecurityController.UserData userData = new SecurityController.UserData();
-        userData.fullName = "Some, One";
-        userData.email = "bla@bal.bla";
-        userData.socialToken = "SomeRandomToken";
+        UserSocialLoginDto dto = new UserSocialLoginDto(
+                "John Doe",
+                "mail@example.com",
+                "someRandomGoogleToken"
+        );
 
-        socialTokenMockResult = true;
-        Http.RequestBuilder httpRequest = fakeRequest(routes.SecurityController.loginThroughGToken()).bodyJson(Json.toJson(userData));
-        Result respResult = route(app, httpRequest);
-        assertEquals(OK, respResult.status());
+        MockSocialTokenVerifier.setMockResult(true);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(routes.SecurityController.loginThroughGoogle().url())
+                .bodyJson(Json.toJson(dto));
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(OK, result.status());
 
-        JsonNode respJson = Json.parse(contentAsString(respResult));
-        JsonNode tokenJson = respJson.get(AUTH_TOKEN);
+        JsonNode resultJson = Json.parse(contentAsString(result));
+        String jwt = resultJson.get("jwtAuthToken").asText();
 
-        httpRequest = fakeRequest(routes.SecurityController.renewToken());
-        TestUtils.addJwtTokenToRequest(httpRequest, tokenJson.asText());
-        respResult = route(app, httpRequest);
-        respJson = Json.parse(contentAsString(respResult));
-        assertEquals(OK, respResult.status());
-        assertNotNull(respJson.get(AUTH_TOKEN));
+        // Renew it
+        httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(routes.SecurityController.renew().url());
+
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
+
+        result = route(application.getApplication(), httpRequest);
+        assertEquals(OK, result.status());
+        resultJson = Json.parse(contentAsString(result));
+        assertNotNull(resultJson.get("jwtAuthToken"));
     }
 
+    /*
     @Test
     public void testRenewToken_InvalidToken() throws UnsupportedEncodingException {
         logger.info("------------------------------------------------------------------------------------------------");
