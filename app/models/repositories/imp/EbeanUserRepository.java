@@ -7,6 +7,7 @@ import models.DatabaseExecutionContext;
 import models.entities.User;
 import models.repositories.UserRepository;
 import models.repositories.exceptions.BusinessLogicViolationException;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
@@ -24,6 +25,8 @@ public class EbeanUserRepository implements UserRepository {
     private DatabaseExecutionContext executionContext;
     private Validator validator;
 
+    private static final Logger.ALogger logger = Logger.of(EbeanUserRepository.class);
+
     @Inject
     public EbeanUserRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext, ValidatorFactory validatorFactory) {
         this.ebean = Ebean.getServer(ebeanConfig.defaultServer());
@@ -32,40 +35,61 @@ public class EbeanUserRepository implements UserRepository {
     }
 
     @Override
-    public CompletionStage<String> create(UserCreateUpdateDto dto) {
+    public CompletionStage<Long> createOrUpdate(UserCreateUpdateDto dto) {
+        logger.debug("createOrUpdate(): dto = {}", dto.toString());
         return supplyAsync(() -> {
-            Set<ConstraintViolation<UserCreateUpdateDto>> violations = validator.validate(dto);
-            if (violations.size() > 0) {
-                throw new BusinessLogicViolationException("User to create is invalid!");
+            User existing = findByEmail(dto.getEmail());
+            if (existing == null) {
+                return create(dto);
+            } else {
+                return update(dto, existing.getId());
             }
-
-            EbeanRepoUtils.assertEntityDoesntExist(ebean, User.class, dto.getEmail());
-
-            User entity = new User();
-            entity.setEmail(dto.getEmail());
-            entity.setFullName(dto.getFullName());
-            entity.setLastUpdate(Instant.now());
-
-            ebean.save(entity);
-
-            return entity.getEmail();
         }, executionContext);
     }
 
-    @Override
-    public CompletionStage<Void> update(UserCreateUpdateDto dto) {
-        return supplyAsync(() -> {
-            return null;
-        }, executionContext);
+    private Long create(UserCreateUpdateDto dto) {
+        logger.debug("create(): dto = {}", dto.toString());
+
+        validate(dto);
+
+        User entity = new User();
+        entity.setEmail(dto.getEmail());
+        entity.setFullName(dto.getFullName());
+        entity.setLastUpdate(Instant.now());
+
+        ebean.save(entity);
+
+        return entity.getId();
     }
 
-    @Override
-    public CompletionStage<Boolean> doesExist(String email) {
-        return supplyAsync(() -> {
-            return ebean.createQuery(User.class)
-                    .where()
-                    .eq("email", email)
-                    .findOneOrEmpty().isPresent();
-        }, executionContext);
+    private Long update(UserCreateUpdateDto dto, Long entityId) {
+        logger.debug("update(): dto = {}", dto.toString());
+
+        validate(dto);
+
+        User entity = new User();
+        entity.setId(entityId);
+        entity.setEmail(dto.getEmail());
+        entity.setFullName(dto.getFullName());
+        entity.setLastUpdate(Instant.now());
+
+        ebean.update(entity);
+
+        return entity.getId();
+    }
+
+    private User findByEmail(String email) {
+        return ebean.createQuery(User.class)
+                .where()
+                .eq("email", email)
+                .findOne();
+
+    }
+
+    private void validate(UserCreateUpdateDto dto){
+        Set<ConstraintViolation<UserCreateUpdateDto>> violations = validator.validate(dto);
+        if (violations.size() > 0) {
+            throw new BusinessLogicViolationException("User dto is invalid!");
+        }
     }
 }

@@ -1,5 +1,7 @@
 package security;
 
+import java.util.concurrent.CompletionStage;
+
 public interface SocialTokenVerifier {
-    boolean verify(String token);
+    CompletionStage<Boolean> verify(String token);
 }

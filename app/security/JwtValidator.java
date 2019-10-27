@@ -8,4 +8,5 @@ public interface JwtValidator {
     }
 
     Either<Error, VerifiedJwt> verify(String token);
+    String create(Long userId);
 }

@@ -1,11 +1,11 @@
 package dto;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.ToString;
 import play.data.validation.Constraints;
 
-@Getter
-@RequiredArgsConstructor
+@Data
+@ToString
 public class UserCreateUpdateDto {
     @Constraints.Email
     private final String email;

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import dto.UserSocialLoginDto;
+import io.ebean.Ebean;
+import models.entities.User;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,11 +20,13 @@ import security.SocialTokenVerifier;
 import security.imp.JwtValidatorImp;
 import utils.MockSocialTokenVerifier;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import java.util.Optional;
+
+import static junit.framework.TestCase.*;
 import static play.inject.Bindings.bind;
 import static play.mvc.Http.HttpVerbs.POST;
 import static play.mvc.Http.Status.OK;
+import static play.mvc.Http.Status.UNAUTHORIZED;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.route;
 
@@ -48,9 +52,9 @@ public class SecurityControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
-    public void testLoginThroughGToken_OK_UserCreated() {
+    public void testLoginThroughGoogle_OK_UserCreated() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGToken_OK");
+        logger.info("-- RUNNING TEST: testLoginThroughGoogle_OK_UserCreated");
         logger.info("------------------------------------------------------------------------------------------------");
 
         UserSocialLoginDto dto = new UserSocialLoginDto(
@@ -59,7 +63,11 @@ public class SecurityControllerTest {
                 "SomeRandomGoogleToken"
         );
 
-        // TODO: Check db for user not existing
+        Optional<User> entityOpt = Ebean.createQuery(User.class)
+                .where()
+                .eq("email", dto.getEmail())
+                .findOneOrEmpty();
+        assertFalse(entityOpt.isPresent());
 
         MockSocialTokenVerifier.setMockResult(true);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
@@ -70,56 +78,77 @@ public class SecurityControllerTest {
         assertEquals(OK, result.status());
 
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertNotNull(resultJson.get("token"));
-        // TODO: Check db for user
+        assertNotNull(resultJson.get("jwtAuthToken"));
+
+        entityOpt = Ebean.createQuery(User.class)
+                .where()
+                .eq("email", dto.getEmail())
+                .findOneOrEmpty();
+        assertTrue(entityOpt.isPresent());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
+    public void testLoginThroughFacebook_OK_UserExists() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testLoginThroughFacebook_OK_UserExists");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        UserSocialLoginDto dto = new UserSocialLoginDto(
+                "John Doe Jack",
+                "user1@example.com",
+                "SomeRandomGoogleToken"
+        );
+
+        Optional<User> entityOpt = Ebean.createQuery(User.class)
+                .where()
+                .eq("email", dto.getEmail())
+                .findOneOrEmpty();
+        assertTrue(entityOpt.isPresent());
+        assertEquals("John Doe", entityOpt.get().getFullName());
+
+        MockSocialTokenVerifier.setMockResult(true);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(routes.SecurityController.loginThroughFacebook().url())
+                .bodyJson(Json.toJson(dto));
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(OK, result.status());
+
+        JsonNode resultJson = Json.parse(contentAsString(result));
+        assertNotNull(resultJson.get("jwtAuthToken"));
+
+        entityOpt = Ebean.createQuery(User.class)
+                .where()
+                .eq("email", dto.getEmail())
+                .findOneOrEmpty();
+        assertTrue(entityOpt.isPresent());
+        assertEquals("John Doe Jack", entityOpt.get().getFullName());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
+    public void testLoginThroughGoogle_Unauthorized() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testLoginThroughGoogle_Unauthorized");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        UserSocialLoginDto dto = new UserSocialLoginDto(
+                "John Doe",
+                "mail@example.com",
+                "SomeRandomGoogleToken"
+        );
+
+        MockSocialTokenVerifier.setMockResult(false);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(routes.SecurityController.loginThroughGoogle().url())
+                .bodyJson(Json.toJson(dto));
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(UNAUTHORIZED, result.status());
     }
 
     /*
-    // TODO: test for login through facebook
-    // TODO: test for login with updated data
-
-
-    @Test
-    public void testLoginThroughGToken_OK_UserExists() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGToken_OK_UserExists");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        SecurityController.UserData userData = new SecurityController.UserData();
-        userData.fullName = "Some, One";
-        userData.email = "bla@bal.bla";
-        userData.socialToken = "SomeRandomToken";
-
-        new User(userData.email, "some", userData.fullName).save();
-        assertNotNull(User.findByEmail(userData.email));
-
-        socialTokenMockResult = true;
-        Http.RequestBuilder httpRequest = fakeRequest(routes.SecurityController.loginThroughGToken()).bodyJson(Json.toJson(userData));
-        Result respResult = route(app, httpRequest);
-        assertEquals(OK, respResult.status());
-
-        JsonNode respJson = Json.parse(contentAsString(respResult));
-        assertNotNull(respJson.get(AUTH_TOKEN));
-    }
-
-    @Test
-    public void testLoginThroughGToken_Unauthorized() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGToken_Unauthorized");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        SecurityController.UserData userData = new SecurityController.UserData();
-        userData.fullName = "Some, One";
-        userData.email = "bla@bal.bla";
-        userData.socialToken = "SomeRandomToken";
-        assertNull(User.findByEmail(userData.email));
-
-        socialTokenMockResult = false;
-        Http.RequestBuilder httpRequest = fakeRequest(routes.SecurityController.loginThroughGToken()).bodyJson(Json.toJson(userData));
-        Result respResult = route(app, httpRequest);
-        assertEquals(UNAUTHORIZED, respResult.status());
-    }
-
     @Test
     public void testLoginThroughGToken_BadRequest() {
         logger.info("------------------------------------------------------------------------------------------------");

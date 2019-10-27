@@ -4,7 +4,10 @@ import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "user")
+@Table(
+        name = "user",
+        uniqueConstraints = @UniqueConstraint(name = "emailConstraint", columnNames = "email")
+)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

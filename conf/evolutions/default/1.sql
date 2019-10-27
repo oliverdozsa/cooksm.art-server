@@ -102,6 +102,7 @@ create table user (
   email                         varchar(255),
   full_name                     varchar(255),
   last_update                   timestamp,
+  constraint uq_user_email unique (email),
   constraint pk_user primary key (id)
 );
 
