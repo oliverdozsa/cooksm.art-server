@@ -1,5 +1,7 @@
 package controllers;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
@@ -21,6 +23,9 @@ import security.imp.JwtValidatorImp;
 import utils.JwtTestUtils;
 import utils.MockSocialTokenVerifier;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Optional;
 
 import static junit.framework.TestCase.*;
@@ -209,43 +214,30 @@ public class SecurityControllerTest {
         assertNotNull(resultJson.get("jwtAuthToken"));
     }
 
-    /*
     @Test
-    public void testRenewToken_InvalidToken() throws UnsupportedEncodingException {
+    @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
+    public void testRenewToken_InvalidToken() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRenewToken_InvalidToken");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String secret = guiceApp.config().getString("play.http.secret.key");
-        Date past = Date.from(ZonedDateTime.now(ZoneId.systemDefault()).minusMinutes(70).toInstant());
+        String secret = application.getApplication().config().getString("play.http.secret.key");
+        String issuer = application.getApplication().config().getString("receptnekem.jwt.issuer");
+        Date past = Date.from(Instant.now().minus(70, ChronoUnit.MINUTES));
         Algorithm algorithm = Algorithm.HMAC256(secret);
         String tokenPast = JWT.create()
-                .withIssuer(ISSUER)
+                .withIssuer(issuer)
                 .withClaim("user_id", 3L)
                 .withExpiresAt(past)
                 .sign(algorithm);
 
-        Http.RequestBuilder httpRequest = fakeRequest(routes.SecurityController.renewToken());
-        TestUtils.addJwtTokenToRequest(httpRequest, tokenPast);
-        Result respResult = route(app, httpRequest);
-        assertEquals(FORBIDDEN, respResult.status());
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(POST)
+                .uri(routes.SecurityController.renew().url());
+
+        JwtTestUtils.addJwtTokenTo(httpRequest, tokenPast);
+
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals(FORBIDDEN, result.status());
     }
-
-    // TODO: test token expires (request any op with filter, with expired token)
-
-    private static class MockRecaptchaTokenVerifier implements RecaptchaTokenVerifier {
-        @Override
-        public boolean verifyToken(String token) {
-            return recaptchaMockResult;
-        }
-    }
-
-    private static class MockSocialTokeVerifier implements SocialTokenVerifier {
-
-        @Override
-        public boolean verifyToken(String token) {
-            return socialTokenMockResult;
-        }
-    }
-    */
 }

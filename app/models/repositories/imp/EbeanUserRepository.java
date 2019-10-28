@@ -47,6 +47,14 @@ public class EbeanUserRepository implements UserRepository {
         }, executionContext);
     }
 
+    @Override
+    public CompletionStage<User> byId(Long id) {
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
+            return ebean.find(User.class, id);
+        }, executionContext);
+    }
+
     private Long create(UserCreateUpdateDto dto) {
         logger.debug("create(): dto = {}", dto.toString());
 

@@ -74,11 +74,13 @@ public class SecurityController extends Controller {
     public CompletionStage<Result> renew(Http.Request request) {
         VerifiedJwt verifiedJwt = SecurityUtils.getFromRequest(request);
 
-        return supplyAsync(() -> {
-            String token = jwt.create(verifiedJwt.getUserId());
-            // TODO: get user by id, then add rest of dto data.
-            return new Result(NOT_IMPLEMENTED);
-        }, httpExecutionContext.current());
+        return repository.byId(verifiedJwt.getUserId())
+                .thenApplyAsync(user -> {
+                    String token = jwt.create(user.getId());
+                    UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName());
+                    return ok(Json.toJson(resultDto));
+                }, httpExecutionContext.current())
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     private CompletionStage<Result> loginThroughSocial(SocialTokenVerifier verifier, Http.Request request) {
