@@ -40,7 +40,7 @@ public class RecipeSearchesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        assertEquals(2, resultJson.get("items").size());
+        assertEquals("Number of items is wrong!", 2, resultJson.get("items").size());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class RecipeSearchesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        assertEquals(2, resultJson.get("items").size());
+        assertEquals("Number of items is wrong!", 2, resultJson.get("items").size());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class RecipeSearchesControllerTest {
         String jwt = JwtTestUtils.createToken(10000L, 42L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class RecipeSearchesControllerTest {
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        assertEquals("user 1 search 1", resultJson.get("name").asText());
+        assertEquals("Name of user search is wrong!", "user 1 search 1", resultJson.get("name").asText());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
 
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 
 
@@ -118,7 +118,7 @@ public class RecipeSearchesControllerTest {
         String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 
 
@@ -142,8 +142,8 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(CREATED, result.status());
-        assertTrue(result.header(LOCATION).isPresent());
+        assertEquals("Result of request is wrong!", CREATED, result.status());
+        assertTrue("Header \"Location\" is not present!", result.header(LOCATION).isPresent());
 
         // Check newly created recipe search
         httpRequest = new Http.RequestBuilder()
@@ -155,11 +155,11 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals("Result of request is wrong!", OK, result.status());
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
-        assertEquals("newSearchUser1", resultJson.get("name").asText());
+        assertEquals("Recipe search name is wrong!", "newSearchUser1", resultJson.get("name").asText());
     }
 
 
@@ -192,7 +192,7 @@ public class RecipeSearchesControllerTest {
 
         Result result = route(application.getApplication(), httpRequest);
         logger.warn("result body = " + contentAsString(result));
-        assertEquals(CREATED, result.status());
+        assertEquals("Result of request is wrong!", CREATED, result.status());
     }
 
     @Test
@@ -219,7 +219,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -244,7 +244,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -269,7 +269,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NO_CONTENT, result.status());
+        assertEquals("Result of request is wrong!", NO_CONTENT, result.status());
 
         httpRequest = new Http.RequestBuilder()
                 .method(GET)
@@ -279,7 +279,7 @@ public class RecipeSearchesControllerTest {
 
         result = route(application.getApplication(), httpRequest);
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertEquals("newSearchUser1", resultJson.get("name").asText());
+        assertEquals("Recipe search name is wrong!", "newSearchUser1", resultJson.get("name").asText());
     }
 
 
@@ -306,7 +306,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
 
@@ -332,7 +332,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -359,10 +359,10 @@ public class RecipeSearchesControllerTest {
             String jwt = JwtTestUtils.createToken(10000L, 3L, application.getApplication().config());
             JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
             result = route(application.getApplication(), httpRequest);
-            if(i < maxNumOfSearches){
-                assertEquals(CREATED, result.status());
+            if (i < maxNumOfSearches) {
+                assertEquals("Result of request is wrong!", CREATED, result.status());
             } else {
-                assertEquals(BAD_REQUEST, result.status());
+                assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
             }
         }
     }
@@ -381,7 +381,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NO_CONTENT, result.status());
+        assertEquals("Result of request is wrong!", NO_CONTENT, result.status());
 
         httpRequest = new Http.RequestBuilder()
                 .method(GET)
@@ -389,7 +389,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
         result = route(application.getApplication(), httpRequest);
 
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 
     @Test
@@ -407,7 +407,7 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -425,6 +425,6 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 }

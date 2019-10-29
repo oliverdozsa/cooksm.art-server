@@ -72,7 +72,7 @@ public class SecurityControllerTest {
                 .where()
                 .eq("email", dto.getEmail())
                 .findOneOrEmpty();
-        assertFalse(entityOpt.isPresent());
+        assertFalse("Entity shouldn't be present!", entityOpt.isPresent());
 
         MockSocialTokenVerifier.setMockResult(true);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
@@ -80,16 +80,16 @@ public class SecurityControllerTest {
                 .uri(routes.SecurityController.loginThroughGoogle().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals("Result of request is wrong!", OK, result.status());
 
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertNotNull(resultJson.get("jwtAuthToken"));
+        assertNotNull("JWT is missing!", resultJson.get("jwtAuthToken"));
 
         entityOpt = Ebean.createQuery(User.class)
                 .where()
                 .eq("email", dto.getEmail())
                 .findOneOrEmpty();
-        assertTrue(entityOpt.isPresent());
+        assertTrue("Entity should be present!", entityOpt.isPresent());
     }
 
     @Test
@@ -109,8 +109,8 @@ public class SecurityControllerTest {
                 .where()
                 .eq("email", dto.getEmail())
                 .findOneOrEmpty();
-        assertTrue(entityOpt.isPresent());
-        assertEquals("John Doe", entityOpt.get().getFullName());
+        assertTrue("Entity should be present!", entityOpt.isPresent());
+        assertEquals("User name is wrong!", "John Doe", entityOpt.get().getFullName());
 
         MockSocialTokenVerifier.setMockResult(true);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
@@ -118,17 +118,17 @@ public class SecurityControllerTest {
                 .uri(routes.SecurityController.loginThroughFacebook().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals("Result of request is wrong!", OK, result.status());
 
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertNotNull(resultJson.get("jwtAuthToken"));
+        assertNotNull("JWT is missing!", resultJson.get("jwtAuthToken"));
 
         entityOpt = Ebean.createQuery(User.class)
                 .where()
                 .eq("email", dto.getEmail())
                 .findOneOrEmpty();
-        assertTrue(entityOpt.isPresent());
-        assertEquals("John Doe Jack", entityOpt.get().getFullName());
+        assertTrue("Entity should be present!", entityOpt.isPresent());
+        assertEquals("User name is wrong!", "John Doe Jack", entityOpt.get().getFullName());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class SecurityControllerTest {
                 .uri(routes.SecurityController.loginThroughGoogle().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(UNAUTHORIZED, result.status());
+        assertEquals("Result of request is wrong!", UNAUTHORIZED, result.status());
     }
 
 
@@ -173,7 +173,7 @@ public class SecurityControllerTest {
                 .uri(routes.SecurityController.loginThroughGoogle().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -196,7 +196,7 @@ public class SecurityControllerTest {
                 .uri(routes.SecurityController.loginThroughGoogle().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals("Result of request is wrong!", OK, result.status());
 
         JsonNode resultJson = Json.parse(contentAsString(result));
         String jwt = resultJson.get("jwtAuthToken").asText();
@@ -209,9 +209,9 @@ public class SecurityControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals("Result of request is wrong!", OK, result.status());
         resultJson = Json.parse(contentAsString(result));
-        assertNotNull(resultJson.get("jwtAuthToken"));
+        assertNotNull("JWT is missing!", resultJson.get("jwtAuthToken"));
     }
 
     @Test
@@ -238,6 +238,6 @@ public class SecurityControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, tokenPast);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(FORBIDDEN, result.status());
+        assertEquals("Result of request is wrong!", FORBIDDEN, result.status());
     }
 }

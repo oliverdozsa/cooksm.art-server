@@ -50,9 +50,9 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
+        assertEquals("Result of request is wrong!", OK, result.status());
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertEquals(0, resultJson.get("totalCount").asInt());
+        assertEquals("Total count is wrong!", 0, resultJson.get("totalCount").asInt());
     }
 
     @Test
@@ -73,9 +73,8 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(CREATED, result.status());
-
-        assertNotNull(result.headers().get("Location"));
+        assertEquals("Result of request is wrong!", CREATED, result.status());
+        assertNotNull("Missing header: Location!", result.headers().get("Location"));
 
         // Get by id
         Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
@@ -84,8 +83,8 @@ public class FavoriteRecipesControllerTest {
         result = route(application.getApplication(), httpRequestGet);
         JsonNode favoriteRecipesJson = Json.parse(contentAsString(result));
 
-        assertEquals("recipe_1", favoriteRecipesJson.get("name").asText());
-        assertEquals("recipe_1_url", favoriteRecipesJson.get("url").asText());
+        assertEquals("Unexpected recipe name!", "recipe_1", favoriteRecipesJson.get("name").asText());
+        assertEquals("Unexpected recipe url!", "recipe_1_url", favoriteRecipesJson.get("url").asText());
 
         // Get all
         httpRequestGet = new Http.RequestBuilder()
@@ -95,9 +94,9 @@ public class FavoriteRecipesControllerTest {
         result = route(application.getApplication(), httpRequestGet);
         JsonNode resultJson = Json.parse(contentAsString(result));
 
-        assertEquals(1, resultJson.get("totalCount").asInt());
-        assertEquals("recipe_1", resultJson.get("items").get(0).get("name").asText());
-        assertEquals("recipe_1_url", resultJson.get("items").get(0).get("url").asText());
+        assertEquals("Total count is wrong!", 1, resultJson.get("totalCount").asInt());
+        assertEquals("Recipe name is wrong!","recipe_1", resultJson.get("items").get(0).get("name").asText());
+        assertEquals("Recipe url is wrong!","recipe_1_url", resultJson.get("items").get(0).get("url").asText());
     }
 
     @Test
@@ -121,7 +120,7 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, token);
 
         Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NO_CONTENT, result.status());
+        assertEquals("Result of request is wrong!", NO_CONTENT, result.status());
     }
 
     @Test
@@ -139,7 +138,7 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -159,7 +158,7 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 
     @Test
@@ -192,7 +191,7 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -218,6 +217,6 @@ public class FavoriteRecipesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
     }
 }
