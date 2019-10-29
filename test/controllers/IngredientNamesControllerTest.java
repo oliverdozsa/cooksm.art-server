@@ -35,7 +35,7 @@ public class IngredientNamesControllerTest {
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
 
-        assertEquals(5, resultJson.get("items").size());
+        assertEquals("Number of ingredients is wrong!",5, resultJson.get("items").size());
     }
 
     @Test
@@ -53,8 +53,8 @@ public class IngredientNamesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         JsonNode resultNamesJson = resultJson.get("items");
 
-        assertEquals(2, resultNamesJson.size());
-        assertEquals(5, resultJson.get("totalCount").asInt());
+        assertEquals("Number of elements in the page is wrong!", 2, resultNamesJson.size());
+        assertEquals("Total number of ingredients is wrong!",5, resultJson.get("totalCount").asInt());
 
         // Next page
         reqParams = "languageId=1&nameLike=hu&offset=2&limit=6";
@@ -65,7 +65,7 @@ public class IngredientNamesControllerTest {
         resultJson = Json.parse(resultContentStr);
         resultNamesJson = resultJson.get("items");
 
-        assertEquals(3, resultNamesJson.size());
+        assertEquals("Number of elements in the last page is wrong!", 3, resultNamesJson.size());
     }
 
     @Test

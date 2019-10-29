@@ -14,7 +14,6 @@ import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
 import java.time.Instant;
-import java.util.Date;
 
 import static junit.framework.TestCase.*;
 import static play.test.Helpers.*;
@@ -48,8 +47,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Wrong recipe id!", 1L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -63,10 +62,7 @@ public class RecipesControllerTest {
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
-        String resultContentStr = contentAsString(result);
-        JsonNode resultJson = Json.parse(resultContentStr);
-
-        assertEquals(BAD_REQUEST, result.status());
+        assertEquals("Unexpected request status!", BAD_REQUEST, result.status());
     }
 
     @Test
@@ -84,9 +80,9 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(2, resultJson.size());
-        assertEquals(1L, resultJson.get(0).get("id").asLong());
-        assertEquals(2L, resultJson.get(1).get("id").asLong());
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(1).get("id").asLong());
     }
 
     @Test
@@ -104,9 +100,9 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(2, resultJson.size());
-        assertEquals(1L, resultJson.get(0).get("id").asLong());
-        assertEquals(2L, resultJson.get(1).get("id").asLong());
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(1).get("id").asLong());
     }
 
     @Test
@@ -124,8 +120,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -143,8 +139,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(3L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 3L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -163,7 +159,7 @@ public class RecipesControllerTest {
         resultJson = resultJson.get("items");
 
         assertEquals(1, resultJson.size());
-        assertEquals(3L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 3L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -181,8 +177,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(OK, result.status());
-        assertEquals(4, resultJson.size());
+        assertEquals("Result of request is wrong!", OK, result.status());
+        assertEquals("Number of items is wrong!", 4, resultJson.size());
     }
 
     @Test
@@ -200,8 +196,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(OK, result.status());
-        assertEquals(3, resultJson.size());
+        assertEquals("Result of request is wrong!", OK, result.status());
+        assertEquals("Number of items is wrong!", 3, resultJson.size());
     }
 
     @Test
@@ -219,8 +215,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(4L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 4L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -238,8 +234,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(4L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 4L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -257,7 +253,7 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
     }
 
     @Test
@@ -275,8 +271,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(3L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 3L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -294,8 +290,8 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(4L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 4L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
@@ -312,7 +308,7 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(2, resultJson.size());
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
     }
 
     @Test
@@ -329,7 +325,7 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertTrue(resultJson.size() >= 4);
+        assertTrue("Number of items is wrong!", resultJson.size() >= 4);
     }
 
     @Test
@@ -345,7 +341,7 @@ public class RecipesControllerTest {
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
 
-        assertEquals(3, resultJson.get("id").asInt());
+        assertEquals("Unexpected recipe!", 3, resultJson.get("id").asInt());
     }
 
     @Test
@@ -358,7 +354,7 @@ public class RecipesControllerTest {
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "/-4");
         Result result = route(application.getApplication(), httpRequest);
 
-        assertEquals(NOT_FOUND, result.status());
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 
     @Test
@@ -376,8 +372,8 @@ public class RecipesControllerTest {
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
 
-        assertEquals(4, resultJson.get("items").size());
-        assertEquals(4, resultJson.get("totalCount").asInt());
+        assertEquals("Number of items is wrong!", 4, resultJson.get("items").size());
+        assertEquals("Total count is wrong!", 4, resultJson.get("totalCount").asInt());
     }
 
     @Test
@@ -418,8 +414,8 @@ public class RecipesControllerTest {
             String resultContentStr = contentAsString(result);
             JsonNode resultJson = Json.parse(resultContentStr);
 
-            assertNotNull(resultJson.get("items"));
-            assertNotNull(resultJson.get("totalCount"));
+            assertNotNull("No result items are present!", resultJson.get("items"));
+            assertNotNull("No total count is present!", resultJson.get("totalCount"));
 
             queryParams = "?limit=10&offset=" + (i * 10);
         }
@@ -434,8 +430,8 @@ public class RecipesControllerTest {
             String resultContentStr = contentAsString(result);
             JsonNode resultJson = Json.parse(resultContentStr);
 
-            assertNotNull(resultJson.get("items"));
-            assertNotNull(resultJson.get("totalCount"));
+            assertNotNull("No result items are present!", resultJson.get("items"));
+            assertNotNull("Total count is not present!", resultJson.get("totalCount"));
 
             queryParams = "?limit=10&offset=" + (i * 10);
         }
@@ -456,7 +452,7 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
-        assertEquals(1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
     }
 }
