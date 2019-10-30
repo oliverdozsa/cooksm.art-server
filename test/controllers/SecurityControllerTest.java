@@ -38,7 +38,6 @@ import static play.test.Helpers.route;
 public class SecurityControllerTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application;
-    private JwtValidator validator;
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
 
@@ -48,11 +47,6 @@ public class SecurityControllerTest {
                         .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
                         .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))
         );
-    }
-
-    @Before
-    public void setup() {
-        validator = new JwtValidatorImp(application.getApplication().config());
     }
 
     @Test

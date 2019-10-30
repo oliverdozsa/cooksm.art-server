@@ -79,13 +79,13 @@ public class IngredientNamesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "languageId=1&nameLike=hu_1&offset=0&limit=2";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(routes.IngredientNamesController.pageNames().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
         JsonNode resultAltNamesJson = resultJson.get("items").get(0).get("altNames");
-        assertEquals(3, resultAltNamesJson.size());
+        assertEquals("Number of items is wrong!", 3, resultAltNamesJson.size());
     }
 
     @Test
@@ -96,12 +96,12 @@ public class IngredientNamesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "languageId=2&nameLike=en_6&offset=0&limit=2";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(routes.IngredientNamesController.pageNames().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
         JsonNode resultAltNamesJson = resultJson.get("items").get(0).get("altNames");
-        assertEquals(0, resultAltNamesJson.size());
+        assertEquals("Number of items is wrong!", 0, resultAltNamesJson.size());
     }
 }
