@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
+import controllers.v1.routes;
 import io.ebean.Ebean;
 import models.entities.*;
 import org.junit.Before;
@@ -23,7 +24,6 @@ public class RecipesControllerTest {
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
-    private static final String RESOURCE_PATH = "/v1/recipes";
 
     @Before
     public void before() {
@@ -40,7 +40,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&limit=50&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=5";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -59,7 +60,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&unknownIngs=4&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=2";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals("Unexpected request status!", BAD_REQUEST, result.status());
@@ -73,7 +75,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -93,7 +96,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngTags[0]=6";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -113,7 +117,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=3&goodIngsRatio=1.0&limit=50&offset=0&orderBy=name&orderBySort=asc&isAdditiveIngs=true&minIngs=1&maxIngs=4&inIngs[0]=1&inIngs[1]=2&inIngs[2]=3&inIngs[3]=4";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -132,7 +137,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=3&goodIngsRatio=1.0&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=10&inIngTags[0]=1&inIngTags[1]=2";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -151,7 +157,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=4&inIngs[0]=4";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -170,7 +177,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngTags[0]=5";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -189,7 +197,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=0&goodIngsRel=gt&limit=50&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=8&inIngs[0]=4&inIngTags[0]=1";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -208,7 +217,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=le&goodIngs=3&goodIngsRel=eq&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&inIngs[2]=7";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -227,7 +237,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -246,7 +257,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&exIngs[0]=4&exIngTags[0]=3";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -264,7 +276,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&nameLike=e_3";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -283,7 +296,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "searchMode=1&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&sourcePages[0]=4";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -301,7 +315,8 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesAll_WithExIngTagsOnly");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?exIngTags[0]=6");
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?exIngTags[0]=6");
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -318,7 +333,8 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetRecipesAll");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url());
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -335,7 +351,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetSingleRecipe");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "/3");
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(routes.RecipesController.singleRecipe(3, 0).url());
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -351,7 +367,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetSingleRecipe_NotFound");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "/-4");
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(routes.RecipesController.singleRecipe(-4, 0).url());
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
@@ -364,7 +380,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetSourcePages");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri("/v1/sourcepages");
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(routes.SourcePagesController.sourcePages().url());
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals(OK, result.status());
@@ -408,7 +424,8 @@ public class RecipesControllerTest {
         // Forward paging.
         int i;
         for (i = 0; i <= 4; i++) {
-            Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + queryParams);
+            Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                    routes.RecipesController.pageRecipes().url() + queryParams);
             Result result = route(application.getApplication(), httpRequest);
 
             String resultContentStr = contentAsString(result);
@@ -424,7 +441,8 @@ public class RecipesControllerTest {
 
         // Backward paging.
         for (i = 4; i >= 0; i--) {
-            Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + queryParams);
+            Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                    routes.RecipesController.pageRecipes().url()  + queryParams);
             Result result = route(application.getApplication(), httpRequest);
 
             String resultContentStr = contentAsString(result);
@@ -445,7 +463,8 @@ public class RecipesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "?searchMode=3&goodIngsRatio=0.6&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=2&inIngs[1]=3";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
