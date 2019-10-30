@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
+import controllers.v1.routes;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
@@ -18,7 +19,6 @@ public class IngredientNamesControllerTest {
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
-    private static final String RESOURCE_PATH = "/v1/ingredientnames";
 
     @Test
     @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
@@ -28,7 +28,8 @@ public class IngredientNamesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "languageId=1&nameLike=hu";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.IngredientNamesController.pageNames().url() + "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -45,7 +46,8 @@ public class IngredientNamesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String reqParams = "languageId=1&nameLike=hu&offset=0&limit=2";
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.IngredientNamesController.pageNames().url()+ "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -57,7 +59,8 @@ public class IngredientNamesControllerTest {
 
         // Next page
         reqParams = "languageId=1&nameLike=hu&offset=2&limit=6";
-        httpRequest = new Http.RequestBuilder().method(GET).uri(RESOURCE_PATH + "?" + reqParams);
+        httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.IngredientNamesController.pageNames().url()+ "?" + reqParams);
         result = route(application.getApplication(), httpRequest);
 
         resultContentStr = contentAsString(result);
