@@ -5,6 +5,7 @@ import dto.SourcePageDto;
 import models.entities.SourcePage;
 import models.repositories.Page;
 import models.repositories.SourcePageRepository;
+import play.Logger;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -23,7 +24,10 @@ public class SourcePagesController extends Controller {
     @Inject
     private SourcePageRepository repository;
 
+    private static final Logger.ALogger logger = Logger.of(SourcePagesController.class);
+
     public CompletionStage<Result> sourcePages() {
+        logger.info("sourcePages()");
         return repository.allSourcePages()
                 .thenApplyAsync(SourcePagesController::toResult, httpExecutionContext.current());
     }

@@ -1,5 +1,6 @@
 package controllers.v1;
 
+import lombok.ToString;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -33,6 +34,7 @@ public class RecipesControllerQuery {
     }
 
     @Constraints.Validate
+    @ToString
     public static class Params implements Constraints.Validatable<ValidationError> {
         @Constraints.Min(1)
         @Constraints.Max(3)

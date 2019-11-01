@@ -22,7 +22,6 @@ import static models.repositories.RecipeRepositoryQuery.*;
 public class EbeanRecipeRepository implements RecipeRepository {
     private EbeanServer ebean;
     private DatabaseExecutionContext executionContext;
-    private static final Logger.ALogger logger = Logger.of(EbeanRecipeRepository.class);
     private static final int DEFAULT_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 50;
 
@@ -49,8 +48,6 @@ public class EbeanRecipeRepository implements RecipeRepository {
             checkIncludedExcludedIngredientsMutuallyExclusive(
                     params.getRecipesWithIncludedIngredientsParams(), params.getCommonParams());
 
-            logger.info("pageOfByGoodIngredientsNumber(): params = {}", params.toString());
-
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);
     }
@@ -72,8 +69,6 @@ public class EbeanRecipeRepository implements RecipeRepository {
             checkIncludedExcludedIngredientsMutuallyExclusive(
                     params.getRecipesWithIncludedIngredientsParams(), params.getCommonParams());
 
-            logger.info("pageOfByGoodIngredientsRatio(): params = {}", params.toString());
-
             return new Page<>(query.findList(), query.findCount());
 
         }, executionContext);
@@ -90,8 +85,6 @@ public class EbeanRecipeRepository implements RecipeRepository {
 
             String sqlString = RecipeQuerySql.create(config);
             Query<Recipe> query = prepare(sqlString, params);
-
-            logger.info("pageOfAll(): params = {}", params.toString());
 
             return new Page<>(query.findList(), query.findCount());
 
