@@ -46,6 +46,7 @@ public class FavoriteRecipesController extends Controller {
 
     public CompletionStage<Result> single(Long id, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        logger.info("single(): id = {}, user id = ", id, jwt.getUserId());
         return repository.single(id, jwt.getUserId())
                 .thenApplyAsync(f -> {
                     if (f == null) {
@@ -60,6 +61,7 @@ public class FavoriteRecipesController extends Controller {
 
     public CompletionStage<Result> allOfUser(Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        logger.info("allOfUser(): user id = {}", jwt.getUserId());
         return repository.allOfUser(jwt.getUserId())
                 .thenApplyAsync(FavoriteRecipesController::toResult, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
@@ -70,11 +72,13 @@ public class FavoriteRecipesController extends Controller {
                 .bindFromRequest(request);
 
         if (form.hasErrors()) {
+            logger.warn("create(): form has errors!");
             return supplyAsync(() -> badRequest(form.errorsAsJson()));
         } else {
-            FavoriteRecipeCreateDto fr = form.get();
+            FavoriteRecipeCreateDto dto = form.get();
             VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-            return repository.create(jwt.getUserId(), fr.getRecipeId())
+            logger.info("create(): user id = {}, dto = {}", jwt.getUserId(), dto);
+            return repository.create(jwt.getUserId(), dto.getRecipeId())
                     .thenApplyAsync(p -> {
                                 String location = routes.FavoriteRecipesController
                                         .single(p).absoluteURL(request);
@@ -87,6 +91,7 @@ public class FavoriteRecipesController extends Controller {
 
     public CompletionStage<Result> delete(Long id, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        logger.info("delete(): id = {}, user id = {}", id, jwt.getUserId());
         return repository.delete(id, jwt.getUserId())
                 .thenApplyAsync(r -> {
                     if (r) {

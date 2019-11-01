@@ -13,7 +13,7 @@ import javax.validation.Validator;
 import java.util.Collections;
 import java.util.Set;
 
-/* Instances of this class is used only inside the appropriate controller in order to avoid
+/* Instances of this class are used only inside the appropriate controller in order to avoid
  * leaking the managed form factory.
  */
 class RecipeSearchCreatorUpdater {

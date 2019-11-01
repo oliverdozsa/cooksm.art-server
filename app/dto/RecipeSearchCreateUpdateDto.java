@@ -1,9 +1,11 @@
 package dto;
 
+import lombok.ToString;
 import play.data.validation.Constraints;
 
 import javax.validation.constraints.NotNull;
 
+@ToString
 public class RecipeSearchCreateUpdateDto {
     private String name;
     private String query;

@@ -47,6 +47,7 @@ public class RecipeSearchesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesController.class);
 
     public CompletionStage<Result> globals() {
+        logger.info("globals()");
         return repository.globals().thenApplyAsync(p -> {
             List<RecipeSearchDto> searchDtos = p.getItems().stream()
                     .map(DtoMapper::toDto)
@@ -58,7 +59,7 @@ public class RecipeSearchesController extends Controller {
 
     public CompletionStage<Result> userSearches(Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-
+        logger.info("userSearches(): user id = {}", jwt.getUserId());
         return repository.userSearches(jwt.getUserId())
                 .thenApplyAsync(p -> {
                     List<RecipeSearchDto> searchDtos = p.getItems().stream()
@@ -72,7 +73,7 @@ public class RecipeSearchesController extends Controller {
 
     public CompletionStage<Result> userSearch(Long entityId, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-
+        logger.info("userSearch(): entityId = {}, user id = {}", entityId, jwt.getUserId());
         return repository.userSearch(jwt.getUserId(), entityId)
                 .thenApplyAsync(e -> {
                     RecipeSearchDto dto = DtoMapper.toDto(e);
@@ -90,7 +91,7 @@ public class RecipeSearchesController extends Controller {
         }
 
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-
+        logger.info("create(): user id = {}, dto = {}", jwt.getUserId(), dto);
         return repository.create(jwt.getUserId(), dto.getName(), dto.getQuery())
                 .thenApplyAsync(id -> {
                     String location = routes.RecipeSearchesController.userSearch(id).absoluteURL(request);
@@ -108,7 +109,7 @@ public class RecipeSearchesController extends Controller {
         }
 
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-
+        logger.info("update(): user id = {}, id = {}, dto = {}", jwt.getUserId(), id, dto);
         return repository.update(jwt.getUserId(), id, dto.getName(), dto.getQuery())
                 .thenApplyAsync(v -> (Result) noContent(), httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
@@ -116,7 +117,7 @@ public class RecipeSearchesController extends Controller {
 
     public CompletionStage<Result> delete(Long id, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-
+        logger.info("delete(): id = {}, user id = {}", id, jwt.getUserId());
         return repository.delete(jwt.getUserId(), id)
                 .thenApplyAsync(success -> {
                     if (success) {

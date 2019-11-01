@@ -1,12 +1,11 @@
 package dto;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 import play.data.validation.Constraints;
 
 import javax.validation.constraints.NotNull;
 
+@ToString
 public class UserSocialLoginDto {
     @Constraints.MinLength(3)
     private String fullName;
@@ -15,6 +14,7 @@ public class UserSocialLoginDto {
     private String email;
 
     @NotNull
+    @ToString.Exclude
     private String token;
 
     public UserSocialLoginDto(@Constraints.MinLength(3) String fullName, @Constraints.Email String email, @NotNull String token) {
