@@ -4,8 +4,10 @@ import dto.IngredientNameDto;
 import dto.PageDto;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import models.entities.IngredientName;
 import models.repositories.IngredientNameRepository;
+import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.data.validation.Constraints;
@@ -32,16 +34,21 @@ public class IngredientNamesController extends Controller {
     @Inject
     private HttpExecutionContext ec;
 
+    private static final Logger.ALogger logger = Logger.of(IngredientNamesController.class);
+
     public CompletionStage<Result> pageNames(Http.Request request) {
         Form<IngredientNameQueryParams> form =
                 formFactory.form(IngredientNameQueryParams.class).bindFromRequest(request);
 
         if (form.hasErrors()) {
+            logger.warn("pageNames(): form has errors!");
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
             IngredientNameQueryParams params = form.get();
             params.limit = params.limit == null ? 25 : params.limit;
             params.offset = params.offset == null ? 0 : params.offset;
+
+            logger.info("pageNames(): params = {}", params);
 
             return ingredientNameRepository.page(params.nameLike, params.languageId, params.limit, params.offset)
                     .thenApplyAsync(p -> {
@@ -61,6 +68,7 @@ public class IngredientNamesController extends Controller {
     @Constraints.Validate
     @Getter
     @Setter
+    @ToString
     public static class IngredientNameQueryParams implements Constraints.Validatable<ValidationError> {
         @Constraints.Required
         private Long languageId;

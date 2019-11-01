@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import dto.PageDto;
 import dto.RecipeDto;
-import models.DatabaseExecutionContext;
 import models.entities.Recipe;
 import models.repositories.Page;
 import models.repositories.RecipeRepository;
@@ -62,10 +61,12 @@ public class RecipesController extends Controller {
 
         if (jsonNodeOrSearchMode.isLeft()) {
             // Request has error
+            logger.warn("pageRecipes(): request has error!");
             JsonNode errorJson = jsonNodeOrSearchMode.left().get();
             return completedFuture(badRequest(errorJson));
         } else {
             RecipesControllerQuery.SearchMode searchMode = jsonNodeOrSearchMode.right().get();
+            logger.info("pageRecipes(): searchMode = {}", searchMode);
             return refineRequestBy(searchMode, request);
         }
     }
@@ -77,20 +78,23 @@ public class RecipesController extends Controller {
 
     private CompletionStage<Result> refineRequestBy(RecipesControllerQuery.SearchMode searchMode, Http.Request request) {
         if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF) {
-            Form<RecipesControllerQuery.Params> params = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
+            Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
                     .bindFromRequest(request);
-            return pageOrBadRequest(params, this::getRecipesByGoodIngredientsNumber);
+            return pageOrBadRequest(form, this::getRecipesByGoodIngredientsNumber);
         } else if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO) {
-            Form<RecipesControllerQuery.Params> params = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class)
+            Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class)
                     .bindFromRequest(request);
-            return pageOrBadRequest(params, this::getRecipesByGoodIngredientsRatio);
+            return pageOrBadRequest(form, this::getRecipesByGoodIngredientsRatio);
         } else if (searchMode == RecipesControllerQuery.SearchMode.NONE) {
-            Form<RecipesControllerQuery.Params> params = formFactory.form(RecipesControllerQuery.Params.class)
+            Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class)
                     .bindFromRequest(request);
-            return pageOrBadRequest(params, this::getRecipesAll);
+            return pageOrBadRequest(form, this::getRecipesAll);
         } else {
+            logger.warn("refineRequestBy(): unknown search mode! searchMode = {}", searchMode);
             return completedFuture(badRequest());
         }
+
+
     }
 
     private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
@@ -134,9 +138,11 @@ public class RecipesController extends Controller {
 
     private <T> CompletionStage<Result> pageOrBadRequest(Form<T> form, Function<T, CompletionStage<Result>> resultProducer) {
         if (form.hasErrors()) {
+            logger.warn("pageOrBadRequest(): form has error!");
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
             T formValue = form.get();
+            logger.warn("pageOrBadRequest(): formValue = {}", formValue);
             return resultProducer.apply(formValue);
         }
     }
