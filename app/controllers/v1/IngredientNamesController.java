@@ -5,7 +5,6 @@ import dto.PageDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import models.entities.IngredientName;
 import models.repositories.IngredientNameRepository;
 import play.Logger;
 import play.data.Form;
@@ -26,13 +25,13 @@ import static play.libs.Json.toJson;
 
 public class IngredientNamesController extends Controller {
     @Inject
-    private IngredientNameRepository ingredientNameRepository;
+    private IngredientNameRepository repository;
 
     @Inject
     private FormFactory formFactory;
 
     @Inject
-    private HttpExecutionContext ec;
+    private HttpExecutionContext executionContext;
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesController.class);
 
@@ -50,7 +49,7 @@ public class IngredientNamesController extends Controller {
 
             logger.info("pageNames(): params = {}", params);
 
-            return ingredientNameRepository.page(params.nameLike, params.languageId, params.limit, params.offset)
+            return repository.page(params.nameLike, params.languageId, params.limit, params.offset)
                     .thenApplyAsync(p -> {
                         PageDto<IngredientNameDto> result = new PageDto<>(
                                 p.getItems().stream().map(DtoMapper::toDto).collect(Collectors.toList()),
