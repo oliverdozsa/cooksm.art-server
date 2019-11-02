@@ -32,13 +32,13 @@ import static play.libs.Json.toJson;
 
 public class RecipesController extends Controller {
     @Inject
-    private RecipeRepository recipeRepository;
+    private RecipeRepository repository;
 
     @Inject
     private FormFactory formFactory;
 
     @Inject
-    private HttpExecutionContext httpExecutionContext;
+    private HttpExecutionContext executionContext;
 
     @Inject
     private Config config;
@@ -72,7 +72,7 @@ public class RecipesController extends Controller {
     }
 
     public CompletionStage<Result> singleRecipe(Long id, Long languageId) {
-        return recipeRepository.single(id).thenApply(r -> toResult(r, languageId))
+        return repository.single(id).thenApply(r -> toResult(r, languageId))
                 .exceptionally(mapException);
     }
 
@@ -98,20 +98,20 @@ public class RecipesController extends Controller {
     }
 
     private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberParams(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+        return repository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
     private CompletionStage<Result> getRecipesByGoodIngredientsRatio(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioParams(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+        return repository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
     private CompletionStage<Result> getRecipesAll(RecipesControllerQuery.Params params) {
-        return recipeRepository.pageOfAll(toCommonParams(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), httpExecutionContext.current())
+        return repository.pageOfAll(toCommonParams(params))
+                .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
