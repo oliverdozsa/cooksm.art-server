@@ -10,6 +10,7 @@ import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
@@ -97,7 +98,9 @@ public class FavoriteRecipesController extends Controller {
                     if (r) {
                         return (Result) noContent();
                     } else {
-                        return badRequest();
+                        logger.warn("delete(): Failed to delete!");
+                        ValidationError ve = new ValidationError("", "Failed to delete!");
+                        return badRequest(Json.toJson(ve.messages()));
                     }
                 }, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);

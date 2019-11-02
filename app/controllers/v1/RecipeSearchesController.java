@@ -5,10 +5,10 @@ import dto.PageDto;
 import dto.RecipeSearchCreateUpdateDto;
 import dto.RecipeSearchDto;
 import models.repositories.RecipeSearchRepository;
-import models.repositories.exceptions.BusinessLogicViolationException;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
@@ -18,7 +18,6 @@ import security.SecurityUtils;
 import security.VerifiedJwt;
 
 import javax.inject.Inject;
-import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -122,7 +121,9 @@ public class RecipeSearchesController extends Controller {
                     if (success) {
                         return (Result) noContent();
                     } else {
-                        return badRequest();
+                        logger.warn("delete(): failed to delete!");
+                        ValidationError ve = new ValidationError("", "Failed to delete.");
+                        return badRequest(Json.toJson(ve.messages()));
                     }
                 }, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);

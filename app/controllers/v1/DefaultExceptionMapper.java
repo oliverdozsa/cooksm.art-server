@@ -4,6 +4,8 @@ import com.google.common.base.Function;
 import models.repositories.exceptions.BusinessLogicViolationException;
 import models.repositories.exceptions.NotFoundException;
 import play.Logger;
+import play.data.validation.ValidationError;
+import play.libs.Json;
 import play.mvc.Result;
 
 import static play.mvc.Results.*;
@@ -21,7 +23,8 @@ class DefaultExceptionMapper implements Function<Throwable, Result> {
         if (input instanceof IllegalArgumentException ||
                 input instanceof BusinessLogicViolationException) {
             logger.warn("Bad Request!", input);
-            return badRequest();
+            ValidationError ve = new ValidationError("", input.getMessage());
+            return badRequest(Json.toJson(ve.messages()));
         }
 
         if (input instanceof NotFoundException) {

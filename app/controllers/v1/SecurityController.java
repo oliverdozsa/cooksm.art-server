@@ -24,7 +24,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class SecurityController extends Controller {
     @Inject
