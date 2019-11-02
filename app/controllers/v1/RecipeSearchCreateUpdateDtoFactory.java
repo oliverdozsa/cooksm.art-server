@@ -16,11 +16,11 @@ import java.util.Set;
 /* Instances of this class are used only inside the appropriate controller in order to avoid
  * leaking the managed form factory.
  */
-class RecipeSearchCreatorUpdater {
+class RecipeSearchCreateUpdateDtoFactory {
     private RecipeSearchCreateUpdateDto dto;
     private Validator validator;
 
-    public RecipeSearchCreatorUpdater(FormFactory formFactory, Http.Request request, Validator validator) {
+    public RecipeSearchCreateUpdateDtoFactory(FormFactory formFactory, Http.Request request, Validator validator) {
         this.validator = validator;
         Form<RecipeSearchCreateUpdateDto> form = formFactory.form(RecipeSearchCreateUpdateDto.class).bindFromRequest(request);
         if (form.hasErrors()) {

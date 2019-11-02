@@ -1,6 +1,7 @@
 package models.repositories.imp;
 
 import com.typesafe.config.Config;
+import dto.RecipeSearchCreateUpdateDto;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import models.DatabaseExecutionContext;
@@ -13,6 +14,7 @@ import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -22,13 +24,14 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     private EbeanServer ebean;
     private DatabaseExecutionContext executionContext;
     private int maxPerUser;
-    private static final Logger.ALogger logger = Logger.of(EbeanRecipeRepository.class);
+    private RecipeSearchCreateUpdateDtoValidator createUpdateDtoValidator;
 
     @Inject
-    public EbeanRecipeSearchRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext, Config config) {
-        this.ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanRecipeSearchRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext, Config config, ValidatorFactory validatorFactory) {
+        ebean = Ebean.getServer(dbConfig.defaultServer());
         this.executionContext = executionContext;
-        this.maxPerUser = config.getInt("receptnekem.usersearches.maxperuser");
+        maxPerUser = config.getInt("receptnekem.usersearches.maxperuser");
+        createUpdateDtoValidator = new RecipeSearchCreateUpdateDtoValidator(validatorFactory.getValidator());
     }
 
     @Override
@@ -70,15 +73,16 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<Long> create(Long userId, String name, String query) {
+    public CompletionStage<Long> create(Long userId, RecipeSearchCreateUpdateDto dto) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             assertCount(userId);
+            createUpdateDtoValidator.validate(dto);
 
             RecipeSearch entity = new RecipeSearch();
             entity.setUser(ebean.find(User.class, userId));
-            entity.setName(name);
-            entity.setQuery(query);
+            entity.setName(dto.getName());
+            entity.setQuery(dto.getQuery());
             ebean.save(entity);
 
             return entity.getId();
@@ -86,10 +90,11 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<Void> update(Long userId, Long entityId, String name, String query) {
+    public CompletionStage<Void> update(Long userId, Long entityId, RecipeSearchCreateUpdateDto dto) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, entityId);
+            createUpdateDtoValidator.validate(dto);
 
             RecipeSearch entity = ebean.createQuery(RecipeSearch.class)
                     .where()
@@ -102,8 +107,8 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
                 throw new BusinessLogicViolationException(msg);
             }
 
-            entity.setName(name);
-            entity.setQuery(query);
+            entity.setName(dto.getName());
+            entity.setQuery(dto.getQuery());
 
             ebean.update(entity);
 

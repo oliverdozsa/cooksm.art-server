@@ -5,7 +5,9 @@ import dto.PageDto;
 import dto.RecipeSearchCreateUpdateDto;
 import dto.RecipeSearchDto;
 import models.repositories.RecipeSearchRepository;
+import models.repositories.exceptions.BusinessLogicViolationException;
 import play.Logger;
+import play.data.Form;
 import play.data.FormFactory;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
@@ -36,9 +38,6 @@ public class RecipeSearchesController extends Controller {
 
     @Inject
     private Config config;
-
-    @Inject
-    private ValidatorFactory validatorFactory;
 
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
@@ -83,16 +82,16 @@ public class RecipeSearchesController extends Controller {
     }
 
     public CompletionStage<Result> create(Http.Request request) {
-        RecipeSearchCreateUpdateDto dto;
-        try {
-            dto = new RecipeSearchCreatorUpdater(formFactory, request, validatorFactory.getValidator()).create();
-        } catch (Exception e) {
-            return completedFuture(mapException.apply(e));
+        Form<RecipeSearchCreateUpdateDto> form = formFactory.form(RecipeSearchCreateUpdateDto.class).bindFromRequest(request);
+        if (form.hasErrors()) {
+            logger.warn("create(): Form has errors!");
+            return completedFuture(badRequest(form.errorsAsJson()));
         }
 
+        RecipeSearchCreateUpdateDto dto = form.get();
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("create(): user id = {}, dto = {}", jwt.getUserId(), dto);
-        return repository.create(jwt.getUserId(), dto.getName(), dto.getQuery())
+        return repository.create(jwt.getUserId(), dto)
                 .thenApplyAsync(id -> {
                     String location = routes.RecipeSearchesController.userSearch(id).absoluteURL(request);
                     return created().withHeader(LOCATION, location);
@@ -101,16 +100,16 @@ public class RecipeSearchesController extends Controller {
     }
 
     public CompletionStage<Result> update(Long id, Http.Request request) {
-        RecipeSearchCreateUpdateDto dto;
-        try {
-            dto = new RecipeSearchCreatorUpdater(formFactory, request, validatorFactory.getValidator()).create();
-        } catch (Exception e) {
-            return completedFuture(mapException.apply(e));
+        Form<RecipeSearchCreateUpdateDto> form = formFactory.form(RecipeSearchCreateUpdateDto.class).bindFromRequest(request);
+        if (form.hasErrors()) {
+            logger.warn("update(): Form has errors!");
+            return completedFuture(badRequest(form.errorsAsJson()));
         }
 
+        RecipeSearchCreateUpdateDto dto = form.get();
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("update(): user id = {}, id = {}, dto = {}", jwt.getUserId(), id, dto);
-        return repository.update(jwt.getUserId(), id, dto.getName(), dto.getQuery())
+        return repository.update(jwt.getUserId(), id, dto)
                 .thenApplyAsync(v -> (Result) noContent(), httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
     }
