@@ -91,7 +91,8 @@ public class RecipesController extends Controller {
             return pageOrBadRequest(form, this::getRecipesAll);
         } else {
             logger.warn("refineRequestBy(): unknown search mode! searchMode = {}", searchMode);
-            return completedFuture(badRequest());
+            ValidationError ve = new ValidationError("", "Unkown search mode!");
+            return completedFuture(badRequest(Json.toJson(ve.messages())));
         }
 
 
