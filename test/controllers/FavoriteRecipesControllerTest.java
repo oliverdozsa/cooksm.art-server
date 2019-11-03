@@ -27,21 +27,20 @@ import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
 
 public class FavoriteRecipesControllerTest {
-    // TODO: Test for getFavorite recipe, where user doesn't own the favorite with the given id.
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
-    private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
+    private static final Logger.ALogger logger = Logger.of(FavoriteRecipesControllerTest.class);
 
     @Before
-    public void setup(){
+    public void setup() {
     }
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testFavoriteRecipes_GetEmpty() {
+    public void testGetEmpty() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_GetEmpty");
+        logger.info("-- RUNNING TEST: testGetEmpty");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().uri(routes.FavoriteRecipesController.allOfUser().url());
@@ -57,9 +56,9 @@ public class FavoriteRecipesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testFavoriteRecipes_Create_Get() throws IOException {
+    public void testCreate_Get() throws IOException {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Get");
+        logger.info("-- RUNNING TEST: testCreate_Get");
         logger.info("------------------------------------------------------------------------------------------------");
 
         FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto(1L);
@@ -95,15 +94,15 @@ public class FavoriteRecipesControllerTest {
         JsonNode resultJson = Json.parse(contentAsString(result));
 
         assertEquals("Total count is wrong!", 1, resultJson.get("totalCount").asInt());
-        assertEquals("Recipe name is wrong!","recipe_1", resultJson.get("items").get(0).get("name").asText());
-        assertEquals("Recipe url is wrong!","recipe_1_url", resultJson.get("items").get(0).get("url").asText());
+        assertEquals("Recipe name is wrong!", "recipe_1", resultJson.get("items").get(0).get("name").asText());
+        assertEquals("Recipe url is wrong!", "recipe_1_url", resultJson.get("items").get(0).get("url").asText());
     }
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testFavoriteRecipes_Delete() {
+    public void testDelete() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_Delete");
+        logger.info("-- RUNNING TEST: testDelete");
         logger.info("------------------------------------------------------------------------------------------------");
 
         // Create a favorite recipes
@@ -124,9 +123,9 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    public void testFavoriteRecipes_Create_Invalid_NoJson() {
+    public void testCreate_Invalid_NoJson() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Invalid_NoJson");
+        logger.info("-- RUNNING TEST: testCreate_Invalid_NoJson");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
@@ -142,9 +141,9 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    public void testFavoriteRecipes_Create_Invalid_RecipeNotExisting() {
+    public void testCreate_Invalid_RecipeNotExisting() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Invalid_RecipeNotExisting");
+        logger.info("-- RUNNING TEST: testCreate_Invalid_RecipeNotExisting");
         logger.info("------------------------------------------------------------------------------------------------");
 
         FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto(4284L);
@@ -162,13 +161,13 @@ public class FavoriteRecipesControllerTest {
     }
 
     @Test
-    public void testFavoriteRecipes_Create_Invalid_MaxReached() {
+    public void testCreate_Invalid_MaxReached() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Invalid_MaxReached");
+        logger.info("-- RUNNING TEST: testCreate_Invalid_MaxReached");
         logger.info("------------------------------------------------------------------------------------------------");
 
         int max = application.getApplication().config().getInt("receptnekem.favoriterecipes.maxperuser");
-        for(int i = 0; i < max; i++){
+        for (int i = 0; i < max; i++) {
             Recipe recipe = new Recipe();
             recipe.setName("recipe_t_" + i);
             recipe.setSourcePage(Ebean.find(SourcePage.class, 1L));
@@ -196,9 +195,9 @@ public class FavoriteRecipesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testFavoriteRecipes_Create_Already_Existing() {
+    public void testCreate_Already_Existing() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_Create_Already_Existing");
+        logger.info("-- RUNNING TEST: testCreate_Already_Existing");
         logger.info("------------------------------------------------------------------------------------------------");
 
         FavoriteRecipe favoriteRecipe = new FavoriteRecipe();
@@ -218,5 +217,23 @@ public class FavoriteRecipesControllerTest {
 
         Result result = route(application.getApplication(), httpRequestCreate);
         assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testSingle_UserDoesntOwn() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testSingle_UserDoesntOwn");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.FavoriteRecipesController.single(2).url());
+
+        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
+
+        Result result = route(application.getApplication(), httpRequestCreate);
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 }

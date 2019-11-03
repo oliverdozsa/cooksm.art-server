@@ -1,5 +1,6 @@
 user:
   - id: 1
+  - id: 2
 
 source_page:
   - id: 1
@@ -14,3 +15,16 @@ recipe:
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 1
+
+  - id: 2
+    name: recipe_2
+    url: recipe_2_url
+    time: 10
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 1
+
+favorite_recipe:
+  - id: 1
+    recipe_id: 2
+    user_id: 2

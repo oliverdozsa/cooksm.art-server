@@ -21,7 +21,6 @@ import static junit.framework.TestCase.assertTrue;
 import static play.test.Helpers.*;
 
 public class RecipeSearchesControllerTest {
-    // TODO: Test for getUserSearch, where user doesn't have the search with the given id.
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
@@ -45,9 +44,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testGetUserSearches() {
+    public void testGetUser_1() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetUserSearches");
+        logger.info("-- RUNNING TEST: testGetUser_1");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
@@ -63,24 +62,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testGetUserSearches_UserNotFound() {
+    public void testGetSingle() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetUserSearches_UserNotFound");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
-                routes.RecipeSearchesController.userSearches().url());
-        String jwt = JwtTestUtils.createToken(10000L, 42L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testGetUserSearch() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetUserSearch");
+        logger.info("-- RUNNING TEST: testGetSingle");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
@@ -96,9 +80,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testGetUserSearch_UserNotFound() {
+    public void testGet_UserNotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetUserSearch");
+        logger.info("-- RUNNING TEST: testGet_UserNotFound");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
@@ -113,9 +97,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testGetUserSearchNotFound() {
+    public void testGet_NotFound() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetUserSearchNotFound");
+        logger.info("-- RUNNING TEST: testGet_NotFound");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri("/api/usersearches/5");
@@ -128,9 +112,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchCreate_NONE() {
+    public void testCreate_NONE() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchCreate_NONE");
+        logger.info("-- RUNNING TEST: testCreate_NONE");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -169,9 +153,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchCreate_COMPOSED_OF() {
+    public void testCreate_COMPOSED_OF() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchCreate_COMPOSED_OF");
+        logger.info("-- RUNNING TEST: testCreate_COMPOSED_OF");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -201,9 +185,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchCreate_COMPOSED_OF_Invalid() {
+    public void testCreate_COMPOSED_OF_Invalid() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchCreate_COMPOSED_OF_Invalid");
+        logger.info("-- RUNNING TEST: testCreate_COMPOSED_OF_Invalid");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -228,9 +212,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchCreate_InvalidParams() {
+    public void testCreate_InvalidParams() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchCreate_InvalidParams");
+        logger.info("-- RUNNING TEST: testCreate_InvalidParams");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -253,9 +237,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchUpdate() {
+    public void testUpdate() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchUpdate");
+        logger.info("-- RUNNING TEST: testUpdate");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -289,9 +273,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchUpdate_InvalidParams() {
+    public void testUpdate_InvalidParams() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchUpdate_InvalidParams");
+        logger.info("-- RUNNING TEST: testUpdate_InvalidParams");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -316,9 +300,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchUpdate_OtherUser() {
+    public void testUpdate_OtherUser() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchUpdate_OtherUser");
+        logger.info("-- RUNNING TEST: testUpdate_OtherUser");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -341,9 +325,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchCreate_LimitReached() {
+    public void testCreate_LimitReached() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchCreate_LimitReached");
+        logger.info("-- RUNNING TEST: testCreate_LimitReached");
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
@@ -373,9 +357,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchDelete() {
+    public void testDelete() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchDelete");
+        logger.info("-- RUNNING TEST: testDelete");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
@@ -398,9 +382,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchDelete_Other() {
+    public void testDelete_Other() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchDelete_Other");
+        logger.info("-- RUNNING TEST: testDelete_Other");
         logger.info("------------------------------------------------------------------------------------------------");
 
 
@@ -416,11 +400,10 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserSearchDelete_NotExisting() {
+    public void testDelete_NotExisting() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserSearchDelete_NotExisting");
+        logger.info("-- RUNNING TEST: testDelete_NotExisting");
         logger.info("------------------------------------------------------------------------------------------------");
-
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
@@ -429,6 +412,22 @@ public class RecipeSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
 
         Result result = route(application.getApplication(), httpRequest);
+        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetSingle_DoesntOwn(){
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testGetSingle_DoesntOwn");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipeSearchesController.userSearch(2).url());
+        String jwt = JwtTestUtils.createToken(10000L, 3L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
+        Result result = route(application.getApplication(), httpRequest);
+
         assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
     }
 }

@@ -74,6 +74,10 @@ public class RecipeSearchesController extends Controller {
         logger.info("userSearch(): entityId = {}, user id = {}", entityId, jwt.getUserId());
         return repository.userSearch(jwt.getUserId(), entityId)
                 .thenApplyAsync(e -> {
+                    if (e == null) {
+                        return notFound();
+                    }
+
                     RecipeSearchDto dto = DtoMapper.toDto(e);
                     return ok(Json.toJson(dto));
                 }, httpExecutionContext.current())
