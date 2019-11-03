@@ -9,9 +9,6 @@ import java.util.List;
 @Entity
 @Table(name = "ingredient_name")
 public class IngredientName {
-    public static final String NQ_LIST_INGREDIENT_NAMES = "listIngredientNames";
-    public static final String NQ_LIST_INGREDIENT_NAMES_COUNT = "listIngredientNamesCount";
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
