@@ -8,7 +8,6 @@ import controllers.v1.routes;
 import dto.UserSocialLoginDto;
 import io.ebean.Ebean;
 import models.entities.User;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
@@ -17,9 +16,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
-import security.JwtValidator;
 import security.SocialTokenVerifier;
-import security.imp.JwtValidatorImp;
 import utils.JwtTestUtils;
 import utils.MockSocialTokenVerifier;
 

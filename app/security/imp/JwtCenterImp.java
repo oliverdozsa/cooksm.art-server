@@ -6,28 +6,26 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.typesafe.config.Config;
-import org.joda.time.Minutes;
 import play.Logger;
 import play.libs.F.Either;
-import security.JwtValidator;
+import security.JwtCenter;
 import security.VerifiedJwt;
 
 import javax.inject.Inject;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
-public class JwtValidatorImp implements JwtValidator {
+public class JwtCenterImp implements JwtCenter {
     private JWTVerifier verifier;
     private Config config;
     private Algorithm algorithm;
     private String issuer;
 
-    private static Logger.ALogger logger = Logger.of(JwtValidator.class);
+    private static Logger.ALogger logger = Logger.of(JwtCenter.class);
 
     @Inject
-    public JwtValidatorImp(Config config) {
+    public JwtCenterImp(Config config) {
         this.config = config;
         issuer = config.getString("receptnekem.jwt.issuer");
 

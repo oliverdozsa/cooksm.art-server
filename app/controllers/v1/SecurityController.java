@@ -13,7 +13,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import security.JwtValidator;
+import security.JwtCenter;
 import security.SecurityUtils;
 import security.SocialTokenVerifier;
 import security.VerifiedJwt;
@@ -44,7 +44,7 @@ public class SecurityController extends Controller {
     private HttpExecutionContext httpExecutionContext;
 
     @Inject
-    private JwtValidator jwt;
+    private JwtCenter jwtCenter;
 
     @Inject
     private Config config;
@@ -77,7 +77,7 @@ public class SecurityController extends Controller {
         logger.info("renew(): user id = {}", verifiedJwt.getUserId());
         return repository.byId(verifiedJwt.getUserId())
                 .thenApplyAsync(user -> {
-                    String token = jwt.create(user.getId());
+                    String token = jwtCenter.create(user.getId());
                     UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName());
                     return ok(Json.toJson(resultDto));
                 }, httpExecutionContext.current())
@@ -97,7 +97,7 @@ public class SecurityController extends Controller {
         return verify(verifier, dto.getToken())
                 .thenCompose(o -> repository.createOrUpdate(convertFrom(dto)))
                 .thenApplyAsync(id -> {
-                    String token = jwt.create(id);
+                    String token = jwtCenter.create(id);
                     UserInfoDto resultDto = new UserInfoDto(token, dto.getEmail(), dto.getFullName());
                     return ok(Json.toJson(resultDto));
                 }, httpExecutionContext.current())

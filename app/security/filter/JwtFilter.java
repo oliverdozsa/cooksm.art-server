@@ -26,7 +26,7 @@ package security.filter;
 
 import akka.stream.Materializer;
 import com.typesafe.config.Config;
-import security.JwtValidator;
+import security.JwtCenter;
 import security.VerifiedJwt;
 import play.Logger;
 import play.libs.F.Either;
@@ -48,16 +48,16 @@ import static play.mvc.Results.forbidden;
 public class JwtFilter extends Filter {
     private static Logger.ALogger logger = Logger.of(JwtFilter.class);
     private static final String ERR_AUTHORIZATION_HEADER = "ERR_AUTHORIZATION_HEADER";
-    private JwtValidator jwtValidator;
+    private JwtCenter jwtCenter;
 
     private String jwtFilterTag;
     private String headerAuthorization;
     private String bearer;
 
     @Inject
-    public JwtFilter(Materializer mat, JwtValidator jwtValidator, Config config) {
+    public JwtFilter(Materializer mat, JwtCenter jwtCenter, Config config) {
         super(mat);
-        this.jwtValidator = jwtValidator;
+        this.jwtCenter = jwtCenter;
 
         jwtFilterTag = config.getString("receptnekem.jwt.filtertag");
         headerAuthorization = config.getString("receptnekem.jwt.header.authorization");
@@ -83,7 +83,7 @@ public class JwtFilter extends Filter {
         }
 
         String token = authHeader.map(ah -> ah.replace(bearer, "")).orElse("");
-        Either<JwtValidator.Error, VerifiedJwt> res = jwtValidator.verify(token);
+        Either<JwtCenter.Error, VerifiedJwt> res = jwtCenter.verify(token);
 
         if (res.left.isPresent()) {
             return CompletableFuture.completedFuture(forbidden(res.left.get().toString()));
