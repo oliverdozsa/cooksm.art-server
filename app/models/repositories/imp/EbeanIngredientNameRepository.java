@@ -38,6 +38,7 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
 
             query.setFirstRow(offset);
             query.setMaxRows(limit);
+            query.orderBy("relevanceScore desc");
 
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);

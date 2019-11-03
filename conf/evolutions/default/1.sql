@@ -25,6 +25,7 @@ create table ingredient_alt_name (
 create table ingredient_name (
   id                            bigint auto_increment not null,
   name                          varchar(255),
+  relevance_score               integer,
   ingredient_id                 bigint,
   language_id                   bigint,
   constraint pk_ingredient_name primary key (id)

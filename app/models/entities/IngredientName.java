@@ -20,6 +20,9 @@ public class IngredientName {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "relevance_score")
+    private Integer relevanceScore;
+
     @JoinColumn(name = "ingredient_id")
     @ManyToOne
     private Ingredient ingredient;
