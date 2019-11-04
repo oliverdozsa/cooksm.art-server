@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(evolutions, jdbc)
 libraryDependencies ++= Seq(javaJpa % "test", "org.hibernate" % "hibernate-core" % "5.4.2.Final" % "test")
 libraryDependencies += "com.github.database-rider" % "rider-core" % "1.7.2" % "test"
 libraryDependencies += "com.auth0" % "java-jwt" % "3.8.2"
+libraryDependencies ++= Seq(javaWs)
 
 lazy val isDisableTestFork = settingKey[Boolean]("true when disabletestfork is true; false otherwise")
 isDisableTestFork := System.getProperty("disabletestfork") == "true"
