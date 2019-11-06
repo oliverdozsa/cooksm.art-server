@@ -16,14 +16,12 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
     private WSClient wsClient;
     private String clientId;
     private String apiUrl;
-    private HttpExecutionContext executionContext;
 
     private static Logger.ALogger logger = Logger.of(SocialTokenVerifierGoogleImp.class);
 
     @Inject
-    public SocialTokenVerifierGoogleImp(WSClient wsClient, Config config, HttpExecutionContext executionContext) {
+    public SocialTokenVerifierGoogleImp(WSClient wsClient, Config config) {
         this.wsClient = wsClient;
-        this.executionContext = executionContext;
         clientId = config.getString("google.clientid");
         apiUrl = config.getString("google.apiurl");
     }
@@ -36,11 +34,10 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
         return wsRequest.get()
                 .thenApply(WSResponse::asJson)
                 .thenApply(responseJson -> {
-                    assertNotNull(responseJson);
+                    assertResponse(responseJson);
 
-                    if (responseJson.get("aud") != null && responseJson.get("aud").asText().equals(clientId)) {
-                        logger.info("verify(): success");
-                        return true;
+                    if (responseJson.get("aud") != null) {
+                        return checkResponseContent(responseJson.get("aud"));
                     } else if (responseJson.get("error_response") != null) {
                         logger.warn("verify(): verification result is error!");
                     }
@@ -53,9 +50,21 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
                 });
     }
 
-    private static void assertNotNull(JsonNode response) {
+    private static void assertResponse(JsonNode response) {
         if (response == null) {
             throw new GoogleVerifierException("Response json is null!");
+        }
+    }
+
+    private boolean checkResponseContent(JsonNode jsonContent) {
+        String receivedClientId = jsonContent.asText();
+        if (receivedClientId.equals(clientId)) {
+            logger.info("checkResponseContent(): verification success!");
+            return true;
+        } else {
+            logger.warn("checkResponseContent(): client id mismatch! receivedClientId = {}, clientId = {}",
+                    receivedClientId, clientId);
+            return false;
         }
     }
 
