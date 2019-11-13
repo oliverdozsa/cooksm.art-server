@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class IngredientNameDto {
-    private final Long ingredientId;
+    private final Long id;
     private final String name;
 }
