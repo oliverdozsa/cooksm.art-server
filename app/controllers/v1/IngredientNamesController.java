@@ -80,7 +80,7 @@ public class IngredientNamesController extends Controller {
 
         @Constraints.Min(1)
         @Constraints.Max(50)
-        private Integer limit;
+        private Integer limit = 25;
 
         @Override
         public ValidationError validate() {
