@@ -8,37 +8,16 @@ import java.util.List;
 
 class RecipesControllerQuery {
     public enum SearchMode {
-        NONE(0),
-        COMPOSED_OF(1),
-        COMPOSED_OF_RATIO(3);
-
-        SearchMode(int id) {
-            this.id = id;
-        }
-
-        public int id;
-
-        public static SearchMode getByIntVal(int val) {
-            SearchMode result = NONE;
-
-            SearchMode[] options = SearchMode.class.getEnumConstants();
-            for (SearchMode field : options) {
-                if (field.id == val) {
-                    result = field;
-                    break;
-                }
-            }
-
-            return result;
-        }
+        NONE,
+        COMPOSED_OF_NUMBER,
+        COMPOSED_OF_RATIO
     }
 
     @Constraints.Validate
     @ToString
     public static class Params implements Constraints.Validatable<ValidationError> {
-        @Constraints.Min(1)
-        @Constraints.Max(3)
-        public Integer searchMode;
+        @Constraints.Pattern("(composed-of-number|composed-of-ratio)")
+        public String searchMode;
 
         @Constraints.Min(0)
         public Integer minIngs;
@@ -95,22 +74,41 @@ class RecipesControllerQuery {
 
         @Override
         public ValidationError validate() {
-            ValidationError result = null;
-
-            if (searchMode != null) {
-                if (searchMode == SearchMode.COMPOSED_OF.id ||
-                        searchMode == SearchMode.COMPOSED_OF_RATIO.id) {
-                    if (inIngs == null && inIngTags == null) {
-                        result = new ValidationError("", "Missing input ingredients (no tags, or ingredients)!");
-                    } else if (searchMode == SearchMode.COMPOSED_OF_RATIO.id) {
-                        if (goodIngsRatio < 0.0 || goodIngsRatio > 1.0) {
-                            result = new ValidationError("", "Invalid good ingredients ratio! Must be between 0.0 and 1.0!");
-                        }
-                    }
-                }
+            SearchMode searchModeEnum = toEnum(searchMode);
+            if (searchModeEnum != SearchMode.NONE) {
+                return checkSearchModeRelatedParams(searchModeEnum);
             }
 
-            return result;
+            return null;
+        }
+
+        public static SearchMode toEnum(String searchModeStr) {
+            if (searchModeStr == null) {
+                return SearchMode.NONE;
+            }
+
+            String transformed = searchModeStr
+                    .replace("-", "_")
+                    .toUpperCase();
+            return SearchMode.valueOf(transformed);
+        }
+
+        private ValidationError checkSearchModeRelatedParams(SearchMode searchMode) {
+            if (inIngs == null && inIngTags == null) {
+                return new ValidationError("", "Missing input ingredients (no tags, or ingredients)!");
+            } else if (searchMode == SearchMode.COMPOSED_OF_RATIO) {
+                return checkGoodIngsRatio();
+            }
+
+            return null;
+        }
+
+        private ValidationError checkGoodIngsRatio() {
+            if (goodIngsRatio < 0.0 || goodIngsRatio > 1.0) {
+                return new ValidationError("", "Invalid good ingredients ratio! Must be between 0.0 and 1.0!");
+            }
+
+            return null;
         }
     }
 

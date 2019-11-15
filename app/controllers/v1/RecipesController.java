@@ -77,7 +77,7 @@ public class RecipesController extends Controller {
     }
 
     private CompletionStage<Result> refineRequestBy(RecipesControllerQuery.SearchMode searchMode, Http.Request request) {
-        if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF) {
+        if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_NUMBER) {
             Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
                     .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesByGoodIngredientsNumber);
@@ -143,7 +143,7 @@ public class RecipesController extends Controller {
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
             T formValue = form.get();
-            logger.warn("pageOrBadRequest(): formValue = {}", formValue);
+            logger.info("pageOrBadRequest(): formValue = {}", formValue);
             return resultProducer.apply(formValue);
         }
     }
@@ -161,13 +161,8 @@ public class RecipesController extends Controller {
         if (form.hasErrors()) {
             return new Left<>(form.errorsAsJson());
         } else {
-            Integer searchModeValue = form.get().searchMode;
-            RecipesControllerQuery.SearchMode searchMode;
-            if (searchModeValue == null) {
-                searchMode = RecipesControllerQuery.SearchMode.NONE;
-            } else {
-                searchMode = RecipesControllerQuery.SearchMode.getByIntVal(searchModeValue);
-            }
+            String searchModeStr = form.get().searchMode;
+            RecipesControllerQuery.SearchMode searchMode = RecipesControllerQuery.Params.toEnum(searchModeStr);
 
             return new Right<>(searchMode);
         }
