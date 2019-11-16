@@ -8,7 +8,6 @@ import play.libs.Json;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.Collections;
 import java.util.Set;
 
 public class RecipeSearchCreateUpdateDtoValidator {
@@ -18,7 +17,7 @@ public class RecipeSearchCreateUpdateDtoValidator {
         this.validator = validator;
     }
 
-    public void validate(RecipeSearchCreateUpdateDto dto){
+    public void validate(RecipeSearchCreateUpdateDto dto) {
         validateQuery(dto.getQuery());
     }
 
@@ -35,20 +34,7 @@ public class RecipeSearchCreateUpdateDtoValidator {
     }
 
     private void validateQueryBasedOnSearchMode(RecipesControllerQuery.Params params) {
-        if (params.searchMode == null || params.searchMode == RecipesControllerQuery.SearchMode.NONE.id) {
-            return;
-        }
-
-        Set<ConstraintViolation<RecipesControllerQuery.Params>> violations = Collections.EMPTY_SET;
-
-        if (params.searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF.id) {
-            violations = validator.validate(params, RecipesControllerQuery.VGRecSearchModeComposedOf.class);
-        } else if (params.searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO.id) {
-            violations = validator.validate(params, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class);
-        } else {
-            throw new RuntimeException("Unknown searchmode!");
-        }
-
+        Set<ConstraintViolation<RecipesControllerQuery.Params>> violations = params.validateWith(validator);
         if (violations.size() > 0) {
             throw new BusinessLogicViolationException("Recipe search to create based on search mode is not valid!");
         }

@@ -159,7 +159,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
-        params.searchMode = RecipesControllerQuery.SearchMode.COMPOSED_OF.id;
+        params.searchMode = "composed-of-number";
         params.inIngs = new ArrayList<>();
         params.inIngs.add(1L);
         params.unknownIngs = 0;
@@ -191,7 +191,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
-        params.searchMode = RecipesControllerQuery.SearchMode.COMPOSED_OF.id;
+        params.searchMode = "composed-of-number";
         params.inIngs = new ArrayList<>();
         params.inIngs.add(1L);
 
@@ -218,7 +218,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
-        params.searchMode = 4284;
+        params.searchMode = "random-invalid-searchmode";
 
         JsonNode paramsJson = Json.toJson(params);
 
@@ -279,7 +279,7 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         RecipesControllerQuery.Params params = new RecipesControllerQuery.Params();
-        params.searchMode = 4842;
+        params.searchMode = "random-invalid-searchmode";
 
         JsonNode paramsJson = Json.toJson(params);
 

@@ -4,7 +4,11 @@ import lombok.ToString;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class RecipesControllerQuery {
     public enum SearchMode {
@@ -88,6 +92,31 @@ public class RecipesControllerQuery {
             return null;
         }
 
+        public Set<ConstraintViolation<Params>> validateWith(Validator validator) {
+            Set<ConstraintViolation<Params>> violations = validator.validate(this, VGRecSearchModeDefault.class);
+            if (violations.size() > 0) {
+                return violations;
+            }
+
+            if (searchMode == null) {
+                return Collections.emptySet();
+            }
+
+            RecipesControllerQuery.SearchMode searchModeEnum = RecipesControllerQuery.Params.toEnum(searchMode);
+
+            if (searchModeEnum == RecipesControllerQuery.SearchMode.NONE) {
+                return Collections.emptySet();
+            }
+
+            if (searchModeEnum == RecipesControllerQuery.SearchMode.COMPOSED_OF_NUMBER) {
+                return validator.validate(this, RecipesControllerQuery.VGRecSearchModeComposedOf.class);
+            } else if (searchModeEnum == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO) {
+                return validator.validate(this, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class);
+            } else {
+                throw new RuntimeException("Unknown searchmode!");
+            }
+        }
+
         public static SearchMode toEnum(String searchModeStr) {
             if (searchModeStr == null) {
                 return SearchMode.NONE;
@@ -124,5 +153,8 @@ public class RecipesControllerQuery {
 
     // Validation group for composed of search
     public interface VGRecSearchModeComposedOf {
+    }
+
+    public interface VGRecSearchModeDefault{
     }
 }
