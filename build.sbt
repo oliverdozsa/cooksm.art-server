@@ -22,3 +22,5 @@ javaOptions in Test ++= Seq("-Dconfig.file=conf/application.test.conf")
 
 enablePlugins(JacocoCoverallsPlugin)
 jacocoExcludes ++= Seq("controllers.v1.javascript*")
+jacocoExcludes ++= Seq("router.*")
+jacocoExcludes ++= Seq("models.entities.*")
