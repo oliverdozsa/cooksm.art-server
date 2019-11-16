@@ -6,4 +6,4 @@ This is a play framework (java) starter project for recipe search web applicatio
 DTO handling. JPA and database-rider are used for easy DB seeding during tests.
 
 ## API
-TBD
+Can be found [here](https://oliverdozsa.github.io/openrecipes-api/).
