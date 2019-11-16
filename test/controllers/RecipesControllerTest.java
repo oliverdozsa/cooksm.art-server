@@ -310,6 +310,21 @@ public class RecipesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testInvalidSearchMode() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testInvalidSearchMode");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "searchMode=invalid-search-mode&unknownIngs=0&unknownIngsRel=ge&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&inIngs[0]=5&inIngs[1]=6&sourcePages[0]=4";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals(BAD_REQUEST, result.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAll_WithExIngTagsOnly() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetAll_WithExIngTagsOnly");

@@ -74,8 +74,14 @@ class RecipesControllerQuery {
 
         @Override
         public ValidationError validate() {
-            SearchMode searchModeEnum = toEnum(searchMode);
-            if (searchModeEnum != SearchMode.NONE) {
+            SearchMode searchModeEnum = null;
+            try {
+                searchModeEnum = toEnum(searchMode);
+            } catch (IllegalArgumentException e) {
+                return new ValidationError("", "Invalid search mode!");
+            }
+
+            if (searchModeEnum != null && searchModeEnum != SearchMode.NONE) {
                 return checkSearchModeRelatedParams(searchModeEnum);
             }
 
