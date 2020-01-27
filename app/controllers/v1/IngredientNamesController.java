@@ -5,7 +5,9 @@ import dto.PageDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import models.entities.IngredientName;
 import models.repositories.IngredientNameRepository;
+import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -17,6 +19,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -50,14 +53,7 @@ public class IngredientNamesController extends Controller {
             logger.info("pageNames(): params = {}", params);
 
             return repository.page(params.nameLike, params.languageId, params.limit, params.offset)
-                    .thenApplyAsync(p -> {
-                        PageDto<IngredientNameDto> result = new PageDto<>(
-                                p.getItems().stream().map(DtoMapper::toDto).collect(Collectors.toList()),
-                                p.getTotalCount()
-                        );
-
-                        return ok(toJson(result));
-                    });
+                    .thenApplyAsync(this::toResult);
         }
     }
 
@@ -86,5 +82,14 @@ public class IngredientNamesController extends Controller {
         public ValidationError validate() {
             return null;
         }
+    }
+
+    private Result toResult(Page<IngredientName> page) {
+        List<IngredientNameDto> dtos = page.getItems()
+                .stream()
+                .map(DtoMapper::toDto)
+                .collect(Collectors.toList());
+
+        return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
     }
 }

@@ -6,7 +6,6 @@ import models.entities.IngredientTag;
 import models.entities.Recipe;
 import models.repositories.Page;
 import models.repositories.RecipeRepository;
-import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
@@ -34,13 +33,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
     @Override
     public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsNumber(WithGoodIngredientsNumberParams params) {
         return supplyAsync(() -> {
-            String sqlString = RecipeQuerySql.create(
-                    new RecipeQuerySql.Configuration(
-                            true,
-                            useExclude(params.getCommonParams()),
-                            RecipeQuerySql.QueryType.NUMBER)
-
-            );
+            String sqlString = createByGoodIngredientsSqlString(RecipeQuerySql.QueryType.NUMBER,
+                    params.getCommonParams());
 
             sqlString = replaceByGoodIngredientsNumberParameters(sqlString, params);
             Query<Recipe> query = prepare(sqlString, params.getCommonParams());
@@ -55,13 +49,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
     @Override
     public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(WithGoodIngredientsRatioParams params) {
         return supplyAsync(() -> {
-            String sqlString = RecipeQuerySql.create(
-                    new RecipeQuerySql.Configuration(
-                            true,
-                            useExclude(params.getCommonParams()),
-                            RecipeQuerySql.QueryType.RATIO)
-
-            );
+            String sqlString = createByGoodIngredientsSqlString(RecipeQuerySql.QueryType.RATIO,
+                    params.getCommonParams());
 
             sqlString = replaceByGoodIngredientsRatioParameters(sqlString, params);
             Query<Recipe> query = prepare(sqlString, params.getCommonParams());
@@ -237,14 +226,27 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     private void checkIncludedExcludedIngredientsMutuallyExclusive(
-            WithIncludedIngredientsParams params, CommonParams baseParams){
+            WithIncludedIngredientsParams params, CommonParams baseParams) {
         // Check, that excluded and included ingredients are mutually exclusive
         if (baseParams.getExcludedIngredients() != null && params.getIncludedIngredients() != null) {
-            for (Long id : baseParams.getExcludedIngredients()) {
-                if (params.getIncludedIngredients().contains(id)) {
-                    throw new IllegalArgumentException(("Included and excluded ingredients are not mutually exclusive!"));
-                }
+            checkMutuallyExclusive(params.getIncludedIngredients(), baseParams.getExcludedIngredients());
+        }
+    }
+
+    private static void checkMutuallyExclusive(List<Long> included, List<Long> excluded){
+        for (Long id : included) {
+            if (excluded.contains(id)) {
+                throw new IllegalArgumentException(("Included and excluded ingredients are not mutually exclusive!"));
             }
         }
+    }
+
+    private static String createByGoodIngredientsSqlString(RecipeQuerySql.QueryType queryType, CommonParams params) {
+        return RecipeQuerySql.create(
+                new RecipeQuerySql.Configuration(
+                        true,
+                        useExclude(params),
+                        queryType)
+        );
     }
 }
