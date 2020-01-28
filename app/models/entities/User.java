@@ -5,7 +5,7 @@ import java.time.Instant;
 
 @Entity
 @Table(
-        name = "user",
+        name = "users",
         uniqueConstraints = @UniqueConstraint(name = "emailConstraint", columnNames = "email")
 )
 public class User {

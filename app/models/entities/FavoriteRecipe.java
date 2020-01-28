@@ -15,7 +15,7 @@ public class FavoriteRecipe {
     private Recipe recipe;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "users_id")
     private User user;
 
     public Long getId() {

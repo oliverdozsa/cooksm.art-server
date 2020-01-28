@@ -14,7 +14,7 @@ public class RecipeSearch {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "users_id")
     private User user;
 
     @Column(name = "query")
