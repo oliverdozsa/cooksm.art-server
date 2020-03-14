@@ -1,10 +1,12 @@
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import models.repositories.*;
+import models.repositories.IngredientTagRepository;
 import models.repositories.imp.*;
 import security.JwtCenter;
 import security.SocialTokenVerifier;
 import security.imp.JwtCenterImp;
+import models.repositories.imp.EbeanIngredientTagRepository;
 import security.imp.SocialTokenVerifierFacebookImp;
 import security.imp.SocialTokenVerifierGoogleImp;
 
@@ -23,5 +25,6 @@ public class Module extends AbstractModule {
         bind(UserRepository.class).to(EbeanUserRepository.class).asEagerSingleton();
         bind(SocialTokenVerifier.class).annotatedWith(Names.named("Google")).to(SocialTokenVerifierGoogleImp.class).asEagerSingleton();
         bind(SocialTokenVerifier.class).annotatedWith(Names.named("Facebook")).to(SocialTokenVerifierFacebookImp.class).asEagerSingleton();
+        bind(IngredientTagRepository.class).to(EbeanIngredientTagRepository.class).asEagerSingleton();
     }
 }

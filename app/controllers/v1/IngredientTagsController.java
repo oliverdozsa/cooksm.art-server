@@ -1,12 +1,12 @@
 package controllers.v1;
 
-import dto.IngredientNameDto;
+import dto.IngredientTagDto;
 import dto.PageDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import models.entities.IngredientName;
-import models.repositories.IngredientNameRepository;
+import models.entities.IngredientTag;
+import models.repositories.IngredientTagRepository;
 import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static play.libs.Json.toJson;
 
-public class IngredientNamesController extends Controller {
+public class IngredientTagsController extends Controller {
     @Inject
-    private IngredientNameRepository repository;
+    private IngredientTagRepository repository;
 
     @Inject
     private FormFactory formFactory;
@@ -36,35 +36,32 @@ public class IngredientNamesController extends Controller {
     @Inject
     private HttpExecutionContext executionContext;
 
-    private static final Logger.ALogger logger = Logger.of(IngredientNamesController.class);
+    private static final Logger.ALogger logger = Logger.of(IngredientTagsController.class);
 
-    public CompletionStage<Result> pageNames(Http.Request request) {
-        Form<IngredientNameQueryParams> form =
-                formFactory.form(IngredientNameQueryParams.class).bindFromRequest(request);
+    public CompletionStage<Result> pageTags(Http.Request request) {
+        Form<IngredientTagQueryParams> form =
+                formFactory.form(IngredientTagQueryParams.class).bindFromRequest(request);
 
         if (form.hasErrors()) {
-            logger.warn("pageNames(): form has errors!");
+            logger.warn("pageTags(): form has errors!");
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
-            IngredientNameQueryParams params = form.get();
-            params.limit = params.limit == null ? 25 : params.limit;
-            params.offset = params.offset == null ? 0 : params.offset;
+            IngredientTagQueryParams queryParams = form.get();
+            queryParams.limit = queryParams.limit == null ? 25 : queryParams.limit;
+            queryParams.offset = queryParams.offset == null ? 0 : queryParams.offset;
 
-            logger.info("pageNames(): params = {}", params);
+            logger.info("pageTags(): queryParams = {}", queryParams);
 
-            return repository.page(params.nameLike, params.languageId, params.limit, params.offset)
+            return repository.page(queryParams.nameLike, queryParams.languageId, queryParams.limit, queryParams.offset)
                     .thenApplyAsync(this::toResult, executionContext.current());
         }
     }
 
-    /**
-     * Ingredient query parameters.
-     */
     @Constraints.Validate
     @Getter
     @Setter
     @ToString
-    public static class IngredientNameQueryParams implements Constraints.Validatable<ValidationError> {
+    public static class IngredientTagQueryParams implements Constraints.Validatable<ValidationError> {
         @Constraints.Required
         private Long languageId;
 
@@ -84,12 +81,10 @@ public class IngredientNamesController extends Controller {
         }
     }
 
-    private Result toResult(Page<IngredientName> page) {
-        List<IngredientNameDto> dtos = page.getItems()
-                .stream()
+    private Result toResult(Page<IngredientTag> page) {
+        List<IngredientTagDto> tags = page.getItems().stream()
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());
-
-        return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
+        return ok(toJson(new PageDto<>(tags, page.getTotalCount())));
     }
 }

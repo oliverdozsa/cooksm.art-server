@@ -56,4 +56,8 @@ class DtoMapper {
     public static RecipeSearchDto toDto(RecipeSearch entity) {
         return new RecipeSearchDto(entity.getId(), entity.getName(), entity.getQuery());
     }
+
+    public static IngredientTagDto toDto(IngredientTag entity) {
+        return new IngredientTagDto(entity.getId(), entity.getName());
+    }
 }
