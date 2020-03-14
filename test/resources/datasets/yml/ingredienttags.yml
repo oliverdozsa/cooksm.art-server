@@ -1,0 +1,79 @@
+ingredient:
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  - id: 6
+
+language:
+  - id: 1
+    iso_name: hu
+
+  - id: 2
+    iso_name: en
+
+ingredient_tag:
+  - id: 1
+    name: ingredient_1_tag_1
+    language_id: 1
+
+  - id: 2
+    name: ingredient_2_tag_1
+    language_id: 1
+
+  - id: 3
+    name: ingredient_2_tag_2
+    language_id: 1
+
+  - id: 4
+    name: ingredient_4_tag_1
+    language_id: 1
+
+  - id: 5
+    name: ingredient_4_5_tag_1
+    language_id: 1
+
+  - id: 6
+    name: ingredient_5_tag_2
+    language_id: 1
+
+  - id: 7
+    name: ingredient_5_tag_3
+    language_id: 1
+
+  - id: 8
+    name: ingredient_6_tag_1
+    language_id: 2
+
+  - id: 9
+    name: ingredient_6_tag_2
+    language_id: 2
+
+ingredient_tag_ingredient:
+  - ingredient_id: 1
+    ingredient_tag_id: 1
+
+  - ingredient_id: 2
+    ingredient_tag_id: 2
+
+  - ingredient_id: 2
+    ingredient_tag_id: 3
+
+  - ingredient_id: 4
+    ingredient_tag_id: 4
+
+  - ingredient_id: 4
+    ingredient_tag_id: 5
+
+  - ingredient_id: 5
+    ingredient_tag_id: 6
+
+  - ingredient_id: 5
+    ingredient_tag_id: 7
+
+  - ingredient_id: 6
+    ingredient_tag_id: 8
+
+  - ingredient_id: 6
+    ingredient_tag_id: 9

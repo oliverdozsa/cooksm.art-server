@@ -18,6 +18,10 @@ public class IngredientTag {
     @Column(name = "name")
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "language_id")
+    private Language language;
+
     @ManyToMany
     @JoinTable(name = "ingredient_tag_ingredient",
             joinColumns = {
@@ -50,5 +54,13 @@ public class IngredientTag {
 
     public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 }

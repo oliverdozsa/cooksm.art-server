@@ -1,9 +1,11 @@
 package controllers.v1;
 
 import dto.IngredientNameDto;
+import dto.IngredientTagDto;
 import dto.RecipeDto;
 import dto.SourcePageDto;
 import models.entities.IngredientName;
+import models.entities.IngredientTag;
 import models.entities.Recipe;
 import models.entities.SourcePage;
 
@@ -15,7 +17,7 @@ class DtoMapper {
         return new IngredientNameDto(entity.getIngredient().getId(), entity.getName());
     }
 
-    public static SourcePageDto toDto(SourcePage entity){
+    public static SourcePageDto toDto(SourcePage entity) {
         return new SourcePageDto(entity.getId(), entity.getName());
     }
 
@@ -40,5 +42,9 @@ class DtoMapper {
                 toDto(recipe.getSourcePage()),
                 ingredientNameDtos
         );
+    }
+
+    public static IngredientTagDto toDto(IngredientTag entity) {
+        return new IngredientTagDto(entity.getId(), entity.getName());
     }
 }
