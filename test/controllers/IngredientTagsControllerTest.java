@@ -11,8 +11,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static play.test.Helpers.*;
 
 public class IngredientTagsControllerTest {
@@ -87,5 +86,31 @@ public class IngredientTagsControllerTest {
 
         Result result = route(application.getApplication(), request);
         assertEquals("Invalid request's response status is not 400!", BAD_REQUEST, result.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
+    public void testIngredientsOfTags(){
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testIngredientsOfTags");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String queryParams = "languageId=1&nameLike=2_tag_2";
+        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
+                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+
+        Result result = route(application.getApplication(), request);
+
+        assertEquals("Status is not success", Http.Status.OK, result.status());
+
+        String jsonStr = contentAsString(result);
+        JsonNode jsonPage = Json.parse(jsonStr);
+
+        assertEquals(1, jsonPage.get("totalCount").asInt());
+
+        JsonNode jsonTag = jsonPage.get("items").get(0);
+
+        assertNotNull("Ingredients field is not present!", jsonTag.get("ingredients"));
+        assertEquals("Number of ingredients of tags is wrong!", 2, jsonTag.get("ingredients").size());
     }
 }

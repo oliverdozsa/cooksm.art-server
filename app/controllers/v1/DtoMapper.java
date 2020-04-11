@@ -58,6 +58,8 @@ class DtoMapper {
     }
 
     public static IngredientTagDto toDto(IngredientTag entity) {
-        return new IngredientTagDto(entity.getId(), entity.getName());
+        List<Long> ingredientsIds =
+                entity.getIngredients().stream().map(Ingredient::getId).collect(Collectors.toList());
+        return new IngredientTagDto(entity.getId(), entity.getName(), ingredientsIds);
     }
 }

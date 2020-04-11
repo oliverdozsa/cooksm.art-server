@@ -60,6 +60,9 @@ ingredient_tag_ingredient:
   - ingredient_id: 2
     ingredient_tag_id: 3
 
+  - ingredient_id: 1
+    ingredient_tag_id: 3
+
   - ingredient_id: 4
     ingredient_tag_id: 4
 
