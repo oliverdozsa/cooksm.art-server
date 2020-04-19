@@ -1,5 +1,5 @@
 {
   "deploy": {
-    "goal": "-Dconfig.file=conf/application.clevercloud.conf"
+    "goal": "-Dconfig.file=conf/application.clevercloud.conf -Dhttp.port=8080"
   }
 }
