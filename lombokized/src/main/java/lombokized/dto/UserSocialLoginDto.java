@@ -1,4 +1,4 @@
-package dto;
+package lombokized.dto;
 
 import lombok.ToString;
 import play.data.validation.Constraints;

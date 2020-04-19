@@ -1,9 +1,9 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
-import dto.UserCreateUpdateDto;
-import dto.UserInfoDto;
-import dto.UserSocialLoginDto;
+import lombokized.dto.UserCreateUpdateDto;
+import lombokized.dto.UserInfoDto;
+import lombokized.dto.UserSocialLoginDto;
 import models.repositories.UserRepository;
 import play.Logger;
 import play.data.Form;

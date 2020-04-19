@@ -2,7 +2,7 @@ package models.repositories.imp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.v1.RecipesControllerQuery;
-import dto.RecipeSearchCreateUpdateDto;
+import lombokized.dto.RecipeSearchCreateUpdateDto;
 import models.repositories.exceptions.BusinessLogicViolationException;
 import play.libs.Json;
 

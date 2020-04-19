@@ -1,6 +1,7 @@
 package models.repositories;
 
-import dto.RecipeSearchCreateUpdateDto;
+import lombokized.dto.RecipeSearchCreateUpdateDto;
+import lombokized.repositories.Page;
 import models.entities.RecipeSearch;
 
 import java.util.concurrent.CompletionStage;

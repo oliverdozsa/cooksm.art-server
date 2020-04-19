@@ -1,11 +1,12 @@
-package models.repositories;
+package lombokized.dto;
+
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class Page <T> {
+public class PageDto <T> {
     private final List<T> items;
     private final int totalCount;
 }

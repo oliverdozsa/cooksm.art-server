@@ -1,7 +1,7 @@
 package controllers.v1;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import dto.RecipeSearchCreateUpdateDto;
+import lombokized.dto.RecipeSearchCreateUpdateDto;
 import models.repositories.exceptions.BusinessLogicViolationException;
 import play.data.Form;
 import play.data.FormFactory;
@@ -10,7 +10,6 @@ import play.mvc.Http;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.Collections;
 import java.util.Set;
 
 /* Instances of this class are used only inside the appropriate controller in order to avoid

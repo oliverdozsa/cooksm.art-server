@@ -1,4 +1,4 @@
-package models.repositories;
+package lombokized.repositories;
 
 import lombok.Builder;
 import lombok.Getter;

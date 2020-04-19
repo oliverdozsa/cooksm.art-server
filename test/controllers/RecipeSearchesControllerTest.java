@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.RecipesControllerQuery;
 import controllers.v1.routes;
-import dto.RecipeSearchCreateUpdateDto;
+import lombokized.dto.RecipeSearchCreateUpdateDto;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;

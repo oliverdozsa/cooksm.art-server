@@ -1,12 +1,12 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
-import dto.FavoriteRecipeCreateDto;
-import dto.FavoriteRecipeDto;
-import dto.PageDto;
+import lombokized.dto.FavoriteRecipeCreateDto;
+import lombokized.dto.FavoriteRecipeDto;
+import lombokized.dto.PageDto;
+import lombokized.repositories.Page;
 import models.entities.FavoriteRecipe;
 import models.repositories.FavoriteRecipeRepository;
-import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;

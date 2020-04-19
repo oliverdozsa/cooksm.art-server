@@ -1,16 +1,15 @@
 package models.repositories.imp;
 
 import com.typesafe.config.Config;
-import dto.RecipeSearchCreateUpdateDto;
+import lombokized.dto.RecipeSearchCreateUpdateDto;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
+import lombokized.repositories.Page;
 import models.DatabaseExecutionContext;
 import models.entities.RecipeSearch;
 import models.entities.User;
-import models.repositories.Page;
 import models.repositories.RecipeSearchRepository;
 import models.repositories.exceptions.BusinessLogicViolationException;
-import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;

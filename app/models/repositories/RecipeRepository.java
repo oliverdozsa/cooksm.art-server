@@ -1,5 +1,7 @@
 package models.repositories;
 
+import lombokized.repositories.Page;
+import lombokized.repositories.RecipeRepositoryQuery;
 import models.entities.Recipe;
 
 import java.util.concurrent.CompletionStage;

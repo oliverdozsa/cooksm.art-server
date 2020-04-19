@@ -3,7 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
-import dto.FavoriteRecipeCreateDto;
+import lombokized.dto.FavoriteRecipeCreateDto;
 import io.ebean.Ebean;
 import models.entities.FavoriteRecipe;
 import models.entities.Recipe;

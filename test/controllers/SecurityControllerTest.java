@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
-import dto.UserSocialLoginDto;
+import lombokized.dto.UserSocialLoginDto;
 import io.ebean.Ebean;
 import models.entities.User;
 import org.junit.Rule;

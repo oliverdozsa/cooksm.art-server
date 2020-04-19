@@ -1,6 +1,6 @@
 package models.repositories.imp;
 
-import dto.UserCreateUpdateDto;
+import lombokized.dto.UserCreateUpdateDto;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import models.DatabaseExecutionContext;

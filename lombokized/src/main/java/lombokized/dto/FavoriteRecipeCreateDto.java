@@ -1,4 +1,4 @@
-package dto;
+package lombokized.dto;
 
 import lombok.Data;
 import lombok.ToString;

@@ -6,7 +6,7 @@ import io.ebean.Query;
 import models.DatabaseExecutionContext;
 import models.entities.IngredientTag;
 import models.repositories.IngredientTagRepository;
-import models.repositories.Page;
+import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;

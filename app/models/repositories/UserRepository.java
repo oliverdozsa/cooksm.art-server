@@ -1,6 +1,6 @@
 package models.repositories;
 
-import dto.UserCreateUpdateDto;
+import lombokized.dto.UserCreateUpdateDto;
 import models.entities.User;
 
 import java.util.concurrent.CompletionStage;

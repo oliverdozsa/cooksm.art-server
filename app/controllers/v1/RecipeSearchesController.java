@@ -1,9 +1,9 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
-import dto.PageDto;
-import dto.RecipeSearchCreateUpdateDto;
-import dto.RecipeSearchDto;
+import lombokized.dto.PageDto;
+import lombokized.dto.RecipeSearchCreateUpdateDto;
+import lombokized.dto.RecipeSearchDto;
 import models.repositories.RecipeSearchRepository;
 import play.Logger;
 import play.data.Form;

@@ -4,7 +4,7 @@ import io.ebean.*;
 import models.DatabaseExecutionContext;
 import models.entities.IngredientTag;
 import models.entities.Recipe;
-import models.repositories.Page;
+import lombokized.repositories.Page;
 import models.repositories.RecipeRepository;
 import play.db.ebean.EbeanConfig;
 
@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static models.repositories.RecipeRepositoryQuery.*;
+import static lombokized.repositories.RecipeRepositoryQuery.*;
 
 public class EbeanRecipeRepository implements RecipeRepository {
     private EbeanServer ebean;

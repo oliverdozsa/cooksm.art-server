@@ -1,6 +1,6 @@
 package controllers.v1;
 
-import dto.*;
+import lombokized.dto.*;
 import models.entities.*;
 
 import java.util.ArrayList;
