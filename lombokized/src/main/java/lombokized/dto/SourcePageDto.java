@@ -1,9 +1,9 @@
-package dto;
+package lombokized.dto;
 
 import lombok.Data;
 
 @Data
-public class IngredientTagDto {
+public class SourcePageDto {
     private final Long id;
     private final String name;
 }

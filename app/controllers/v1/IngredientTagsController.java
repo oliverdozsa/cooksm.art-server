@@ -1,18 +1,14 @@
 package controllers.v1;
 
-import dto.IngredientTagDto;
-import dto.PageDto;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombokized.dto.IngredientTagDto;
+import lombokized.dto.PageDto;
+import lombokized.queryparams.IngredientTagQueryParams;
+import lombokized.repositories.Page;
 import models.entities.IngredientTag;
 import models.repositories.IngredientTagRepository;
-import models.repositories.Page;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
-import play.data.validation.Constraints;
-import play.data.validation.ValidationError;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -47,37 +43,13 @@ public class IngredientTagsController extends Controller {
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
             IngredientTagQueryParams queryParams = form.get();
-            queryParams.limit = queryParams.limit == null ? 25 : queryParams.limit;
-            queryParams.offset = queryParams.offset == null ? 0 : queryParams.offset;
+            queryParams.setLimit(queryParams.getLimit() == null ? 25 : queryParams.getLimit());
+            queryParams.setOffset(queryParams.getOffset() == null ? 0 : queryParams.getOffset());
 
             logger.info("pageTags(): queryParams = {}", queryParams);
 
-            return repository.page(queryParams.nameLike, queryParams.languageId, queryParams.limit, queryParams.offset)
+            return repository.page(queryParams.getNameLike(), queryParams.getLanguageId(), queryParams.getLimit(), queryParams.getOffset())
                     .thenApplyAsync(this::toResult, executionContext.current());
-        }
-    }
-
-    @Constraints.Validate
-    @Getter
-    @Setter
-    @ToString
-    public static class IngredientTagQueryParams implements Constraints.Validatable<ValidationError> {
-        @Constraints.Required
-        private Long languageId;
-
-        @Constraints.MinLength(2)
-        private String nameLike;
-
-        @Constraints.Min(0)
-        private Integer offset;
-
-        @Constraints.Min(1)
-        @Constraints.Max(50)
-        private Integer limit = 25;
-
-        @Override
-        public ValidationError validate() {
-            return null;
         }
     }
 

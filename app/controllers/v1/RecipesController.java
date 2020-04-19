@@ -2,10 +2,10 @@ package controllers.v1;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
-import dto.PageDto;
-import dto.RecipeDto;
+import lombokized.dto.PageDto;
+import lombokized.dto.RecipeDto;
 import models.entities.Recipe;
-import models.repositories.Page;
+import lombokized.repositories.Page;
 import models.repositories.RecipeRepository;
 import play.Logger;
 import play.data.Form;

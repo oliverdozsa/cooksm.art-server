@@ -5,7 +5,7 @@ import io.ebean.EbeanServer;
 import io.ebean.Query;
 import models.DatabaseExecutionContext;
 import models.entities.SourcePage;
-import models.repositories.Page;
+import lombokized.repositories.Page;
 import models.repositories.SourcePageRepository;
 import play.db.ebean.EbeanConfig;
 

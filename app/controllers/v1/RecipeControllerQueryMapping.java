@@ -1,6 +1,6 @@
 package controllers.v1;
 
-import models.repositories.RecipeRepositoryQuery;
+import lombokized.repositories.RecipeRepositoryQuery;
 
 // Maps controller query to repository queries
 class RecipeControllerQueryMapping {

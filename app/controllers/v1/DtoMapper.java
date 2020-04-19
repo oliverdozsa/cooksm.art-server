@@ -1,9 +1,6 @@
 package controllers.v1;
 
-import dto.IngredientNameDto;
-import dto.IngredientTagDto;
-import dto.RecipeDto;
-import dto.SourcePageDto;
+import lombokized.dto.*;
 import models.entities.IngredientName;
 import models.entities.IngredientTag;
 import models.entities.Recipe;

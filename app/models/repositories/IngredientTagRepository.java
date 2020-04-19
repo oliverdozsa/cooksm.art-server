@@ -1,5 +1,6 @@
 package models.repositories;
 
+import lombokized.repositories.Page;
 import models.entities.IngredientTag;
 
 import java.util.concurrent.CompletionStage;

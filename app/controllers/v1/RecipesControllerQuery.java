@@ -1,6 +1,5 @@
 package controllers.v1;
 
-import lombok.ToString;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -14,7 +13,6 @@ class RecipesControllerQuery {
     }
 
     @Constraints.Validate
-    @ToString
     public static class Params implements Constraints.Validatable<ValidationError> {
         @Constraints.Pattern("(composed-of-number|composed-of-ratio)")
         public String searchMode;
@@ -97,6 +95,31 @@ class RecipesControllerQuery {
                     .replace("-", "_")
                     .toUpperCase();
             return SearchMode.valueOf(transformed);
+        }
+
+        @Override
+        public String toString() {
+            return "Params{" +
+                    "searchMode='" + searchMode + '\'' +
+                    ", minIngs=" + minIngs +
+                    ", maxIngs=" + maxIngs +
+                    ", orderBy='" + orderBy + '\'' +
+                    ", orderBySort='" + orderBySort + '\'' +
+                    ", unknownIngs=" + unknownIngs +
+                    ", unknownIngsRel='" + unknownIngsRel + '\'' +
+                    ", goodIngs=" + goodIngs +
+                    ", goodIngsRel='" + goodIngsRel + '\'' +
+                    ", offset=" + offset +
+                    ", limit=" + limit +
+                    ", goodIngsRatio=" + goodIngsRatio +
+                    ", nameLike='" + nameLike + '\'' +
+                    ", exIngs=" + exIngs +
+                    ", exIngTags=" + exIngTags +
+                    ", inIngs=" + inIngs +
+                    ", inIngTags=" + inIngTags +
+                    ", sourcePages=" + sourcePages +
+                    ", languageId=" + languageId +
+                    '}';
         }
 
         private ValidationError checkSearchModeRelatedParams(SearchMode searchMode) {
