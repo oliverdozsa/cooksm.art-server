@@ -12,3 +12,4 @@ database/*
 *create-all.sql
 *drop-all.sql
 conf/evolutions/test
+.clever.json
