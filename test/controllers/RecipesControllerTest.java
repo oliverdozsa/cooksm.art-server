@@ -125,8 +125,9 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
         assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 5L, resultJson.get(1).get("id").asLong());
     }
 
     @Test
@@ -145,7 +146,7 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
         assertEquals("Unexpected recipe!", 3L, resultJson.get(0).get("id").asLong());
     }
 
@@ -165,8 +166,9 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals(1, resultJson.size());
+        assertEquals(2, resultJson.size());
         assertEquals("Unexpected recipe!", 3L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 5L, resultJson.get(1).get("id").asLong());
     }
 
     @Test
@@ -206,7 +208,7 @@ public class RecipesControllerTest {
         resultJson = resultJson.get("items");
 
         assertEquals("Result of request is wrong!", OK, result.status());
-        assertEquals("Number of items is wrong!", 3, resultJson.size());
+        assertEquals("Number of items is wrong!", 4, resultJson.size());
     }
 
     @Test
@@ -338,7 +340,7 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Number of items is wrong!", 3, resultJson.size());
     }
 
     @Test
@@ -490,5 +492,64 @@ public class RecipesControllerTest {
 
         assertEquals("Number of items is wrong!", 1, resultJson.size());
         assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testComposedOfNumber_WithAdditionals() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testComposedOfNumber_WithAdditionals");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "?searchMode=composed-of-number&limit=50&unknownIngs=0&unknownIngsRel=ge&goodIngs=1&goodIngsRel=eq&goodAdditionalIngs=1&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=4&addIngs[0]=9&addIngs[1]=5";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 3L, resultJson.get(1).get("id").asLong());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testComposedOfNumber_WithAdditionals_WithTags() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testComposedOfNumber_WithAdditionals_WithTags");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+
+        String reqParams = "?searchMode=composed-of-number&limit=50&unknownIngs=0&unknownIngsRel=ge&goodIngs=1&goodIngsRel=eq&goodAdditionalIngs=1&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=4&addIngTags[0]=7";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 3L, resultJson.get(1).get("id").asLong());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testComposedOfNumber_WithAdditionals_MissingParams() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testComposedOfNumber_WithAdditionals_MissingParams");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+
+        String reqParams = "?searchMode=composed-of-number&limit=50&unknownIngs=0&unknownIngsRel=ge&goodIngs=1&goodIngsRel=eq&goodAdditionalIngs=1&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=4";
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals("Unexpected status!", BAD_REQUEST, result.status());
     }
 }

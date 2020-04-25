@@ -83,15 +83,17 @@ public class RecipeRepositoryQuery {
         private Relation unknownIngredientsRelation;
         private CommonParams commonParams;
         private WithIncludedIngredientsParams recipesWithIncludedIngredientsParams;
+        private WithAdditionalIngredientsParams additionalIngredientsParams;
 
         @Builder
-        public WithGoodIngredientsNumberParams(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, CommonParams commonParams, WithIncludedIngredientsParams recipesWithIncludedIngredientsParams) {
+        public WithGoodIngredientsNumberParams(Integer goodIngredients, Relation goodIngredientsRelation, Integer unknownIngredients, Relation unknownIngredientsRelation, CommonParams commonParams, WithIncludedIngredientsParams recipesWithIncludedIngredientsParams, WithAdditionalIngredientsParams additionalIngredientsParams) {
             this.goodIngredients = goodIngredients;
             this.goodIngredientsRelation = goodIngredientsRelation;
             this.unknownIngredients = unknownIngredients;
             this.unknownIngredientsRelation = unknownIngredientsRelation;
             this.commonParams = commonParams;
             this.recipesWithIncludedIngredientsParams = recipesWithIncludedIngredientsParams;
+            this.additionalIngredientsParams = additionalIngredientsParams;
         }
     }
 
@@ -107,6 +109,21 @@ public class RecipeRepositoryQuery {
             this.goodIngredientsRatio = goodIngredientsRatio;
             this.commonParams = commonParams;
             this.recipesWithIncludedIngredientsParams = recipesWithIncludedIngredientsParams;
+        }
+    }
+
+    @Getter
+    @ToString
+    public static class WithAdditionalIngredientsParams {
+        private Integer goodAdditionalIngredients;
+        private List<Long> additionalIngredients;
+        private List<Long> additionalIngredientTags;
+
+        @Builder
+        public WithAdditionalIngredientsParams(Integer goodAdditionalIngredients, List<Long> additionalIngredients, List<Long> additionaIngredientTags) {
+            this.goodAdditionalIngredients = goodAdditionalIngredients;
+            this.additionalIngredients = additionalIngredients == null ? new ArrayList<>() : additionalIngredients;
+            this.additionalIngredientTags = additionaIngredientTags;
         }
     }
 }

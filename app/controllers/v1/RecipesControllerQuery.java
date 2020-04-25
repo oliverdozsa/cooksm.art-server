@@ -41,6 +41,9 @@ class RecipesControllerQuery {
         @Constraints.Min(0)
         public Integer goodIngs;
 
+        @Constraints.Min(0)
+        public Integer goodAdditionalIngs;
+
         @Constraints.Pattern("(eq|gt|lt|ge|le)")
         @Constraints.Required(groups = {VGRecSearchModeComposedOf.class})
         public String goodIngsRel;
@@ -65,6 +68,10 @@ class RecipesControllerQuery {
         public List<Long> inIngs;
 
         public List<Long> inIngTags;
+
+        public List<Long> addIngs;
+
+        public List<Long> addIngTags;
 
         public List<Long> sourcePages;
 
@@ -117,6 +124,8 @@ class RecipesControllerQuery {
                     ", exIngTags=" + exIngTags +
                     ", inIngs=" + inIngs +
                     ", inIngTags=" + inIngTags +
+                    ", addIngs=" + addIngs +
+                    ", addIngTags=" + addIngTags +
                     ", sourcePages=" + sourcePages +
                     ", languageId=" + languageId +
                     '}';
@@ -127,6 +136,8 @@ class RecipesControllerQuery {
                 return new ValidationError("", "Missing input ingredients (no tags, or ingredients)!");
             } else if (searchMode == SearchMode.COMPOSED_OF_RATIO) {
                 return checkGoodIngsRatio();
+            } else if (searchMode == SearchMode.COMPOSED_OF_NUMBER) {
+                return checkAdditionaIngs();
             }
 
             return null;
@@ -135,6 +146,22 @@ class RecipesControllerQuery {
         private ValidationError checkGoodIngsRatio() {
             if (goodIngsRatio < 0.0 || goodIngsRatio > 1.0) {
                 return new ValidationError("", "Invalid good ingredients ratio! Must be between 0.0 and 1.0!");
+            }
+
+            return null;
+        }
+
+        private ValidationError checkAdditionaIngs() {
+            if (goodAdditionalIngs == null) {
+                return null;
+            }
+
+            if (goodAdditionalIngs <= 0) {
+                return new ValidationError("", "Invalid good additional ingredients number!");
+            }
+
+            if (addIngTags == null && addIngs == null) {
+                return new ValidationError("", "Missing input additional ingredients (no tags, or ingredients)!");
             }
 
             return null;

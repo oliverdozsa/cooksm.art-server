@@ -14,12 +14,16 @@ class RecipeControllerQueryMapping {
         RecipeRepositoryQuery.WithGoodIngredientsNumberParams.WithGoodIngredientsNumberParamsBuilder withGoodIngredientsNumberParamsBuilder =
                 RecipeRepositoryQuery.WithGoodIngredientsNumberParams.builder();
 
+        RecipeRepositoryQuery.WithAdditionalIngredientsParams.WithAdditionalIngredientsParamsBuilder withAdditionalIngredientsParamsBuilder =
+                toWithAdditionalIngredientsBuilder(params);
+
         withGoodIngredientsNumberParamsBuilder.commonParams(commonBuilder.build());
         withGoodIngredientsNumberParamsBuilder.recipesWithIncludedIngredientsParams(withIncludedIngredientsBuilder.build());
         withGoodIngredientsNumberParamsBuilder.goodIngredients(params.goodIngs);
         withGoodIngredientsNumberParamsBuilder.goodIngredientsRelation(RecipeRepositoryQuery.Relation.fromString(params.goodIngsRel));
         withGoodIngredientsNumberParamsBuilder.unknownIngredients(params.unknownIngs);
         withGoodIngredientsNumberParamsBuilder.unknownIngredientsRelation(RecipeRepositoryQuery.Relation.fromString(params.unknownIngsRel));
+        withGoodIngredientsNumberParamsBuilder.additionalIngredientsParams(withAdditionalIngredientsParamsBuilder.build());
 
         return withGoodIngredientsNumberParamsBuilder.build();
     }
@@ -80,6 +84,20 @@ class RecipeControllerQueryMapping {
 
         if (params.inIngTags != null && params.inIngTags.size() > 0) {
             builder.includedIngredientTags(params.inIngTags);
+        }
+
+        return builder;
+    }
+
+    private static RecipeRepositoryQuery.WithAdditionalIngredientsParams.WithAdditionalIngredientsParamsBuilder
+    toWithAdditionalIngredientsBuilder(RecipesControllerQuery.Params params){
+        RecipeRepositoryQuery.WithAdditionalIngredientsParams.WithAdditionalIngredientsParamsBuilder
+                builder = RecipeRepositoryQuery.WithAdditionalIngredientsParams.builder();
+
+        if(params.goodAdditionalIngs != null) {
+            builder.goodAdditionalIngredients(params.goodAdditionalIngs);
+            builder.additionalIngredients(params.addIngs);
+            builder.additionaIngredientTags(params.addIngTags);
         }
 
         return builder;
