@@ -1,14 +1,14 @@
 package models.repositories;
 
 import lombokized.repositories.Page;
-import lombokized.repositories.RecipeRepositoryQuery;
+import lombokized.repositories.RecipeRepositoryParams.*;
 import models.entities.Recipe;
 
 import java.util.concurrent.CompletionStage;
 
 public interface RecipeRepository {
-    CompletionStage<Page<Recipe>> pageOfByGoodIngredientsNumber(RecipeRepositoryQuery.WithGoodIngredientsNumberParams params);
-    CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(RecipeRepositoryQuery.WithGoodIngredientsRatioParams params);
-    CompletionStage<Page<Recipe>> pageOfAll(RecipeRepositoryQuery.CommonParams params);
+    CompletionStage<Page<Recipe>> pageOfQueryTypeNumber(QueryTypeNumber params);
+    CompletionStage<Page<Recipe>> pageOfQueryTypeRatio(QueryTypeRatio params);
+    CompletionStage<Page<Recipe>> pageOfQueryTypeNone(Common params);
     CompletionStage<Recipe> single(Long id);
 }
