@@ -26,9 +26,10 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static controllers.v1.RecipeControllerQueryMapping.*;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static play.libs.Json.toJson;
+import static controllers.v1.RecipeControllerQueryMapping.*;
+
 
 public class RecipesController extends Controller {
     @Inject
@@ -80,15 +81,15 @@ public class RecipesController extends Controller {
         if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_NUMBER) {
             Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
                     .bindFromRequest(request);
-            return pageOrBadRequest(form, this::getRecipesByGoodIngredientsNumber);
+            return pageOrBadRequest(form, this::getRecipesForQueryTypeNumber);
         } else if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO) {
             Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class)
                     .bindFromRequest(request);
-            return pageOrBadRequest(form, this::getRecipesByGoodIngredientsRatio);
+            return pageOrBadRequest(form, this::getRecipesForQueryTypeRatio);
         } else if (searchMode == RecipesControllerQuery.SearchMode.NONE) {
             Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class)
                     .bindFromRequest(request);
-            return pageOrBadRequest(form, this::getRecipesAll);
+            return pageOrBadRequest(form, this::getRecipesForQueryTypeNone);
         } else {
             logger.warn("refineRequestBy(): unknown search mode! searchMode = {}", searchMode);
             ValidationError ve = new ValidationError("", "Unkown search mode!");
@@ -98,20 +99,20 @@ public class RecipesController extends Controller {
 
     }
 
-    private CompletionStage<Result> getRecipesByGoodIngredientsNumber(RecipesControllerQuery.Params params) {
-        return repository.pageOfByGoodIngredientsNumber(toGoodIngredientsNumberParams(params))
+    private CompletionStage<Result> getRecipesForQueryTypeNumber(RecipesControllerQuery.Params params) {
+        return repository.pageOfQueryTypeNumber(toQueryTypeNumber(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
-    private CompletionStage<Result> getRecipesByGoodIngredientsRatio(RecipesControllerQuery.Params params) {
-        return repository.pageOfByGoodIngredientsRatio(toGoodIngredientsRatioParams(params))
+    private CompletionStage<Result> getRecipesForQueryTypeRatio(RecipesControllerQuery.Params params) {
+        return repository.pageOfQueryTypeRatio(toQueryTypeRatio(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
-    private CompletionStage<Result> getRecipesAll(RecipesControllerQuery.Params params) {
-        return repository.pageOfAll(toCommonParams(params))
+    private CompletionStage<Result> getRecipesForQueryTypeNone(RecipesControllerQuery.Params params) {
+        return repository.pageOfQueryTypeNone(toCommon(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
@@ -127,7 +128,7 @@ public class RecipesController extends Controller {
     }
 
     private Result toResult(Recipe recipe, Long languageId) {
-        if(recipe == null) {
+        if (recipe == null) {
             return notFound();
 
         } else {
@@ -168,15 +169,15 @@ public class RecipesController extends Controller {
         }
     }
 
-    private Long getLanguageIdOrDefault(Long id){
-        if(id == null){
+    private Long getLanguageIdOrDefault(Long id) {
+        if (id == null) {
             return getDefaultLanguageId();
         }
 
-        if(id == 0L){
+        if (id == 0L) {
             return getDefaultLanguageId();
         }
 
-        return  id;
+        return id;
     }
 }

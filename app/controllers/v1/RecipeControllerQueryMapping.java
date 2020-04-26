@@ -1,87 +1,87 @@
 package controllers.v1;
 
-import lombokized.repositories.RecipeRepositoryQuery;
+import static lombokized.repositories.RecipeRepositoryParams.QueryTypeNumber;
+import static lombokized.repositories.RecipeRepositoryParams.QueryTypeRatio;
+import static lombokized.repositories.RecipeRepositoryParams.Common;
+import static lombokized.repositories.RecipeRepositoryParams.IncludedIngredients;
+import static lombokized.repositories.RecipeRepositoryParams.AdditionalIngredients;
+import static lombokized.repositories.RecipeRepositoryParams.Relation;
 
-// Maps controller query to repository queries
-class RecipeControllerQueryMapping {
-    static RecipeRepositoryQuery.WithGoodIngredientsNumberParams toGoodIngredientsNumberParams(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQuery.CommonParams.CommonParamsBuilder commonBuilder =
-                toCommonBuilder(params);
+public class RecipeControllerQueryMapping {
+    public static QueryTypeNumber toQueryTypeNumber(RecipesControllerQuery.Params queryParams) {
+        QueryTypeNumber.Builder builder = QueryTypeNumber.builder();
 
-        RecipeRepositoryQuery.WithIncludedIngredientsParams.WithIncludedIngredientsParamsBuilder
-                withIncludedIngredientsBuilder = toWithIncludedIngredientsBuilder(params);
+        builder.common(toCommon(queryParams));
+        builder.includedIngredients(toIncludedIngredients(queryParams));
+        builder.goodIngredients(queryParams.goodIngs);
+        builder.goodIngredientsRelation(Relation.fromString(queryParams.goodIngsRel));
+        builder.unknownIngredients(queryParams.unknownIngs);
+        builder.unknownIngredientsRelation(Relation.fromString(queryParams.unknownIngsRel));
+        builder.additionalIngredients(toAdditionalIngredients(queryParams));
 
-        RecipeRepositoryQuery.WithGoodIngredientsNumberParams.WithGoodIngredientsNumberParamsBuilder withGoodIngredientsNumberParamsBuilder =
-                RecipeRepositoryQuery.WithGoodIngredientsNumberParams.builder();
-
-        withGoodIngredientsNumberParamsBuilder.commonParams(commonBuilder.build());
-        withGoodIngredientsNumberParamsBuilder.recipesWithIncludedIngredientsParams(withIncludedIngredientsBuilder.build());
-        withGoodIngredientsNumberParamsBuilder.goodIngredients(params.goodIngs);
-        withGoodIngredientsNumberParamsBuilder.goodIngredientsRelation(RecipeRepositoryQuery.Relation.fromString(params.goodIngsRel));
-        withGoodIngredientsNumberParamsBuilder.unknownIngredients(params.unknownIngs);
-        withGoodIngredientsNumberParamsBuilder.unknownIngredientsRelation(RecipeRepositoryQuery.Relation.fromString(params.unknownIngsRel));
-
-        return withGoodIngredientsNumberParamsBuilder.build();
+        return builder.build();
     }
 
-    static RecipeRepositoryQuery.WithGoodIngredientsRatioParams toGoodIngredientsRatioParams(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQuery.CommonParams.CommonParamsBuilder commonParamsBuilder =
-                toCommonBuilder(params);
+    public static QueryTypeRatio toQueryTypeRatio(RecipesControllerQuery.Params queryParams) {
+        QueryTypeRatio.Builder builder = QueryTypeRatio.builder();
 
-        RecipeRepositoryQuery.WithIncludedIngredientsParams.WithIncludedIngredientsParamsBuilder
-                withIncludedIngredientsBuilder = toWithIncludedIngredientsBuilder(params);
+        builder.common(toCommon(queryParams));
+        builder.goodIngredientsRatio(queryParams.goodIngsRatio);
+        builder.includedIngredients(toIncludedIngredients(queryParams));
 
-        RecipeRepositoryQuery.WithGoodIngredientsRatioParams.WithGoodIngredientsRatioParamsBuilder withGoodIngredientsRatioParamsBuilder =
-                RecipeRepositoryQuery.WithGoodIngredientsRatioParams.builder();
-
-        withGoodIngredientsRatioParamsBuilder.commonParams(commonParamsBuilder.build());
-        withGoodIngredientsRatioParamsBuilder.goodIngredientsRatio(params.goodIngsRatio);
-        withGoodIngredientsRatioParamsBuilder.recipesWithIncludedIngredientsParams(withIncludedIngredientsBuilder.build());
-
-        return withGoodIngredientsRatioParamsBuilder.build();
+        return builder.build();
     }
 
-    static RecipeRepositoryQuery.CommonParams toCommonParams(RecipesControllerQuery.Params params){
-        return toCommonBuilder(params).build();
+    public static Common toCommon(RecipesControllerQuery.Params queryParams) {
+        Common.Builder builder = Common.builder();
+
+        if (queryParams.exIngs != null && queryParams.exIngs.size() > 0) {
+            builder.excludedIngredients(queryParams.exIngs);
+        }
+
+        if (queryParams.exIngTags != null && queryParams.exIngTags.size() > 0) {
+            builder.excludedIngredientTags(queryParams.exIngTags);
+        }
+
+        builder.limit(queryParams.limit);
+        builder.offset(queryParams.offset);
+        builder.maximumNumberOfIngredients(queryParams.maxIngs);
+        builder.minimumNumberOfIngredients(queryParams.minIngs);
+        builder.nameLike(queryParams.nameLike);
+        builder.orderBy(queryParams.orderBy);
+        builder.orderBySort(queryParams.orderBySort);
+        builder.sourcePageIds(queryParams.sourcePages);
+
+        return builder.build();
     }
 
-    // Converts controller query params to repository query params builder.
-    private static RecipeRepositoryQuery.CommonParams.CommonParamsBuilder toCommonBuilder(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQuery.CommonParams.CommonParamsBuilder builder = RecipeRepositoryQuery.CommonParams.builder();
+    private static IncludedIngredients toIncludedIngredients(RecipesControllerQuery.Params queryParams) {
+        IncludedIngredients.Builder builder = IncludedIngredients.builder();
 
-        if (params.exIngs != null && params.exIngs.size() > 0) {
-            builder.excludedIngredients(params.exIngs);
+        if (queryParams.inIngs != null && queryParams.inIngs.size() > 0) {
+            builder.includedIngredients(queryParams.inIngs);
         }
 
-        if (params.exIngTags != null && params.exIngTags.size() > 0) {
-            builder.excludedIngredientTags(params.exIngTags);
+        if (queryParams.inIngTags != null && queryParams.inIngTags.size() > 0) {
+            builder.includedIngredientTags(queryParams.inIngTags);
         }
 
-        builder.limit(params.limit);
-        builder.offset(params.offset);
-        builder.maximumNumberOfIngredients(params.maxIngs);
-        builder.minimumNumberOfIngredients(params.minIngs);
-        builder.nameLike(params.nameLike);
-        builder.orderBy(params.orderBy);
-        builder.orderBySort(params.orderBySort);
-        builder.sourcePageIds(params.sourcePages);
-
-        return builder;
+        return builder.build();
     }
 
-    private static RecipeRepositoryQuery.WithIncludedIngredientsParams.WithIncludedIngredientsParamsBuilder
-    toWithIncludedIngredientsBuilder(RecipesControllerQuery.Params params) {
-        RecipeRepositoryQuery.WithIncludedIngredientsParams.WithIncludedIngredientsParamsBuilder
-                builder = RecipeRepositoryQuery.WithIncludedIngredientsParams.builder();
-
-        if (params.inIngs != null && params.inIngs.size() > 0) {
-            builder.includedIngredients(params.inIngs);
+    private static AdditionalIngredients toAdditionalIngredients(RecipesControllerQuery.Params queryParams) {
+        if (queryParams.goodAdditionalIngs == null) {
+            return null;
         }
 
-        if (params.inIngTags != null && params.inIngTags.size() > 0) {
-            builder.includedIngredientTags(params.inIngTags);
-        }
+        AdditionalIngredients.Builder builder = AdditionalIngredients.builder();
 
-        return builder;
+        builder.goodAdditionalIngredients(queryParams.goodAdditionalIngs);
+        if (queryParams.addIngs != null) {
+            builder.additionalIngredients(queryParams.addIngs);
+        }
+        builder.additionalIngredientTags(queryParams.addIngTags);
+
+        return builder.build();
     }
 }

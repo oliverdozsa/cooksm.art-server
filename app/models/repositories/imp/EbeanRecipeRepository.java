@@ -9,14 +9,11 @@ import models.repositories.RecipeRepository;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static lombokized.repositories.RecipeRepositoryQuery.*;
+import static lombokized.repositories.RecipeRepositoryParams.*;
 
 public class EbeanRecipeRepository implements RecipeRepository {
     private EbeanServer ebean;
@@ -31,32 +28,33 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsNumber(WithGoodIngredientsNumberParams params) {
+    public CompletionStage<Page<Recipe>> pageOfQueryTypeNumber(QueryTypeNumber params) {
         return supplyAsync(() -> {
-            String sqlString = createByGoodIngredientsSqlString(RecipeQuerySql.QueryType.NUMBER,
-                    params.getCommonParams());
+            RecipeQuerySql.Configuration configuration = createConfig(params);
+            String sqlString = RecipeQuerySql.create(configuration);
 
-            sqlString = replaceByGoodIngredientsNumberParameters(sqlString, params);
-            Query<Recipe> query = prepare(sqlString, params.getCommonParams());
-            setIncludedIngredientsConditions(query, params.getRecipesWithIncludedIngredientsParams());
-            checkIncludedExcludedIngredientsMutuallyExclusive(
-                    params.getRecipesWithIncludedIngredientsParams(), params.getCommonParams());
+            sqlString = replaceByQueryTypeNumberParameters(sqlString, params);
+            Query<Recipe> query = prepare(sqlString, params.getCommon());
+            setIncludedIngredientsConditions(query, params.getIncludedIngredients());
+            setAdditionalIngredientsConditions(query, params.getAdditionalIngredients());
+            checkMutuallyExclusive(params.getIncludedIngredients(), params.getCommon().getExcludedIngredients());
+            checkMutuallyExclusive(params.getAdditionalIngredients(), params.getCommon().getExcludedIngredients());
+            checkMutuallyExclusive(params.getAdditionalIngredients(), params.getIncludedIngredients());
 
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfByGoodIngredientsRatio(WithGoodIngredientsRatioParams params) {
+    public CompletionStage<Page<Recipe>> pageOfQueryTypeRatio(QueryTypeRatio params) {
         return supplyAsync(() -> {
-            String sqlString = createByGoodIngredientsSqlString(RecipeQuerySql.QueryType.RATIO,
-                    params.getCommonParams());
+            RecipeQuerySql.Configuration configuration = createConfig(params);
+            String sqlString = RecipeQuerySql.create(configuration);
 
-            sqlString = replaceByGoodIngredientsRatioParameters(sqlString, params);
-            Query<Recipe> query = prepare(sqlString, params.getCommonParams());
-            setIncludedIngredientsConditions(query, params.getRecipesWithIncludedIngredientsParams());
-            checkIncludedExcludedIngredientsMutuallyExclusive(
-                    params.getRecipesWithIncludedIngredientsParams(), params.getCommonParams());
+            sqlString = replaceQueryTypeRatioParams(sqlString, params);
+            Query<Recipe> query = prepare(sqlString, params.getCommon());
+            setIncludedIngredientsConditions(query, params.getIncludedIngredients());
+            checkMutuallyExclusive(params.getIncludedIngredients(), params.getCommon().getExcludedIngredients());
 
             return new Page<>(query.findList(), query.findCount());
 
@@ -64,12 +62,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfAll(CommonParams params) {
+    public CompletionStage<Page<Recipe>> pageOfQueryTypeNone(Common params) {
         return supplyAsync(() -> {
             RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
                     true,
                     useExclude(params),
-                    RecipeQuerySql.QueryType.ALL,
+                    RecipeQuerySql.QueryType.NONE,
                     false);
 
             String sqlString = RecipeQuerySql.create(config);
@@ -85,6 +83,29 @@ public class EbeanRecipeRepository implements RecipeRepository {
         return supplyAsync(() -> ebean.find(Recipe.class, id), executionContext);
     }
 
+    private String replaceByQueryTypeNumberParameters(String sql, QueryTypeNumber params) {
+        // All parameters used are Integers, or Enums therefore it's safe to replace them.
+        String replaced = sql;
+        replaced = replaced.replace(":goodIngredientsRelation", params.getGoodIngredientsRelation().getStringRep());
+        replaced = replaced.replace(":goodIngredients", params.getGoodIngredients().toString());
+        replaced = replaced.replace(":unknownIngredientsRelation", params.getUnknownIngredientsRelation().getStringRep());
+        replaced = replaced.replace(":unknownIngredients", params.getUnknownIngredients().toString());
+        if (params.getAdditionalIngredients().isPresent()) {
+            Integer goodAdditionalIngredients = params.getAdditionalIngredients().get().getGoodAdditionalIngredients();
+            replaced = replaced.replace(":goodAdditionalIngredientIds", goodAdditionalIngredients.toString());
+        }
+
+        return replaced;
+    }
+
+    private Query<Recipe> prepare(String sql, Common params) {
+        RawSql rawSql = setColumnMappings(RawSqlBuilder.parse(sql)).create();
+        Query<Recipe> query = ebean.createQuery(Recipe.class).setRawSql(rawSql);
+        setCommonConditions(query, params);
+
+        return query;
+    }
+
     private RawSqlBuilder setColumnMappings(RawSqlBuilder builder) {
         builder
                 .columnMapping("recipe.id", "id")
@@ -98,7 +119,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         return builder;
     }
 
-    private void setCommonConditions(Query<Recipe> query, CommonParams params) {
+    private void setCommonConditions(Query<Recipe> query, Common params) {
         setNumberOfIngredientsCondition(query, params);
         setOrderByCondition(query, params);
         setSourcePagesCondition(query, params);
@@ -107,7 +128,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         setExcludedIngredientsCondition(query, params);
     }
 
-    private void setNumberOfIngredientsCondition(Query<Recipe> query, CommonParams params) {
+    private void setNumberOfIngredientsCondition(Query<Recipe> query, Common params) {
         if (params.getMaximumNumberOfIngredients() != null && params.getMaximumNumberOfIngredients() > 0) {
             query.where().le("numofings", params.getMaximumNumberOfIngredients());
         }
@@ -117,7 +138,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
-    private void setOrderByCondition(Query<Recipe> query, CommonParams params) {
+    private void setOrderByCondition(Query<Recipe> query, Common params) {
         /*
            Sorting by id is necessary to avoid occurring the same results across different pages.
            E.g. sorting by number of ingredient is not a unique sorting as many recipes have the same number
@@ -130,20 +151,20 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
-    private void setSourcePagesCondition(Query<Recipe> query, CommonParams params) {
+    private void setSourcePagesCondition(Query<Recipe> query, Common params) {
         if (params.getSourcePageIds() != null && params.getSourcePageIds().size() > 0) {
             query.where().in("sourcePage.id", params.getSourcePageIds());
         }
     }
 
-    private void setNameLikeCondition(Query<Recipe> query, CommonParams params) {
+    private void setNameLikeCondition(Query<Recipe> query, Common params) {
         // Name like
         if (params.getNameLike() != null) {
             query.where().ilike("name", "%" + params.getNameLike() + "%");
         }
     }
 
-    private void setPagingCondition(Query<Recipe> query, CommonParams params) {
+    private void setPagingCondition(Query<Recipe> query, Common params) {
         // Paging
         int offset = params.getOffset() == null ? DEFAULT_OFFSET : params.getOffset();
         int limit = params.getLimit() == null ? DEFAULT_LIMIT : params.getLimit();
@@ -152,7 +173,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         query.setMaxRows(limit);
     }
 
-    private void setIncludedIngredientsConditions(Query<Recipe> query, WithIncludedIngredientsParams params) {
+    private void setIncludedIngredientsConditions(Query<Recipe> query, IncludedIngredients params) {
         // Merge tags
         if (params.getIncludedIngredientTags() != null) {
             mergeIngredientIds(params.getIncludedIngredients(), getIngredientIdsForTags(params.getIncludedIngredientTags()));
@@ -161,7 +182,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         query.setParameter("includedIngredients", params.getIncludedIngredients());
     }
 
-    private void setExcludedIngredientsCondition(Query<Recipe> query, CommonParams params) {
+    private void setExcludedIngredientsCondition(Query<Recipe> query, Common params) {
         if (params.getExcludedIngredients() != null) {
             if (params.getExcludedIngredientTags() != null) {
                 // Merge tags
@@ -169,6 +190,17 @@ public class EbeanRecipeRepository implements RecipeRepository {
             }
 
             query.setParameter("excludedIngredients", params.getExcludedIngredients());
+        }
+    }
+
+    private void setAdditionalIngredientsConditions(Query<Recipe> query, Optional<AdditionalIngredients> params) {
+        if (params.isPresent()) {
+            AdditionalIngredients additionals = params.get();
+            if (additionals.getAdditionalIngredientTags() != null) {
+                mergeIngredientIds(additionals.getAdditionalIngredients(), getIngredientIdsForTags(additionals.getAdditionalIngredientTags()));
+            }
+
+            query.setParameter("additionalIngredientIds", additionals.getAdditionalIngredients());
         }
     }
 
@@ -193,60 +225,67 @@ public class EbeanRecipeRepository implements RecipeRepository {
         target.addAll(ids);
     }
 
-    private static boolean useExclude(CommonParams params) {
+    private static boolean useExclude(Common params) {
         return (params.getExcludedIngredients() != null && params.getExcludedIngredients().size() > 0) ||
                 (params.getExcludedIngredientTags() != null && params.getExcludedIngredientTags().size() > 0);
     }
 
-    private Query<Recipe> prepare(String sql, CommonParams params) {
-        RawSql rawSql = setColumnMappings(RawSqlBuilder.parse(sql)).create();
-        Query<Recipe> query = ebean.createQuery(Recipe.class).setRawSql(rawSql);
-        setCommonConditions(query, params);
-
-        return query;
-    }
-
-    private String replaceByGoodIngredientsNumberParameters(String sql, WithGoodIngredientsNumberParams params) {
-        // All parameters used are Integers, or Enums therefore it's safe to replace them.
+    private String replaceQueryTypeRatioParams(String sql, QueryTypeRatio params) {
         String replaced = sql;
-        replaced = replaced.replace(":goodIngredientsRelation", params.getGoodIngredientsRelation().getStringRep());
-        replaced = replaced.replace(":goodIngredients", params.getGoodIngredients().toString());
-        replaced = replaced.replace(":unknownIngredientsRelation", params.getUnknownIngredientsRelation().getStringRep());
-        replaced = replaced.replace(":unknownIngredients", params.getUnknownIngredients().toString());
-
-        return replaced;
-    }
-
-    private String replaceByGoodIngredientsRatioParameters(String sql, WithGoodIngredientsRatioParams params) {
-        String replaced = sql;
-
         replaced = replaced.replace(":ratio", params.getGoodIngredientsRatio().toString());
-
         return replaced;
     }
 
-    private void checkIncludedExcludedIngredientsMutuallyExclusive(
-            WithIncludedIngredientsParams params, CommonParams baseParams) {
-        // Check, that excluded and included ingredients are mutually exclusive
-        if (baseParams.getExcludedIngredients() != null && params.getIncludedIngredients() != null) {
-            checkMutuallyExclusive(params.getIncludedIngredients(), baseParams.getExcludedIngredients());
+    private static void checkMutuallyExclusive(Optional<AdditionalIngredients> additional, List<Long> excluded) {
+        if(additional.isPresent() && !areMutuallyExclusive(additional.get().getAdditionalIngredients(), excluded)){
+            throw new IllegalArgumentException("Additional and excluded ingredients are not mutually exclusive!");
         }
     }
 
-    private static void checkMutuallyExclusive(List<Long> included, List<Long> excluded){
+    private static void checkMutuallyExclusive(Optional<AdditionalIngredients> additional, IncludedIngredients included) {
+        if(additional.isPresent() && !areMutuallyExclusive(additional.get().getAdditionalIngredients(), included.getIncludedIngredients())){
+            throw new IllegalArgumentException("Additional and included ingredients are not mutually exclusive!");
+        }
+    }
+
+    private static void checkMutuallyExclusive(IncludedIngredients included, List<Long> excluded) {
+        if(!areMutuallyExclusive(included.getIncludedIngredients(), excluded)){
+            throw new IllegalArgumentException("Included and excluded ingredients are not mutually exclusive!");
+        }
+    }
+
+    private static boolean areMutuallyExclusive(List<Long> included, List<Long> excluded) {
+        if (included == null || excluded == null) {
+            return true;
+        }
+
         for (Long id : included) {
             if (excluded.contains(id)) {
-                throw new IllegalArgumentException(("Included and excluded ingredients are not mutually exclusive!"));
+                return false;
             }
         }
+
+        return true;
     }
 
-    private static String createByGoodIngredientsSqlString(RecipeQuerySql.QueryType queryType, CommonParams params) {
-        return RecipeQuerySql.create(
-                new RecipeQuerySql.Configuration(
-                        true,
-                        useExclude(params),
-                        queryType)
+    private static RecipeQuerySql.Configuration createConfig(QueryTypeNumber params) {
+        RecipeQuerySql.Configuration configuration = createConfigForIncludedIngredients(RecipeQuerySql.QueryType.NUMBER, params.getCommon());
+        if (params.getAdditionalIngredients().isPresent()) {
+            configuration.useAdditionalIngrs = true;
+        }
+
+        return configuration;
+    }
+
+    private static RecipeQuerySql.Configuration createConfig(QueryTypeRatio params) {
+        return createConfigForIncludedIngredients(RecipeQuerySql.QueryType.RATIO, params.getCommon());
+    }
+
+    private static RecipeQuerySql.Configuration createConfigForIncludedIngredients(RecipeQuerySql.QueryType queryType, Common params) {
+        return new RecipeQuerySql.Configuration(
+                true,
+                useExclude(params),
+                queryType
         );
     }
 }

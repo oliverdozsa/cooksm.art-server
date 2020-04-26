@@ -31,6 +31,7 @@ class RecipeQuerySql {
         public boolean useExclude;
         public QueryType queryType;
         public boolean putExcludedAnd;
+        public boolean useAdditionalIngrs;
 
         public Configuration(boolean selectOtherFields, boolean useExclude, QueryType queryType) {
             this(selectOtherFields, useExclude, queryType, true);
@@ -45,7 +46,7 @@ class RecipeQuerySql {
     }
 
     public enum QueryType {
-        RATIO, NUMBER, ALL
+        RATIO, NUMBER, NONE
     }
 
     private static String createExcludedJoin(Configuration config) {
@@ -95,7 +96,7 @@ class RecipeQuerySql {
             return prefix + havingNumberCondition();
         } else if (QueryType.RATIO.equals(config.queryType)) {
             return prefix + havingRatioCondition();
-        } else if (QueryType.ALL.equals(config.queryType)) {
+        } else if (QueryType.NONE.equals(config.queryType)) {
             return "";
         }
 
@@ -112,10 +113,11 @@ class RecipeQuerySql {
     }
 
     private static String createIncludedIngredientsCondition(Configuration config) {
-        if (QueryType.RATIO.equals(config.queryType) || QueryType.NUMBER.equals(config.queryType)) {
+        if (QueryType.RATIO.equals(config.queryType) ||
+                QueryType.NUMBER.equals(config.queryType)) {
             return "" +
                     "  recipe_ingredient.ingredient_id IN (:includedIngredients) ";
-        } else if (QueryType.ALL.equals(config.queryType)) {
+        } else if (QueryType.NONE.equals(config.queryType)) {
             return "";
         }
 
@@ -123,13 +125,17 @@ class RecipeQuerySql {
     }
 
     private static String createIncludedIngredientsJoin(Configuration config) {
+        String join = "";
         if (QueryType.RATIO.equals(config.queryType) || QueryType.NUMBER.equals(config.queryType)) {
-            return "  JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id ";
-        } else if (QueryType.ALL.equals(config.queryType)) {
-            return "";
+            join = " JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id ";
         }
 
-        throw new IllegalArgumentException("Query type is invalid!");
+        if(QueryType.NUMBER.equals(config.queryType) && config.useAdditionalIngrs){
+            join = join + " JOIN ("+ createAdditionalIngredientsQuery() +") AS additionals " +
+                    " ON recipe.id = additionals.recipe_id ";
+        }
+
+        return join;
     }
 
     private static String createWhereClause(Configuration config) {
@@ -147,10 +153,20 @@ class RecipeQuerySql {
     private static String createOtherFieldsSelections(Configuration config) {
         String otherFieldSelections = "";
 
-        if(config.selectOtherFields){
+        if (config.selectOtherFields) {
             otherFieldSelections = ", recipe.name, recipe.url, recipe.date_added, recipe.numofings, recipe.time, recipe.source_page_id ";
         }
 
-        return  otherFieldSelections;
+        return otherFieldSelections;
+    }
+
+    private static String createAdditionalIngredientsQuery() {
+        return " SELECT recipe.id AS recipe_id " +
+                " FROM recipe " +
+                " JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id " +
+                " WHERE recipe_ingredient.ingredient_id IN (:additionalIngredientIds) " +
+                " GROUP BY recipe.id " +
+                " HAVING " +
+                "   COUNT(recipe_ingredient.ingredient_id) >= :goodAdditionalIngredientIds ";
     }
 }
