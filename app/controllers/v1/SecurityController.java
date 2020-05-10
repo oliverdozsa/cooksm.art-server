@@ -4,6 +4,8 @@ import com.typesafe.config.Config;
 import lombokized.dto.UserCreateUpdateDto;
 import lombokized.dto.UserInfoDto;
 import lombokized.dto.UserSocialLoginDto;
+import lombokized.security.VerifiedFacebookUserInfo;
+import lombokized.security.VerifiedGoogleUserInfo;
 import lombokized.security.VerifiedUserInfo;
 import models.repositories.UserRepository;
 import play.Logger;
@@ -97,10 +99,6 @@ public class SecurityController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
-    private UserCreateUpdateDto convertFrom(VerifiedUserInfo dto) {
-        return new UserCreateUpdateDto(dto.getEmail(), dto.getFullName());
-    }
-
     private CompletionStage<Result> toResult(VerifiedUserInfo verifiedUserInfo) {
         return repository.createOrUpdate(convertFrom(verifiedUserInfo))
                 .thenApplyAsync(id -> {
@@ -108,5 +106,19 @@ public class SecurityController extends Controller {
                     UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
                     return ok(Json.toJson(result));
                 }, httpExecutionContext.current());
+    }
+
+    private UserCreateUpdateDto convertFrom(VerifiedUserInfo info) {
+        if (info instanceof VerifiedGoogleUserInfo) {
+            String socialId = ((VerifiedGoogleUserInfo) info).getSocialId();
+            return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), socialId, null);
+        }
+
+        if (info instanceof VerifiedFacebookUserInfo) {
+            String socialId = ((VerifiedFacebookUserInfo) info).getSocialId();
+            return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), null, socialId);
+        }
+
+        return null;
     }
 }

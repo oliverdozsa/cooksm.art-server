@@ -23,6 +23,12 @@ public class User {
     @Column(name = "last_update")
     private Instant lastUpdate;
 
+    @Column(name = "google_user_id")
+    private String googleUserId;
+
+    @Column(name = "facebook_user_id")
+    private String facebookUserId;
+
     public String getEmail() {
         return email;
     }
@@ -53,5 +59,21 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getGoogleUserId() {
+        return googleUserId;
+    }
+
+    public void setGoogleUserId(String googleUserId) {
+        this.googleUserId = googleUserId;
+    }
+
+    public String getFacebookUserId() {
+        return facebookUserId;
+    }
+
+    public void setFacebookUserId(String facebookUserId) {
+        this.facebookUserId = facebookUserId;
     }
 }

@@ -60,6 +60,7 @@ public class SocialTokenVerifierGoogleImpTest {
         jsonRespone.put("aud", mockClientId);
         jsonRespone.put("name", "someName");
         jsonRespone.put("email", "someEmail");
+        jsonRespone.put("sub", "4242");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
         assertNotNull("Verification result should be not null!", verifier.verify("someToken").toCompletableFuture().get());

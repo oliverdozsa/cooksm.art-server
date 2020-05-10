@@ -2,6 +2,7 @@ package security.imp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
+import lombokized.security.VerifiedGoogleUserInfo;
 import lombokized.security.VerifiedUserInfo;
 import play.Logger;
 import play.libs.ws.WSClient;
@@ -68,7 +69,8 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
     private VerifiedUserInfo toVerifiedUserInfo(JsonNode json) {
         String fullName = json.get("name").asText();
         String email = json.get("email").asText();
-        return new VerifiedUserInfo(fullName, email);
+        String userId = json.get("sub").asText();
+        return new VerifiedGoogleUserInfo(fullName, email, userId);
     }
 
     private static class GoogleVerifierException extends TokenVerificationException {

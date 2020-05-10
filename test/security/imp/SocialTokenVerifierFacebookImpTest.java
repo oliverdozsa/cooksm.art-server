@@ -72,6 +72,7 @@ public class SocialTokenVerifierFacebookImpTest {
         ObjectNode userInfoJson = Json.newObject();
         userInfoJson.put("name", "Some One");
         userInfoJson.put("email", "some@one.com");
+        userInfoJson.put("id", "4221");
 
         when(mockWsResponse.asJson())
                 .thenReturn(jsonRespone)

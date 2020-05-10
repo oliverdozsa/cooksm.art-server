@@ -12,4 +12,8 @@ public class UserCreateUpdateDto {
 
     @Constraints.MinLength(3)
     private final String fullName;
+
+    private final String googleUserId;
+
+    private final String facebookUserId;
 }

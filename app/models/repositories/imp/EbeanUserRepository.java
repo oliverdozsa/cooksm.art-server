@@ -38,7 +38,7 @@ public class EbeanUserRepository implements UserRepository {
     public CompletionStage<Long> createOrUpdate(UserCreateUpdateDto dto) {
         logger.debug("createOrUpdate(): dto = {}", dto.toString());
         return supplyAsync(() -> {
-            User existing = findByEmail(dto.getEmail());
+            User existing = findByDto(dto);
             if (existing == null) {
                 return create(dto);
             } else {
@@ -64,6 +64,7 @@ public class EbeanUserRepository implements UserRepository {
         entity.setEmail(dto.getEmail());
         entity.setFullName(dto.getFullName());
         entity.setLastUpdate(Instant.now());
+        setSocialId(dto, entity);
 
         ebean.save(entity);
 
@@ -80,24 +81,48 @@ public class EbeanUserRepository implements UserRepository {
         entity.setEmail(dto.getEmail());
         entity.setFullName(dto.getFullName());
         entity.setLastUpdate(Instant.now());
+        setSocialId(dto, entity);
 
         ebean.update(entity);
 
         return entity.getId();
     }
 
-    private User findByEmail(String email) {
-        return ebean.createQuery(User.class)
-                .where()
-                .eq("email", email)
-                .findOne();
+    private User findByDto(UserCreateUpdateDto dto) {
+        User existing = findByProperty("email", dto.getEmail());
 
+        if (existing == null && dto.getGoogleUserId() != null) {
+            existing = findByProperty("googleUserId", dto.getGoogleUserId());
+        }
+
+        if (existing == null && dto.getFacebookUserId() != null) {
+            existing = findByProperty("facebookUserId", dto.getFacebookUserId());
+        }
+
+        return existing;
     }
 
-    private void validate(UserCreateUpdateDto dto){
+    private User findByProperty(String property, String value) {
+        return ebean.createQuery(User.class)
+                .where()
+                .eq(property, value)
+                .findOne();
+    }
+
+    private void validate(UserCreateUpdateDto dto) {
         Set<ConstraintViolation<UserCreateUpdateDto>> violations = validator.validate(dto);
         if (violations.size() > 0) {
             throw new BusinessLogicViolationException("User dto is invalid!");
+        }
+    }
+
+    private void setSocialId(UserCreateUpdateDto dto, User entity) {
+        if (dto.getFacebookUserId() != null) {
+            entity.setFacebookUserId(dto.getFacebookUserId());
+        }
+
+        if (dto.getGoogleUserId() != null) {
+            entity.setGoogleUserId(dto.getGoogleUserId());
         }
     }
 }

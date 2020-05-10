@@ -2,6 +2,7 @@ package security.imp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
+import lombokized.security.VerifiedFacebookUserInfo;
 import lombokized.security.VerifiedUserInfo;
 import play.Logger;
 import play.libs.ws.WSClient;
@@ -74,8 +75,9 @@ public class SocialTokenVerifierFacebookImp implements SocialTokenVerifier {
     private VerifiedUserInfo toVerifiedUserInfo(JsonNode json){
         String fullName = json.get("name").asText();
         String email = json.get("email").asText();
+        String userId = json.get("id").asText();
 
-        return new VerifiedUserInfo(fullName, email);
+        return new VerifiedFacebookUserInfo(fullName, email, userId);
     }
 
     private String getUserId(JsonNode json) {
