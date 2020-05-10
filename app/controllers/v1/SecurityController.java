@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import lombokized.dto.UserCreateUpdateDto;
 import lombokized.dto.UserInfoDto;
 import lombokized.dto.UserSocialLoginDto;
+import lombokized.security.VerifiedUserInfo;
 import models.repositories.UserRepository;
 import play.Logger;
 import play.data.Form;
@@ -13,10 +14,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import security.JwtCenter;
-import security.SecurityUtils;
-import security.SocialTokenVerifier;
-import security.VerifiedJwt;
+import security.*;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -51,7 +49,7 @@ public class SecurityController extends Controller {
 
     private Function<Throwable, Result> defaultExceptionMapper = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapException = t -> {
-        if (t instanceof TokenVerificiationException) {
+        if (t instanceof TokenVerificationException) {
             logger.warn("Unauthorized!", t);
             return unauthorized();
         } else {
@@ -93,35 +91,22 @@ public class SecurityController extends Controller {
         }
 
         UserSocialLoginDto dto = form.get();
-        logger.info("loginThroughSocial(): dto = {}", dto);
-        return verify(verifier, dto.getToken())
-                .thenCompose(o -> repository.createOrUpdate(convertFrom(dto)))
-                .thenApplyAsync(id -> {
-                    String token = jwtCenter.create(id);
-                    UserInfoDto resultDto = new UserInfoDto(token, dto.getEmail(), dto.getFullName());
-                    return ok(Json.toJson(resultDto));
-                }, httpExecutionContext.current())
+        logger.info("loginThroughSocial(): token = " + verifier.verify(dto.getToken()));
+        return verifier.verify(dto.getToken())
+                .thenCompose(this::toResult)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
-    private UserCreateUpdateDto convertFrom(UserSocialLoginDto dto) {
+    private UserCreateUpdateDto convertFrom(VerifiedUserInfo dto) {
         return new UserCreateUpdateDto(dto.getEmail(), dto.getFullName());
     }
 
-    private CompletionStage<Void> verify(SocialTokenVerifier verifier, String token) {
-        return verifier.verify(token)
-                .thenApplyAsync(isValid -> {
-                    if (!isValid) {
-                        String msg = String.format("Failed to verify token with %s", verifier.getClass().getCanonicalName());
-                        throw new TokenVerificiationException(msg);
-                    }
-                    return null;
+    private CompletionStage<Result> toResult(VerifiedUserInfo verifiedUserInfo) {
+        return repository.createOrUpdate(convertFrom(verifiedUserInfo))
+                .thenApplyAsync(id -> {
+                    String token = jwtCenter.create(id);
+                    UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
+                    return ok(Json.toJson(result));
                 }, httpExecutionContext.current());
-    }
-
-    private static class TokenVerificiationException extends RuntimeException {
-        public TokenVerificiationException(String message) {
-            super(message);
-        }
     }
 }

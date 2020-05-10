@@ -1,7 +1,9 @@
 package security;
 
+import lombokized.security.VerifiedUserInfo;
+
 import java.util.concurrent.CompletionStage;
 
 public interface SocialTokenVerifier {
-    CompletionStage<Boolean> verify(String token);
+    CompletionStage<VerifiedUserInfo> verify(String token);
 }

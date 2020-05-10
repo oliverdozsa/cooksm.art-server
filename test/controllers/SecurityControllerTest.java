@@ -7,6 +7,7 @@ import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import lombokized.dto.UserSocialLoginDto;
 import io.ebean.Ebean;
+import lombokized.security.VerifiedUserInfo;
 import models.entities.User;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,19 +54,17 @@ public class SecurityControllerTest {
         logger.info("-- RUNNING TEST: testLoginThroughGoogle_OK_UserCreated");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        UserSocialLoginDto dto = new UserSocialLoginDto(
-                "John Doe",
-                "mail@example.com",
-                "SomeRandomGoogleToken"
-        );
+        UserSocialLoginDto dto = new UserSocialLoginDto("SomeRandomGoogleToken");
+        String email = "some@one.com";
 
         Optional<User> entityOpt = Ebean.createQuery(User.class)
                 .where()
-                .eq("email", dto.getEmail())
+                .eq("email", email)
                 .findOneOrEmpty();
         assertFalse("Entity shouldn't be present!", entityOpt.isPresent());
 
-        MockSocialTokenVerifier.setMockResult(true);
+        VerifiedUserInfo mockResult = new VerifiedUserInfo("Some One", email);
+        MockSocialTokenVerifier.setMockResult(mockResult);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(POST)
                 .uri(routes.SecurityController.loginThroughGoogle().url())
@@ -78,7 +77,7 @@ public class SecurityControllerTest {
 
         entityOpt = Ebean.createQuery(User.class)
                 .where()
-                .eq("email", dto.getEmail())
+                .eq("email", email)
                 .findOneOrEmpty();
         assertTrue("Entity should be present!", entityOpt.isPresent());
     }
@@ -90,20 +89,18 @@ public class SecurityControllerTest {
         logger.info("-- RUNNING TEST: testLoginThroughFacebook_OK_UserExists");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        UserSocialLoginDto dto = new UserSocialLoginDto(
-                "John Doe Jack",
-                "user1@example.com",
-                "SomeRandomGoogleToken"
-        );
+        UserSocialLoginDto dto = new UserSocialLoginDto("SomeRandomGoogleToken");
+        String email = "user1@example.com";
 
         Optional<User> entityOpt = Ebean.createQuery(User.class)
                 .where()
-                .eq("email", dto.getEmail())
+                .eq("email", email)
                 .findOneOrEmpty();
         assertTrue("Entity should be present!", entityOpt.isPresent());
         assertEquals("User name is wrong!", "John Doe", entityOpt.get().getFullName());
 
-        MockSocialTokenVerifier.setMockResult(true);
+        VerifiedUserInfo userInfo = new VerifiedUserInfo("John Doe Jack", email);
+        MockSocialTokenVerifier.setMockResult(userInfo);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(POST)
                 .uri(routes.SecurityController.loginThroughFacebook().url())
@@ -116,7 +113,7 @@ public class SecurityControllerTest {
 
         entityOpt = Ebean.createQuery(User.class)
                 .where()
-                .eq("email", dto.getEmail())
+                .eq("email", email)
                 .findOneOrEmpty();
         assertTrue("Entity should be present!", entityOpt.isPresent());
         assertEquals("User name is wrong!", "John Doe Jack", entityOpt.get().getFullName());
@@ -129,19 +126,18 @@ public class SecurityControllerTest {
         logger.info("-- RUNNING TEST: testLoginThroughGoogle_Unauthorized");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        UserSocialLoginDto dto = new UserSocialLoginDto(
-                "John Doe",
-                "mail@example.com",
-                "SomeRandomGoogleToken"
-        );
+        UserSocialLoginDto dto = new UserSocialLoginDto("SomeRandomGoogleToken");
 
-        MockSocialTokenVerifier.setMockResult(false);
+        VerifiedUserInfo mockResult = new VerifiedUserInfo("Some One", "some@one.com");
+        MockSocialTokenVerifier.setMockResult(mockResult);
+        MockSocialTokenVerifier.shouldThrowException(true);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(POST)
                 .uri(routes.SecurityController.loginThroughGoogle().url())
                 .bodyJson(Json.toJson(dto));
         Result result = route(application.getApplication(), httpRequest);
         assertEquals("Result of request is wrong!", UNAUTHORIZED, result.status());
+        MockSocialTokenVerifier.shouldThrowException(false);
     }
 
 
@@ -152,13 +148,9 @@ public class SecurityControllerTest {
         logger.info("-- RUNNING TEST: testLoginThroughGoogle_BadRequest");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        UserSocialLoginDto dto = new UserSocialLoginDto(
-                "John Doe",
-                "mail@example.com",
-                null
-        );
+        UserSocialLoginDto dto = new UserSocialLoginDto(null);
 
-        MockSocialTokenVerifier.setMockResult(false);
+        MockSocialTokenVerifier.setMockResult(null);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(POST)
                 .uri(routes.SecurityController.loginThroughGoogle().url())
@@ -175,13 +167,10 @@ public class SecurityControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         // Get token
-        UserSocialLoginDto dto = new UserSocialLoginDto(
-                "John Doe",
-                "mail@example.com",
-                "someRandomGoogleToken"
-        );
+        UserSocialLoginDto dto = new UserSocialLoginDto("someRandomGoogleToken");
 
-        MockSocialTokenVerifier.setMockResult(true);
+        VerifiedUserInfo mockResult = new VerifiedUserInfo("Some One", "some@one.com");
+        MockSocialTokenVerifier.setMockResult(mockResult);
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(POST)
                 .uri(routes.SecurityController.loginThroughGoogle().url())

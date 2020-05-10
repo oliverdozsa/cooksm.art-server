@@ -3,7 +3,9 @@ package security.imp;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import play.libs.Json;
@@ -16,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 public class SocialTokenVerifierGoogleImpTest {
@@ -30,6 +33,9 @@ public class SocialTokenVerifierGoogleImpTest {
 
     @Mock
     private WSResponse mockWsResponse;
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     private String mockClientId = "mockClientId";
     private String mockApiUrl = "mockApiUrl";
@@ -52,9 +58,11 @@ public class SocialTokenVerifierGoogleImpTest {
     public void testVerificationSuccessful() throws ExecutionException, InterruptedException {
         ObjectNode jsonRespone = Json.newObject();
         jsonRespone.put("aud", mockClientId);
+        jsonRespone.put("name", "someName");
+        jsonRespone.put("email", "someEmail");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
-        assertTrue("Verification result should be true!", verifier.verify("someToken").toCompletableFuture().get());
+        assertNotNull("Verification result should be not null!", verifier.verify("someToken").toCompletableFuture().get());
     }
 
     @Test
@@ -63,14 +71,18 @@ public class SocialTokenVerifierGoogleImpTest {
         jsonRespone.put("error_response", "someErrorMsg");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
-        assertFalse("Verification result should be false!", verifier.verify("someToken").toCompletableFuture().get());
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("doesn't have aud");
+        verifier.verify("someToken").toCompletableFuture().get();
     }
 
     @Test
     public void testNullResponse() throws ExecutionException, InterruptedException {
         when(mockWsResponse.asJson()).thenReturn(null);
 
-        assertFalse("Verification result should be false!", verifier.verify("someToken").toCompletableFuture().get());
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("Response json is null");
+        verifier.verify("someToken").toCompletableFuture().get();
     }
 
     @Test
@@ -79,6 +91,32 @@ public class SocialTokenVerifierGoogleImpTest {
         jsonRespone.put("aud", mockClientId + "addingSomeContentToGetDifferentClientId");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
-        assertFalse("Verification result should be false!", verifier.verify("someToken").toCompletableFuture().get());
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("client id mismatch");
+        verifier.verify("someToken").toCompletableFuture().get();
+    }
+
+    @Test
+    public void testMissingEmail() throws ExecutionException, InterruptedException {
+        ObjectNode jsonRespone = Json.newObject();
+        jsonRespone.put("aud", mockClientId);
+        jsonRespone.put("name", "someName");
+        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
+
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("doesn't have email");
+        verifier.verify("someToken").toCompletableFuture().get();
+    }
+
+    @Test
+    public void testMissingName() throws ExecutionException, InterruptedException {
+        ObjectNode jsonRespone = Json.newObject();
+        jsonRespone.put("aud", mockClientId);
+        jsonRespone.put("email", "some@oneName");
+        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
+
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("doesn't have name");
+        verifier.verify("someToken").toCompletableFuture().get();
     }
 }
