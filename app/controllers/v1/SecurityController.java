@@ -93,7 +93,7 @@ public class SecurityController extends Controller {
         }
 
         UserSocialLoginDto dto = form.get();
-        logger.info("loginThroughSocial(): token = " + verifier.verify(dto.getToken()));
+        logger.info("loginThroughSocial()");
         return verifier.verify(dto.getToken())
                 .thenCompose(this::toResult)
                 .exceptionally(mapExceptionWithUnpack);
@@ -110,12 +110,12 @@ public class SecurityController extends Controller {
 
     private UserCreateUpdateDto convertFrom(VerifiedUserInfo info) {
         if (info instanceof VerifiedGoogleUserInfo) {
-            String socialId = ((VerifiedGoogleUserInfo) info).getSocialId();
+            String socialId = info.getSocialId();
             return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), socialId, null);
         }
 
         if (info instanceof VerifiedFacebookUserInfo) {
-            String socialId = ((VerifiedFacebookUserInfo) info).getSocialId();
+            String socialId = info.getSocialId();
             return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), null, socialId);
         }
 
