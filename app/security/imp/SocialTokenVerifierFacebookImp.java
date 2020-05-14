@@ -44,7 +44,7 @@ public class SocialTokenVerifierFacebookImp implements SocialTokenVerifier {
                     assertResponse(responseJson);
                     return getUserId(responseJson);
                 })
-                .thenCompose(userid -> wsClient.url(userInfoUrl + "/" + userid + "?fields=id,name,email&access_token=" + token).get())
+                .thenCompose(userid -> createUserInfoRequest(userid, token).get())
                 .thenApply(WSResponse::asJson)
                 .thenApply(this::toVerifiedUserInfo);
     }
@@ -88,5 +88,12 @@ public class SocialTokenVerifierFacebookImp implements SocialTokenVerifier {
         public FacebookVerifierException(String message) {
             super(message);
         }
+    }
+
+    private WSRequest createUserInfoRequest(String userId, String token){
+        WSRequest request = wsClient.url(userInfoUrl + "/" + userId);
+        request.addQueryParameter("fields", "id,name,email");
+        request.addQueryParameter("access_token", token);
+        return request;
     }
 }
