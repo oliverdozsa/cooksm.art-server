@@ -1,6 +1,7 @@
 package models.entities;
 
 import javax.persistence.*;
+import java.time.Instant;
 
 @Entity
 @Table(name = "recipe_search")
@@ -10,16 +11,15 @@ public class RecipeSearch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "users_id")
-    private User user;
-
     @Column(name = "query")
     @Lob
     private String query;
+
+    @Column(name = "last_accessed")
+    private Instant lastAccessed;
+
+    @Column(name = "is_permanent")
+    private boolean isPermanent;
 
     public Long getId() {
         return id;
@@ -29,27 +29,27 @@ public class RecipeSearch {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public String getQuery() {
         return query;
     }
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    public Instant getLastAccessed() {
+        return lastAccessed;
+    }
+
+    public void setLastAccessed(Instant lastAccessed) {
+        this.lastAccessed = lastAccessed;
+    }
+
+    public boolean isPermanent() {
+        return isPermanent;
+    }
+
+    public void setPermanent(boolean permanent) {
+        isPermanent = permanent;
     }
 }

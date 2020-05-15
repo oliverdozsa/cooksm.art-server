@@ -3,7 +3,6 @@ package controllers.v1;
 import lombokized.dto.*;
 import models.entities.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,10 +50,6 @@ class DtoMapper {
                 entity.getRecipe().getUrl(),
                 entity.getRecipe().getId()
         );
-    }
-
-    public static RecipeSearchDto toDto(RecipeSearch entity) {
-        return new RecipeSearchDto(entity.getId(), entity.getName(), entity.getQuery());
     }
 
     public static IngredientTagDto toDto(IngredientTag entity) {
