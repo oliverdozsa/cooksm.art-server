@@ -5,10 +5,11 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "recipe_search")
+@SequenceGenerator(name = "recipe_search_seq", initialValue = 61 * 62 * 62 + 61 * 62 + 61)
 public class RecipeSearch {
     @Column(name = "id")
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "recipe_search_seq")
     private Long id;
 
     @Column(name = "query")

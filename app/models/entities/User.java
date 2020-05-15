@@ -2,6 +2,7 @@ package models.entities;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(
@@ -28,6 +29,9 @@ public class User {
 
     @Column(name = "facebook_user_id")
     private String facebookUserId;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserSearch> searches;
 
     public String getEmail() {
         return email;
@@ -75,5 +79,13 @@ public class User {
 
     public void setFacebookUserId(String facebookUserId) {
         this.facebookUserId = facebookUserId;
+    }
+
+    public List<UserSearch> getSearches() {
+        return searches;
+    }
+
+    public void setSearches(List<UserSearch> searches) {
+        this.searches = searches;
     }
 }
