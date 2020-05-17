@@ -12,7 +12,7 @@ public class RecipeSearch {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "recipe_search_seq")
     private Long id;
 
-    @Column(name = "query")
+    @Column(name = "query", nullable = false)
     @Lob
     private String query;
 
