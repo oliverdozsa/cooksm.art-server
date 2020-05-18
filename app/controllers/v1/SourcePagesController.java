@@ -2,9 +2,9 @@ package controllers.v1;
 
 import lombokized.dto.PageDto;
 import lombokized.dto.SourcePageDto;
-import models.entities.SourcePage;
+import data.entities.SourcePage;
 import lombokized.repositories.Page;
-import models.repositories.SourcePageRepository;
+import data.repositories.SourcePageRepository;
 import play.Logger;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;

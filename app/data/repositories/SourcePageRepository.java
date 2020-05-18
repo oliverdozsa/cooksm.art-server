@@ -1,7 +1,7 @@
-package models.repositories;
+package data.repositories;
 
+import data.entities.SourcePage;
 import lombokized.repositories.Page;
-import models.entities.SourcePage;
 
 import java.util.concurrent.CompletionStage;
 

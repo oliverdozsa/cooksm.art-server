@@ -1,8 +1,8 @@
-package models.repositories;
+package data.repositories;
 
 import lombokized.repositories.Page;
 import lombokized.repositories.RecipeRepositoryParams.*;
-import models.entities.Recipe;
+import data.entities.Recipe;
 
 import java.util.concurrent.CompletionStage;
 

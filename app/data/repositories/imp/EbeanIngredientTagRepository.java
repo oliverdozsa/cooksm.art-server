@@ -1,11 +1,11 @@
-package models.repositories.imp;
+package data.repositories.imp;
 
+import data.DatabaseExecutionContext;
+import data.entities.IngredientTag;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
-import models.DatabaseExecutionContext;
-import models.entities.IngredientTag;
-import models.repositories.IngredientTagRepository;
+import data.repositories.IngredientTagRepository;
 import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 

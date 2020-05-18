@@ -1,12 +1,12 @@
-package models.repositories.imp;
+package data.repositories.imp;
 
+import data.DatabaseExecutionContext;
+import data.entities.SourcePage;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
-import models.DatabaseExecutionContext;
-import models.entities.SourcePage;
 import lombokized.repositories.Page;
-import models.repositories.SourcePageRepository;
+import data.repositories.SourcePageRepository;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;

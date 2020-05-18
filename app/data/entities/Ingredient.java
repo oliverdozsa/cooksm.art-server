@@ -1,6 +1,4 @@
-package models.entities;
-
-import io.ebean.Model;
+package data.entities;
 
 import javax.persistence.*;
 import java.util.List;

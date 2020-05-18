@@ -1,10 +1,10 @@
 package controllers.v1;
 
 import lombokized.dto.*;
-import models.entities.IngredientName;
-import models.entities.IngredientTag;
-import models.entities.Recipe;
-import models.entities.SourcePage;
+import data.entities.IngredientName;
+import data.entities.IngredientTag;
+import data.entities.Recipe;
+import data.entities.SourcePage;
 
 import java.util.List;
 import java.util.stream.Collectors;

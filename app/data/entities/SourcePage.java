@@ -1,10 +1,10 @@
-package models.entities;
+package data.entities;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "measure")
-public class Measure {
+@Table(name = "source_page")
+public class SourcePage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -12,6 +12,10 @@ public class Measure {
 
     @Column(name = "name")
     private String name;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "language_id")
+    private Language language;
 
     public Long getId() {
         return id;
@@ -27,5 +31,13 @@ public class Measure {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 }

@@ -1,12 +1,12 @@
 import com.google.inject.AbstractModule;
-import models.repositories.IngredientNameRepository;
-import models.repositories.IngredientTagRepository;
-import models.repositories.RecipeRepository;
-import models.repositories.SourcePageRepository;
-import models.repositories.imp.EbeanIngredientNameRepository;
-import models.repositories.imp.EbeanIngredientTagRepository;
-import models.repositories.imp.EbeanRecipeRepository;
-import models.repositories.imp.EbeanSourcePageRepository;
+import data.repositories.IngredientNameRepository;
+import data.repositories.IngredientTagRepository;
+import data.repositories.RecipeRepository;
+import data.repositories.SourcePageRepository;
+import data.repositories.imp.EbeanIngredientNameRepository;
+import data.repositories.imp.EbeanIngredientTagRepository;
+import data.repositories.imp.EbeanRecipeRepository;
+import data.repositories.imp.EbeanSourcePageRepository;
 
 /**
  * Module for bindings.

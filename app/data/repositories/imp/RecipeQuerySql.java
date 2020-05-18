@@ -1,4 +1,4 @@
-package models.repositories.imp;
+package data.repositories.imp;
 
 // Contains code for generating raw SQL strings for queries.
 class RecipeQuerySql {
