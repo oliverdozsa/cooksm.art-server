@@ -9,7 +9,7 @@ import data.entities.SourcePage;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class DtoMapper {
+public class DtoMapper {
     public static IngredientNameDto toDto(IngredientName entity) {
         return new IngredientNameDto(entity.getIngredient().getId(), entity.getName());
     }

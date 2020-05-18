@@ -19,6 +19,7 @@ import play.mvc.Result;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
+import services.RecipesService;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -43,6 +44,9 @@ public class RecipesController extends Controller {
 
     @Inject
     private Config config;
+
+    @Inject
+    private RecipesService service;
 
     private Function<Throwable, Result> mapException = t -> {
         logger.error("Internal Error!", t.getCause());

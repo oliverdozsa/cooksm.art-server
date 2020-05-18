@@ -5,7 +5,7 @@ import play.data.validation.ValidationError;
 
 import java.util.List;
 
-class RecipesControllerQuery {
+public class RecipesControllerQuery {
     public enum SearchMode {
         NONE,
         COMPOSED_OF_NUMBER,

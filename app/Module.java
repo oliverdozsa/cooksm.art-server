@@ -7,6 +7,7 @@ import data.repositories.imp.EbeanIngredientNameRepository;
 import data.repositories.imp.EbeanIngredientTagRepository;
 import data.repositories.imp.EbeanRecipeRepository;
 import data.repositories.imp.EbeanSourcePageRepository;
+import services.RecipesService;
 
 /**
  * Module for bindings.
@@ -18,5 +19,6 @@ public class Module extends AbstractModule {
         bind(RecipeRepository.class).to(EbeanRecipeRepository.class).asEagerSingleton();
         bind(SourcePageRepository.class).to(EbeanSourcePageRepository.class).asEagerSingleton();
         bind(IngredientTagRepository.class).to(EbeanIngredientTagRepository.class).asEagerSingleton();
+        bind(RecipesService.class);
     }
 }
