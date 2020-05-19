@@ -1,4 +1,4 @@
-package controllers.v1;
+package services;
 
 import lombokized.dto.*;
 import data.entities.IngredientName;

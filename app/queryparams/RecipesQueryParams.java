@@ -1,11 +1,11 @@
-package controllers.v1;
+package queryparams;
 
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
 import java.util.List;
 
-public class RecipesControllerQuery {
+public class RecipesQueryParams {
     public enum SearchMode {
         NONE,
         COMPOSED_OF_NUMBER,

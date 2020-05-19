@@ -16,9 +16,11 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import queryparams.RecipesQueryParams;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
+import services.DtoMapper;
 import services.RecipesService;
 
 import javax.inject.Inject;
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static play.libs.Json.toJson;
-import static controllers.v1.RecipeControllerQueryMapping.*;
+import static services.RecipesQueryParamsMapping.*;
 
 
 public class RecipesController extends Controller {
@@ -61,7 +63,7 @@ public class RecipesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 
     public CompletionStage<Result> pageRecipes(Http.Request request) {
-        Either<JsonNode, RecipesControllerQuery.SearchMode> jsonNodeOrSearchMode =
+        Either<JsonNode, RecipesQueryParams.SearchMode> jsonNodeOrSearchMode =
                 retreiveSearchMode(request);
 
         if (jsonNodeOrSearchMode.isLeft()) {
@@ -70,7 +72,7 @@ public class RecipesController extends Controller {
             JsonNode errorJson = jsonNodeOrSearchMode.left().get();
             return completedFuture(badRequest(errorJson));
         } else {
-            RecipesControllerQuery.SearchMode searchMode = jsonNodeOrSearchMode.right().get();
+            RecipesQueryParams.SearchMode searchMode = jsonNodeOrSearchMode.right().get();
             logger.info("pageRecipes(): searchMode = {}", searchMode);
             return refineRequestBy(searchMode, request);
         }
@@ -81,17 +83,17 @@ public class RecipesController extends Controller {
                 .exceptionally(mapException);
     }
 
-    private CompletionStage<Result> refineRequestBy(RecipesControllerQuery.SearchMode searchMode, Http.Request request) {
-        if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_NUMBER) {
-            Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOf.class)
+    private CompletionStage<Result> refineRequestBy(RecipesQueryParams.SearchMode searchMode, Http.Request request) {
+        if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
+            Form<RecipesQueryParams.Params> form = formFactory.form(RecipesQueryParams.Params.class, RecipesQueryParams.VGRecSearchModeComposedOf.class)
                     .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesForQueryTypeNumber);
-        } else if (searchMode == RecipesControllerQuery.SearchMode.COMPOSED_OF_RATIO) {
-            Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class, RecipesControllerQuery.VGRecSearchModeComposedOfRatio.class)
+        } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
+            Form<RecipesQueryParams.Params> form = formFactory.form(RecipesQueryParams.Params.class, RecipesQueryParams.VGRecSearchModeComposedOfRatio.class)
                     .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesForQueryTypeRatio);
-        } else if (searchMode == RecipesControllerQuery.SearchMode.NONE) {
-            Form<RecipesControllerQuery.Params> form = formFactory.form(RecipesControllerQuery.Params.class)
+        } else if (searchMode == RecipesQueryParams.SearchMode.NONE) {
+            Form<RecipesQueryParams.Params> form = formFactory.form(RecipesQueryParams.Params.class)
                     .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesForQueryTypeNone);
         } else {
@@ -103,19 +105,19 @@ public class RecipesController extends Controller {
 
     }
 
-    private CompletionStage<Result> getRecipesForQueryTypeNumber(RecipesControllerQuery.Params params) {
+    private CompletionStage<Result> getRecipesForQueryTypeNumber(RecipesQueryParams.Params params) {
         return repository.pageOfQueryTypeNumber(toQueryTypeNumber(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
-    private CompletionStage<Result> getRecipesForQueryTypeRatio(RecipesControllerQuery.Params params) {
+    private CompletionStage<Result> getRecipesForQueryTypeRatio(RecipesQueryParams.Params params) {
         return repository.pageOfQueryTypeRatio(toQueryTypeRatio(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
     }
 
-    private CompletionStage<Result> getRecipesForQueryTypeNone(RecipesControllerQuery.Params params) {
+    private CompletionStage<Result> getRecipesForQueryTypeNone(RecipesQueryParams.Params params) {
         return repository.pageOfQueryTypeNone(toCommon(params))
                 .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
                 .exceptionally(mapException);
@@ -157,17 +159,17 @@ public class RecipesController extends Controller {
         return config.getLong("openrecipes.default.languageid");
     }
 
-    private Either<JsonNode, RecipesControllerQuery.SearchMode> retreiveSearchMode(Http.Request request) {
+    private Either<JsonNode, RecipesQueryParams.SearchMode> retreiveSearchMode(Http.Request request) {
         // Get form without groups to access search mode.
-        Form<RecipesControllerQuery.Params> form =
-                formFactory.form(RecipesControllerQuery.Params.class)
+        Form<RecipesQueryParams.Params> form =
+                formFactory.form(RecipesQueryParams.Params.class)
                         .bindFromRequest(request);
 
         if (form.hasErrors()) {
             return new Left<>(form.errorsAsJson());
         } else {
             String searchModeStr = form.get().searchMode;
-            RecipesControllerQuery.SearchMode searchMode = RecipesControllerQuery.Params.toEnum(searchModeStr);
+            RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(searchModeStr);
 
             return new Right<>(searchMode);
         }

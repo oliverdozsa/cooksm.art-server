@@ -1,8 +1,7 @@
 package services;
 
 import com.typesafe.config.Config;
-import controllers.v1.DtoMapper;
-import controllers.v1.RecipesControllerQuery;
+import queryparams.RecipesQueryParams;
 import data.entities.Recipe;
 import data.repositories.RecipeRepository;
 import lombokized.dto.PageDto;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
-import static controllers.v1.RecipeControllerQueryMapping.*;
+import static services.RecipesQueryParamsMapping.*;
 import static lombokized.repositories.RecipeRepositoryParams.*;
 
 public class RecipesService {
@@ -25,19 +24,19 @@ public class RecipesService {
     @Inject
     private Config config;
 
-    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesControllerQuery.Params params) {
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params params) {
         QueryTypeNumber query = toQueryTypeNumber(params);
         return repository.pageOfQueryTypeNumber(query)
                 .thenApplyAsync(p -> toPageDto(p, params.languageId));
     }
 
-    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesControllerQuery.Params params) {
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params params) {
         QueryTypeRatio query = toQueryTypeRatio(params);
         return repository.pageOfQueryTypeRatio(query)
                 .thenApplyAsync(p -> toPageDto(p, params.languageId));
     }
 
-    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesControllerQuery.Params params) {
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params params) {
         Common query = toCommon(params);
         return repository.pageOfQueryTypeNone(query)
                 .thenApplyAsync(p -> toPageDto(p, params.languageId));

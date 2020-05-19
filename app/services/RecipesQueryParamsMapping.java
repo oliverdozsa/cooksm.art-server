@@ -1,4 +1,6 @@
-package controllers.v1;
+package services;
+
+import queryparams.RecipesQueryParams;
 
 import static lombokized.repositories.RecipeRepositoryParams.QueryTypeNumber;
 import static lombokized.repositories.RecipeRepositoryParams.QueryTypeRatio;
@@ -7,8 +9,8 @@ import static lombokized.repositories.RecipeRepositoryParams.IncludedIngredients
 import static lombokized.repositories.RecipeRepositoryParams.AdditionalIngredients;
 import static lombokized.repositories.RecipeRepositoryParams.Relation;
 
-public class RecipeControllerQueryMapping {
-    public static QueryTypeNumber toQueryTypeNumber(RecipesControllerQuery.Params queryParams) {
+public class RecipesQueryParamsMapping {
+    public static QueryTypeNumber toQueryTypeNumber(RecipesQueryParams.Params queryParams) {
         QueryTypeNumber.Builder builder = QueryTypeNumber.builder();
 
         builder.common(toCommon(queryParams));
@@ -22,7 +24,7 @@ public class RecipeControllerQueryMapping {
         return builder.build();
     }
 
-    public static QueryTypeRatio toQueryTypeRatio(RecipesControllerQuery.Params queryParams) {
+    public static QueryTypeRatio toQueryTypeRatio(RecipesQueryParams.Params queryParams) {
         QueryTypeRatio.Builder builder = QueryTypeRatio.builder();
 
         builder.common(toCommon(queryParams));
@@ -32,7 +34,7 @@ public class RecipeControllerQueryMapping {
         return builder.build();
     }
 
-    public static Common toCommon(RecipesControllerQuery.Params queryParams) {
+    public static Common toCommon(RecipesQueryParams.Params queryParams) {
         Common.Builder builder = Common.builder();
 
         if (queryParams.exIngs != null && queryParams.exIngs.size() > 0) {
@@ -55,7 +57,7 @@ public class RecipeControllerQueryMapping {
         return builder.build();
     }
 
-    private static IncludedIngredients toIncludedIngredients(RecipesControllerQuery.Params queryParams) {
+    private static IncludedIngredients toIncludedIngredients(RecipesQueryParams.Params queryParams) {
         IncludedIngredients.Builder builder = IncludedIngredients.builder();
 
         if (queryParams.inIngs != null && queryParams.inIngs.size() > 0) {
@@ -69,7 +71,7 @@ public class RecipeControllerQueryMapping {
         return builder.build();
     }
 
-    private static AdditionalIngredients toAdditionalIngredients(RecipesControllerQuery.Params queryParams) {
+    private static AdditionalIngredients toAdditionalIngredients(RecipesQueryParams.Params queryParams) {
         if (queryParams.goodAdditionalIngs == null) {
             return null;
         }
