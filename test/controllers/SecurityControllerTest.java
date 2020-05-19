@@ -39,7 +39,7 @@ public class SecurityControllerTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application;
 
-    private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
+    private static final Logger.ALogger logger = Logger.of(SecurityControllerTest.class);
 
     public SecurityControllerTest() {
         application = new PlayApplicationWithGuiceDbRider(
