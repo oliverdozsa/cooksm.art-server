@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import lombokized.dto.PageDto;
 import lombokized.dto.RecipeDto;
-import data.entities.Recipe;
-import lombokized.repositories.Page;
-import data.repositories.RecipeRepository;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -20,24 +17,17 @@ import queryparams.RecipesQueryParams;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
-import services.DtoMapper;
 import services.RecipesService;
 
 import javax.inject.Inject;
-import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static play.libs.Json.toJson;
-import static services.RecipesQueryParamsMapping.*;
 
 
 public class RecipesController extends Controller {
-    @Inject
-    private RecipeRepository repository;
-
     @Inject
     private FormFactory formFactory;
 
@@ -64,7 +54,7 @@ public class RecipesController extends Controller {
 
     public CompletionStage<Result> pageRecipes(Http.Request request) {
         Either<JsonNode, RecipesQueryParams.SearchMode> jsonNodeOrSearchMode =
-                retreiveSearchMode(request);
+                retrieveSearchMode(request);
 
         if (jsonNodeOrSearchMode.isLeft()) {
             // Request has error
@@ -79,7 +69,8 @@ public class RecipesController extends Controller {
     }
 
     public CompletionStage<Result> singleRecipe(Long id, Long languageId) {
-        return repository.single(id).thenApply(r -> toResult(r, languageId))
+        return service.single(id, languageId)
+                .thenApplyAsync(this::toResult, executionContext.current())
                 .exceptionally(mapException);
     }
 
@@ -101,45 +92,34 @@ public class RecipesController extends Controller {
             ValidationError ve = new ValidationError("", "Unkown search mode!");
             return completedFuture(badRequest(Json.toJson(ve.messages())));
         }
-
-
     }
 
     private CompletionStage<Result> getRecipesForQueryTypeNumber(RecipesQueryParams.Params params) {
-        return repository.pageOfQueryTypeNumber(toQueryTypeNumber(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
+        return service.pageOfQueryTypeNumber(params)
+                .thenApplyAsync(this::toResult, executionContext.current())
                 .exceptionally(mapException);
     }
 
     private CompletionStage<Result> getRecipesForQueryTypeRatio(RecipesQueryParams.Params params) {
-        return repository.pageOfQueryTypeRatio(toQueryTypeRatio(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
+        return service.pageOfQueryTypeRatio(params)
+                .thenApplyAsync(this::toResult, executionContext.current())
                 .exceptionally(mapException);
     }
 
     private CompletionStage<Result> getRecipesForQueryTypeNone(RecipesQueryParams.Params params) {
-        return repository.pageOfQueryTypeNone(toCommon(params))
-                .thenApplyAsync(page -> toResult(page, params.languageId), executionContext.current())
+        return service.pageOfQueryTypeNone(params)
+                .thenApplyAsync(this::toResult)
                 .exceptionally(mapException);
     }
 
-    private Result toResult(Page<Recipe> page, Long languageId) {
-        Long usedLanguageId = getLanguageIdOrDefault(languageId);
-        List<RecipeDto> dtos = page.getItems()
-                .stream()
-                .map(entity -> DtoMapper.toDto(entity, usedLanguageId))
-                .collect(Collectors.toList());
-
-        return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
+    private Result toResult(PageDto<RecipeDto> pageDto) {
+        return ok(toJson(pageDto));
     }
 
-    private Result toResult(Recipe recipe, Long languageId) {
-        if (recipe == null) {
+    private Result toResult(RecipeDto dto) {
+        if (dto == null) {
             return notFound();
-
         } else {
-            Long usedLanguageId = getLanguageIdOrDefault(languageId);
-            RecipeDto dto = DtoMapper.toDto(recipe, usedLanguageId);
             return ok(toJson(dto));
         }
     }
@@ -155,11 +135,7 @@ public class RecipesController extends Controller {
         }
     }
 
-    private Long getDefaultLanguageId() {
-        return config.getLong("openrecipes.default.languageid");
-    }
-
-    private Either<JsonNode, RecipesQueryParams.SearchMode> retreiveSearchMode(Http.Request request) {
+    private Either<JsonNode, RecipesQueryParams.SearchMode> retrieveSearchMode(Http.Request request) {
         // Get form without groups to access search mode.
         Form<RecipesQueryParams.Params> form =
                 formFactory.form(RecipesQueryParams.Params.class)
@@ -173,17 +149,5 @@ public class RecipesController extends Controller {
 
             return new Right<>(searchMode);
         }
-    }
-
-    private Long getLanguageIdOrDefault(Long id) {
-        if (id == null) {
-            return getDefaultLanguageId();
-        }
-
-        if (id == 0L) {
-            return getDefaultLanguageId();
-        }
-
-        return id;
     }
 }

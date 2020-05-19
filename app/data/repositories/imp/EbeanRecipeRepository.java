@@ -37,9 +37,6 @@ public class EbeanRecipeRepository implements RecipeRepository {
             Query<Recipe> query = prepare(sqlString, params.getCommon());
             setIncludedIngredientsConditions(query, params.getIncludedIngredients());
             setAdditionalIngredientsConditions(query, params.getAdditionalIngredients());
-            checkMutuallyExclusive(params.getIncludedIngredients(), params.getCommon().getExcludedIngredients());
-            checkMutuallyExclusive(params.getAdditionalIngredients(), params.getCommon().getExcludedIngredients());
-            checkMutuallyExclusive(params.getAdditionalIngredients(), params.getIncludedIngredients());
 
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);
@@ -54,7 +51,6 @@ public class EbeanRecipeRepository implements RecipeRepository {
             sqlString = replaceQueryTypeRatioParams(sqlString, params);
             Query<Recipe> query = prepare(sqlString, params.getCommon());
             setIncludedIngredientsConditions(query, params.getIncludedIngredients());
-            checkMutuallyExclusive(params.getIncludedIngredients(), params.getCommon().getExcludedIngredients());
 
             return new Page<>(query.findList(), query.findCount());
 
@@ -234,38 +230,6 @@ public class EbeanRecipeRepository implements RecipeRepository {
         String replaced = sql;
         replaced = replaced.replace(":ratio", params.getGoodIngredientsRatio().toString());
         return replaced;
-    }
-
-    private static void checkMutuallyExclusive(Optional<AdditionalIngredients> additional, List<Long> excluded) {
-        if(additional.isPresent() && !areMutuallyExclusive(additional.get().getAdditionalIngredients(), excluded)){
-            throw new IllegalArgumentException("Additional and excluded ingredients are not mutually exclusive!");
-        }
-    }
-
-    private static void checkMutuallyExclusive(Optional<AdditionalIngredients> additional, IncludedIngredients included) {
-        if(additional.isPresent() && !areMutuallyExclusive(additional.get().getAdditionalIngredients(), included.getIncludedIngredients())){
-            throw new IllegalArgumentException("Additional and included ingredients are not mutually exclusive!");
-        }
-    }
-
-    private static void checkMutuallyExclusive(IncludedIngredients included, List<Long> excluded) {
-        if(!areMutuallyExclusive(included.getIncludedIngredients(), excluded)){
-            throw new IllegalArgumentException("Included and excluded ingredients are not mutually exclusive!");
-        }
-    }
-
-    private static boolean areMutuallyExclusive(List<Long> included, List<Long> excluded) {
-        if (included == null || excluded == null) {
-            return true;
-        }
-
-        for (Long id : included) {
-            if (excluded.contains(id)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static RecipeQuerySql.Configuration createConfig(QueryTypeNumber params) {
