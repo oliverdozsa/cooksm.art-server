@@ -4,8 +4,8 @@ import lombokized.dto.IngredientTagDto;
 import lombokized.dto.PageDto;
 import lombokized.queryparams.IngredientTagQueryParams;
 import lombokized.repositories.Page;
-import models.entities.IngredientTag;
-import models.repositories.IngredientTagRepository;
+import data.entities.IngredientTag;
+import data.repositories.IngredientTagRepository;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -13,6 +13,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.DtoMapper;
 
 import javax.inject.Inject;
 import java.util.List;

@@ -5,8 +5,8 @@ import lombokized.dto.FavoriteRecipeCreateDto;
 import lombokized.dto.FavoriteRecipeDto;
 import lombokized.dto.PageDto;
 import lombokized.repositories.Page;
-import models.entities.FavoriteRecipe;
-import models.repositories.FavoriteRecipeRepository;
+import data.entities.FavoriteRecipe;
+import data.repositories.FavoriteRecipeRepository;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -18,6 +18,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import security.SecurityUtils;
 import security.VerifiedJwt;
+import services.DtoMapper;
 
 import javax.inject.Inject;
 import java.util.List;

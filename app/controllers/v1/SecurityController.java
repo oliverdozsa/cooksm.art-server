@@ -7,7 +7,7 @@ import lombokized.dto.UserSocialLoginDto;
 import lombokized.security.VerifiedFacebookUserInfo;
 import lombokized.security.VerifiedGoogleUserInfo;
 import lombokized.security.VerifiedUserInfo;
-import models.repositories.UserRepository;
+import data.repositories.UserRepository;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;

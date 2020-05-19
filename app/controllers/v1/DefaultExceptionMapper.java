@@ -1,8 +1,8 @@
 package controllers.v1;
 
 import com.google.common.base.Function;
-import models.repositories.exceptions.BusinessLogicViolationException;
-import models.repositories.exceptions.NotFoundException;
+import data.repositories.exceptions.BusinessLogicViolationException;
+import data.repositories.exceptions.NotFoundException;
 import play.Logger;
 import play.data.validation.ValidationError;
 import play.libs.Json;

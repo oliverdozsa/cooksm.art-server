@@ -1,7 +1,7 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
-import models.repositories.RecipeSearchRepository;
+import data.repositories.RecipeSearchRepository;
 import play.Logger;
 import play.data.FormFactory;
 import play.libs.concurrent.HttpExecutionContext;

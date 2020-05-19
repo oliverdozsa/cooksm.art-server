@@ -3,8 +3,8 @@ package controllers.v1;
 import lombokized.dto.IngredientNameDto;
 import lombokized.dto.PageDto;
 import lombokized.queryparams.IngredientNameQueryParams;
-import models.entities.IngredientName;
-import models.repositories.IngredientNameRepository;
+import data.entities.IngredientName;
+import data.repositories.IngredientNameRepository;
 import lombokized.repositories.Page;
 import play.Logger;
 import play.data.Form;
@@ -13,6 +13,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.DtoMapper;
 
 import javax.inject.Inject;
 import java.util.List;

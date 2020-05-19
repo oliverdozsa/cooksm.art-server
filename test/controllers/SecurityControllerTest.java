@@ -10,7 +10,7 @@ import io.ebean.Ebean;
 import lombokized.security.VerifiedFacebookUserInfo;
 import lombokized.security.VerifiedGoogleUserInfo;
 import lombokized.security.VerifiedUserInfo;
-import models.entities.User;
+import data.entities.User;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
