@@ -1,19 +1,18 @@
 package data.repositories.imp;
 
 import com.typesafe.config.Config;
-import io.ebean.Ebean;
-import io.ebean.EbeanServer;
-import io.ebean.Query;
-import lombokized.repositories.Page;
 import data.DatabaseExecutionContext;
 import data.entities.RecipeSearch;
 import data.entities.User;
 import data.entities.UserSearch;
 import data.repositories.UserSearchRepository;
+import io.ebean.Ebean;
+import io.ebean.EbeanServer;
+import io.ebean.Query;
+import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
-import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
