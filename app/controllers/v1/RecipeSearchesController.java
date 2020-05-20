@@ -6,6 +6,7 @@ import play.Logger;
 import play.data.FormFactory;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -30,6 +31,11 @@ public class RecipeSearchesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesController.class);
 
     public CompletionStage<Result> get(String id) {
+        // TODO
+        return completedFuture(notFound());
+    }
+
+    public CompletionStage<Result> create(Http.Request request){
         // TODO
         return completedFuture(notFound());
     }
