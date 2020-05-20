@@ -1,1 +1,22 @@
-# TODO
+recipe_search:
+  - id: 239327 # Initial value + 1000
+    query: >
+      {
+        "searchMode": "composed-of-number",
+        "goodIngs": 3,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    last_accessed: 2020-01-11 04:02:00
+    is_permanent: false
+
+  - id: 239328 # Initial value + 1000
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    last_accessed: 2020-01-11 04:02:00
+    is_permanent: false

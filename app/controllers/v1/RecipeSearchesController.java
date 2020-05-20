@@ -6,8 +6,12 @@ import play.Logger;
 import play.data.FormFactory;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
+import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.util.concurrent.CompletionStage;
+
+import static java.util.concurrent.CompletableFuture.completedFuture;
 
 public class RecipeSearchesController extends Controller {
     @Inject
@@ -25,5 +29,8 @@ public class RecipeSearchesController extends Controller {
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesController.class);
 
-    // TODO
+    public CompletionStage<Result> get(String id) {
+        // TODO
+        return completedFuture(notFound());
+    }
 }

@@ -18,6 +18,7 @@ libraryDependencies += "com.h2database" % "h2" % "1.4.192"
 libraryDependencies ++= Seq(evolutions, jdbc)
 libraryDependencies += "com.auth0" % "java-jwt" % "3.8.2"
 libraryDependencies ++= Seq(javaWs)
+libraryDependencies += "io.seruco.encoding" % "base62" % "0.1.3"
 
 libraryDependencies ++= Seq(javaJpa % "test", "org.hibernate" % "hibernate-core" % "5.4.2.Final" % "test")
 libraryDependencies += "com.github.database-rider" % "rider-core" % "1.7.2" % "test"

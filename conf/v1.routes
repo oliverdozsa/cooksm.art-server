@@ -15,7 +15,7 @@ GET    /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.singl
 DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delete(id: Long, request: Request)
 
 # Recipe searches
-# TODO
+GET   /recipesearches/:id         controllers.v1.RecipeSearchesController.get(id: String)
 
 # Security
 POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
