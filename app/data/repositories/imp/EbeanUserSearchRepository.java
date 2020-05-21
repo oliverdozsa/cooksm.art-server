@@ -5,6 +5,7 @@ import data.DatabaseExecutionContext;
 import data.entities.RecipeSearch;
 import data.entities.User;
 import data.entities.UserSearch;
+import data.repositories.RecipeSearchRepository;
 import data.repositories.UserSearchRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
@@ -21,28 +22,30 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class EbeanUserSearchRepository implements UserSearchRepository {
     private DatabaseExecutionContext executionContext;
     private EbeanServer ebean;
+    private RecipeSearchRepository recipeSearchRepository;
     private int maxPerUser;
 
     @Inject
-    public EbeanUserSearchRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext, Config config) {
+    public EbeanUserSearchRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext, Config config,
+                                     RecipeSearchRepository recipeSearchRepository) {
         this.executionContext = executionContext;
         ebean = Ebean.getServer(ebeanConfig.defaultServer());
         maxPerUser = config.getInt("receptnekem.usersearches.maxperuser");
+        this.recipeSearchRepository = recipeSearchRepository;
     }
 
     @Override
     public CompletionStage<Long> create(String query, String name, Long userId) {
-        return supplyAsync(() -> {
+        return recipeSearchRepository.create(query, true).thenApplyAsync(search -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             if (name == null || name.length() == 0) {
                 throw new IllegalArgumentException("name is empty!");
             }
 
-            RecipeSearch recipeSearch = createRecipeSearch(query);
             User user = ebean.find(User.class, userId);
 
             UserSearch userSearch = new UserSearch();
-            userSearch.setSearch(recipeSearch);
+            userSearch.setSearch(search);
             userSearch.setUser(user);
             userSearch.setName(name);
             ebean.save(userSearch);
@@ -86,18 +89,5 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
             userSearch.getSearch().setQuery(query);
             ebean.save(userSearch);
         }, executionContext);
-    }
-
-    private RecipeSearch createRecipeSearch(String query) {
-        if (query == null || query.length() == 0) {
-            throw new IllegalArgumentException("query is empty!");
-        }
-
-        RecipeSearch entity = new RecipeSearch();
-
-        entity.setQuery(query);
-        entity.setPermanent(true);
-
-        return entity;
     }
 }

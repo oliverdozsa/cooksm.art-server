@@ -24,18 +24,20 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<Long> create(String query) {
+    public CompletionStage<RecipeSearch> create(String query, boolean isPermanent) {
         return supplyAsync(() -> {
             if (query == null || query.length() == 0) {
                 throw new IllegalArgumentException("query is empty!");
             }
 
             RecipeSearch entity = new RecipeSearch();
-            entity.setLastAccessed(Instant.now());
-            entity.setPermanent(false);
+            if (!isPermanent) {
+                entity.setLastAccessed(Instant.now());
+            }
+            entity.setPermanent(isPermanent);
             entity.setQuery(query);
             ebean.save(entity);
-            return entity.getId();
+            return entity;
         }, executionContext);
     }
 
