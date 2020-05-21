@@ -7,6 +7,7 @@ import security.SocialTokenVerifier;
 import security.imp.JwtCenterImp;
 import security.imp.SocialTokenVerifierFacebookImp;
 import security.imp.SocialTokenVerifierGoogleImp;
+import services.RecipeSearchService;
 import services.RecipesService;
 
 /**
@@ -29,5 +30,6 @@ public class Module extends AbstractModule {
         bind(RecipeSearchRepository.class).to(EbeanRecipeSearchRepository.class).asEagerSingleton();
         bind(UserSearchRepository.class).to(EbeanUserSearchRepository.class).asEagerSingleton();
         bind(GlobalSearchRepository.class).to(EbeanGlobalSearchRepository.class).asEagerSingleton();
+        bind(RecipeSearchService.class);
     }
 }

@@ -158,4 +158,11 @@ public class RecipeSearchesControllerTest {
         Result response = route(application.getApplication(), httpCreateRequest);
         assertEquals("Created request above the maximum threshold!", FORBIDDEN, response.status());
     }
+
+    @Test
+    public void testCreate_InvalidSearchMode(){
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testCreate_InvalidSearchMode");
+        logger.info("------------------------------------------------------------------------------------------------");
+    }
 }

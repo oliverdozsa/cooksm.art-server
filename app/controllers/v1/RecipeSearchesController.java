@@ -3,16 +3,19 @@ package controllers.v1;
 import com.typesafe.config.Config;
 import data.repositories.RecipeSearchRepository;
 import play.Logger;
+import play.data.Form;
 import play.data.FormFactory;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import queryparams.RecipesQueryParams;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class RecipeSearchesController extends Controller {
     @Inject
@@ -35,7 +38,7 @@ public class RecipeSearchesController extends Controller {
         return completedFuture(notFound());
     }
 
-    public CompletionStage<Result> create(Http.Request request){
+    public CompletionStage<Result> create(Http.Request request) {
         // TODO
         return completedFuture(notFound());
     }
