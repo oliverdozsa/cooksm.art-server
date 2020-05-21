@@ -1,6 +1,5 @@
 package controllers.v1;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import lombokized.dto.PageDto;
 import lombokized.dto.RecipeDto;
@@ -14,9 +13,6 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import queryparams.RecipesQueryParams;
-import scala.util.Either;
-import scala.util.Left;
-import scala.util.Right;
 import services.RecipesService;
 
 import javax.inject.Inject;
@@ -53,18 +49,13 @@ public class RecipesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 
     public CompletionStage<Result> pageRecipes(Http.Request request) {
-        Either<JsonNode, RecipesQueryParams.SearchMode> jsonNodeOrSearchMode =
-                retrieveSearchMode(request);
+        RecipesQueryParamsRetrieve retriever = new RecipesQueryParamsRetrieve(formFactory, request);
+        Form<RecipesQueryParams.Params> form = retriever.retrieve();
 
-        if (jsonNodeOrSearchMode.isLeft()) {
-            // Request has error
-            logger.warn("pageRecipes(): request has error!");
-            JsonNode errorJson = jsonNodeOrSearchMode.left().get();
-            return completedFuture(badRequest(errorJson));
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
         } else {
-            RecipesQueryParams.SearchMode searchMode = jsonNodeOrSearchMode.right().get();
-            logger.info("pageRecipes(): searchMode = {}", searchMode);
-            return refineRequestBy(searchMode, request);
+            return refineRequest(form);
         }
     }
 
@@ -74,18 +65,15 @@ public class RecipesController extends Controller {
                 .exceptionally(mapException);
     }
 
-    private CompletionStage<Result> refineRequestBy(RecipesQueryParams.SearchMode searchMode, Http.Request request) {
+    private CompletionStage<Result> refineRequest(Form<RecipesQueryParams.Params> form) {
+        String searchModeStr = form.get().searchMode;
+        RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(searchModeStr);
+
         if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
-            Form<RecipesQueryParams.Params> form = formFactory.form(RecipesQueryParams.Params.class, RecipesQueryParams.VGRecSearchModeComposedOf.class)
-                    .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesForQueryTypeNumber);
         } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
-            Form<RecipesQueryParams.Params> form = formFactory.form(RecipesQueryParams.Params.class, RecipesQueryParams.VGRecSearchModeComposedOfRatio.class)
-                    .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesForQueryTypeRatio);
         } else if (searchMode == RecipesQueryParams.SearchMode.NONE) {
-            Form<RecipesQueryParams.Params> form = formFactory.form(RecipesQueryParams.Params.class)
-                    .bindFromRequest(request);
             return pageOrBadRequest(form, this::getRecipesForQueryTypeNone);
         } else {
             logger.warn("refineRequestBy(): unknown search mode! searchMode = {}", searchMode);
@@ -132,22 +120,6 @@ public class RecipesController extends Controller {
             T formValue = form.get();
             logger.info("pageOrBadRequest(): formValue = {}", formValue);
             return resultProducer.apply(formValue);
-        }
-    }
-
-    private Either<JsonNode, RecipesQueryParams.SearchMode> retrieveSearchMode(Http.Request request) {
-        // Get form without groups to access search mode.
-        Form<RecipesQueryParams.Params> form =
-                formFactory.form(RecipesQueryParams.Params.class)
-                        .bindFromRequest(request);
-
-        if (form.hasErrors()) {
-            return new Left<>(form.errorsAsJson());
-        } else {
-            String searchModeStr = form.get().searchMode;
-            RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(searchModeStr);
-
-            return new Right<>(searchMode);
         }
     }
 }
