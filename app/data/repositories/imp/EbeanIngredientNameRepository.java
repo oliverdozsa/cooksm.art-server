@@ -10,6 +10,8 @@ import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -41,6 +43,23 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
             query.orderBy("relevanceScore desc");
 
             return new Page<>(query.findList(), query.findCount());
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<List<IngredientName>> byIds(List<Long> ids) {
+        return supplyAsync(() -> {
+            List<IngredientName> names = new ArrayList<>();
+            ids.forEach(id -> {
+                IngredientName ingredientName = ebean.find(IngredientName.class, id);
+                if (ingredientName == null) {
+                    throw new IllegalArgumentException("ID is not valid. ID = " + id);
+                }
+
+                names.add(ingredientName);
+            });
+
+            return names;
         }, executionContext);
     }
 }

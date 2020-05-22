@@ -1,12 +1,12 @@
 package dto;
 
-import queryparams.RecipesQueryParams;
+import lombokized.dto.RecipeSearchQueryDto;
 
 public class RecipeSearchDto {
     private final String id;
-    private final RecipesQueryParams.Params query;
+    private final RecipeSearchQueryDto query;
 
-    public RecipeSearchDto(String id, RecipesQueryParams.Params query) {
+    public RecipeSearchDto(String id, RecipeSearchQueryDto query) {
         this.id = id;
         this.query = query;
     }
@@ -15,7 +15,7 @@ public class RecipeSearchDto {
         return id;
     }
 
-    public RecipesQueryParams.Params getQuery() {
+    public RecipeSearchQueryDto getQuery() {
         return query;
     }
 }

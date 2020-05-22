@@ -3,6 +3,7 @@ package services;
 import data.entities.*;
 import lombokized.dto.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,5 +57,23 @@ public class DtoMapper {
         List<Long> ingredientsIds =
                 entity.getIngredients().stream().map(Ingredient::getId).collect(Collectors.toList());
         return new IngredientTagDto(entity.getId(), entity.getName(), ingredientsIds);
+    }
+
+    public static List<IngredientNameDto> toIngredientNameDtoList(List<IngredientName> ingredientNames) {
+        List<IngredientNameDto> dtoList = new ArrayList<>();
+        ingredientNames.forEach(e -> dtoList.add(toDto(e)));
+        return dtoList;
+    }
+
+    public static List<IngredientTagDto> toIngredientTagDtoList(List<IngredientTag> ingredientTags) {
+        List<IngredientTagDto> dtoList = new ArrayList<>();
+        ingredientTags.forEach(e -> dtoList.add(toDto(e)));
+        return dtoList;
+    }
+
+    public static List<SourcePageDto> toSourcePageDtoList(List<SourcePage> sourcePages) {
+        List<SourcePageDto> dtoList = new ArrayList<>();
+        sourcePages.forEach(e -> dtoList.add(toDto(e)));
+        return dtoList;
     }
 }

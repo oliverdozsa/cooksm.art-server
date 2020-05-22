@@ -10,6 +10,7 @@ import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -35,5 +36,11 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<List<IngredientTag>> byIds(List<Long> ids) {
+        // TODO
+        return null;
     }
 }

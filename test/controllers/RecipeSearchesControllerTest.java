@@ -1,11 +1,15 @@
 package controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import data.entities.RecipeSearch;
 import io.ebean.Ebean;
 import io.seruco.encoding.base62.Base62;
+import lombokized.dto.IngredientNameDto;
+import lombokized.dto.IngredientTagDto;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
@@ -17,9 +21,9 @@ import rules.PlayApplicationWithGuiceDbRider;
 
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.*;
 import static play.mvc.Http.HttpVerbs.GET;
 import static play.mvc.Http.HttpVerbs.POST;
 import static play.mvc.Http.Status.*;
@@ -63,7 +67,7 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate() {
+    public void testCreate() throws JsonProcessingException {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -73,7 +77,14 @@ public class RecipeSearchesControllerTest {
                 "\"searchMode\": \"composed-of-number\"," +
                 "\"goodIngs\": 3," +
                 "\"goodIngsRel\": \"ge\"," +
-                "\"inIngs\": [1, 2, 3]" +
+                "\"goodAdditionalIngs\": 2," +
+                "\"inIngs\": [1, 2, 3]," +
+                "\"inIngTags\": [1]," +
+                "\"exIngs\": [4, 7]," +
+                "\"exIngTags\": [2]," +
+                "\"addIngs\": [5]," +
+                "\"addIngTags\": [6]," +
+                "\"sourcePages\": [1, 2]" +
                 "}"
         );
 
@@ -102,8 +113,32 @@ public class RecipeSearchesControllerTest {
         assertEquals("Ids are not matching", encodedId, responseJson.get("id").asText());
         JsonNode query = responseJson.get("query");
         assertEquals("Wrong query in result!", "composed-of-number", query.get("searchMode").asText());
-        assertEquals("Number of ingredients is wrong", 3, query.get("inIngs").size());
         assertEquals("Good ingredients is wrong", 3, query.get("goodIngs").asInt());
+        assertEquals("Number of included ingredients is wrong", 3, query.get("inIngs").size());
+        assertEquals("Number of included ingredient tags is wrong", 1, query.get("inIngTags").size());
+        assertEquals("Number of excluded ingredients is wrong", 2, query.get("exIngs").size());
+        assertEquals("Number of excluded ingredient tags is wrong", 2, query.get("exIngTags").size());
+        assertEquals("Number of additional ingredients is wrong", 1, query.get("addIngs").size());
+        assertEquals("Number of additional ingredient tags is wrong", 1, query.get("addIngTags").size());
+        assertEquals("Number of source pages is wrong", 1, query.get("sourcePages").size());
+
+        List<IngredientNameDto> includedIngredients = Json.mapper().readValue(query.get("inIngs").toString(), new TypeReference<List<IngredientNameDto>>() {
+        });
+
+        List<IngredientTagDto> includedIngredientTags = Json.mapper().readValue(query.get("inIngTags").toString(), new TypeReference<List<IngredientTagDto>>() {
+        });
+
+        List<IngredientNameDto> excludedIngredients = Json.mapper().readValue(query.get("exIngs").toString(), new TypeReference<List<IngredientNameDto>>() {
+        });
+
+        List<IngredientTagDto> excludedIngredientTags = Json.mapper().readValue(query.get("exIngTags").toString(), new TypeReference<List<IngredientTagDto>>() {
+        });
+
+        List<IngredientNameDto> additionalIngredients = Json.mapper().readValue(query.get("addIngs").toString(), new TypeReference<List<IngredientNameDto>>() {
+        });
+
+        List<IngredientTagDto> additionalIngredientTags = Json.mapper().readValue(query.get("addIngTags").toString(), new TypeReference<List<IngredientTagDto>>() {
+        });
     }
 
     @Test
@@ -164,5 +199,47 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate_InvalidSearchMode");
         logger.info("------------------------------------------------------------------------------------------------");
+
+        JsonNode searchJson = Json.parse("" +
+                "{" +
+                "\"searchMode\": \"some-random-search-mode\"," +
+                "\"goodIngs\": 3," +
+                "\"goodIngsRel\": \"ge\"," +
+                "\"inIngs\": [1, 2, 3]" +
+                "}"
+        );
+
+        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
+                .method(POST)
+                .bodyJson(searchJson)
+                .uri(routes.RecipeSearchesController.create().url());
+
+        Result response = route(application.getApplication(), httpCreateRequest);
+        assertEquals(BAD_REQUEST, response.status());
+    }
+
+    @Test
+    public void testCreate_InvalidNotMutuallyExclusive(){
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testCreate_InvalidNotMutuallyExclusive");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        JsonNode searchJson = Json.parse("" +
+                "{" +
+                "\"searchMode\": \"composed-of-number\"," +
+                "\"goodIngs\": 3," +
+                "\"goodIngsRel\": \"ge\"," +
+                "\"inIngs\": [1, 2, 3]," +
+                "\"exIngs\": [1, 5, 6]" +
+                "}"
+        );
+
+        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
+                .method(POST)
+                .bodyJson(searchJson)
+                .uri(routes.RecipeSearchesController.create().url());
+
+        Result response = route(application.getApplication(), httpCreateRequest);
+        assertEquals(BAD_REQUEST, response.status());
     }
 }
