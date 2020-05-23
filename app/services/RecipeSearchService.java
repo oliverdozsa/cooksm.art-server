@@ -1,13 +1,14 @@
 package services;
 
-import data.entities.RecipeSearch;
+import controllers.v1.routes;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.SourcePageRepository;
-import dto.RecipeSearchDto;
 import io.seruco.encoding.base62.Base62;
+import lombokized.dto.RecipeSearchDto;
 import lombokized.repositories.RecipeRepositoryParams;
+import play.Logger;
 import play.libs.Json;
 import queryparams.RecipesQueryParams;
 
@@ -32,8 +33,24 @@ public class RecipeSearchService {
 
     private Base62 base62 = Base62.createInstance();
 
-    public CompletionStage<RecipeSearchDto> create(RecipesQueryParams.Params query, boolean isPermanent) {
-        RecipeSearchQueryDtoResolver resolver = new RecipeSearchQueryDtoResolver(query);
+    private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
+
+    public CompletionStage<RecipeSearchDto> get(String id) {
+        byte[] idBytes = base62.decode(id.getBytes());
+        long decodedId = new BigInteger(idBytes).longValue();
+
+        return recipeSearchRepository.read(decodedId)
+                .thenApplyAsync(entity -> {
+                    if (entity == null) {
+                        return null;
+                    }
+
+                    return DtoMapper.toDto(entity);
+                });
+    }
+
+    public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
+        RecipeSearchCreateDtoResolver resolver = new RecipeSearchCreateDtoResolver(query);
         resolver.setIngredientNameRepository(ingredientNameRepository);
         resolver.setIngredientTagRepository(ingredientTagRepository);
         resolver.setSourcePageRepository(sourcePageRepository);
@@ -44,10 +61,9 @@ public class RecipeSearchService {
                     String queryStr = Json.toJson(dto).toString();
                     return recipeSearchRepository.create(queryStr, isPermanent);
                 })
-                .thenApplyAsync(e -> {
-                    byte[] encodedId = base62.encode(BigInteger.valueOf(e.getId()).toByteArray());
-                    String encodedIdString = new String(encodedId);
-                    return new RecipeSearchDto(encodedIdString, resolver.getDto());
+                .thenApplyAsync(id -> {
+                    byte[] encodedId = base62.encode(BigInteger.valueOf(id).toByteArray());
+                    return new String(encodedId);
                 });
     }
 

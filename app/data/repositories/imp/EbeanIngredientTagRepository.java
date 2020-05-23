@@ -2,14 +2,15 @@ package data.repositories.imp;
 
 import data.DatabaseExecutionContext;
 import data.entities.IngredientTag;
+import data.repositories.IngredientTagRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
-import data.repositories.IngredientTagRepository;
 import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -40,7 +41,17 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
     @Override
     public CompletionStage<List<IngredientTag>> byIds(List<Long> ids) {
-        // TODO
-        return null;
+        return supplyAsync(() -> {
+            List<IngredientTag> tags = new ArrayList<>();
+            ids.forEach(id -> {
+                IngredientTag entity = ebean.find(IngredientTag.class, id);
+                if (entity == null) {
+                    throw new IllegalArgumentException("ID is not valid. ID = " + id);
+                }
+
+                tags.add(entity);
+            });
+            return tags;
+        }, executionContext);
     }
 }

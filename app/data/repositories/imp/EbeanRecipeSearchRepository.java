@@ -24,7 +24,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<RecipeSearch> create(String query, boolean isPermanent) {
+    public CompletionStage<Long> create(String query, boolean isPermanent) {
         return supplyAsync(() -> {
             if (query == null || query.length() == 0) {
                 throw new IllegalArgumentException("query is empty!");
@@ -37,7 +37,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
             entity.setPermanent(isPermanent);
             entity.setQuery(query);
             ebean.save(entity);
-            return entity;
+            return entity.getId();
         }, executionContext);
     }
 
@@ -47,13 +47,13 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<String> read(Long id) {
+    public CompletionStage<RecipeSearch> read(Long id) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, id);
             RecipeSearch entity = ebean.find(RecipeSearch.class, id);
             entity.setLastAccessed(Instant.now());
             ebean.save(entity);
-            return entity.getQuery();
+            return entity;
         }, executionContext);
     }
 }

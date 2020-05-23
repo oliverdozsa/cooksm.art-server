@@ -6,7 +6,7 @@ import data.repositories.IngredientTagRepository;
 import data.repositories.SourcePageRepository;
 import lombokized.dto.IngredientNameDto;
 import lombokized.dto.IngredientTagDto;
-import lombokized.dto.RecipeSearchQueryDto;
+import lombokized.dto.RecipeSearchCreateDto;
 import lombokized.dto.SourcePageDto;
 import queryparams.RecipesQueryParams;
 
@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static services.DtoMapper.*;
 
-class RecipeSearchQueryDtoResolver {
+class RecipeSearchCreateDtoResolver {
     private IngredientNameRepository ingredientNameRepository;
     private IngredientTagRepository ingredientTagRepository;
     private SourcePageRepository sourcePageRepository;
@@ -31,9 +32,11 @@ class RecipeSearchQueryDtoResolver {
     private List<IngredientTagDto> additionalIngredientTags;
     private List<SourcePageDto> sourcePages;
 
-    private RecipeSearchQueryDto dto;
+    private RecipeSearchCreateDto dto;
 
-    public RecipeSearchQueryDtoResolver(RecipesQueryParams.Params queryParams) {
+    private CompletionStage<Void> noopStage = completedFuture(null);
+
+    public RecipeSearchCreateDtoResolver(RecipesQueryParams.Params queryParams) {
         this.queryParams = queryParams;
     }
 
@@ -49,7 +52,7 @@ class RecipeSearchQueryDtoResolver {
         this.sourcePageRepository = sourcePageRepository;
     }
 
-    public CompletionStage<RecipeSearchQueryDto> resolve() {
+    public CompletionStage<RecipeSearchCreateDto> resolve() {
         return collectIncludedIngredients()
                 .thenComposeAsync(v -> collectIncludedIngredients())
                 .thenComposeAsync(v -> collectExcludedIngredients())
@@ -64,41 +67,69 @@ class RecipeSearchQueryDtoResolver {
                 });
     }
 
-    public RecipeSearchQueryDto getDto() {
+    public RecipeSearchCreateDto getDto() {
         return dto;
     }
 
     private CompletionStage<Void> collectIncludedIngredients() {
+        if (queryParams.inIngs == null) {
+            return noopStage;
+        }
+
         return ingredientNameRepository.byIds(queryParams.inIngs)
                 .thenAcceptAsync(l -> includedIngredients = toIngredientNameDtoList(l));
     }
 
     private CompletionStage<Void> collectExcludedIngredients() {
+        if (queryParams.exIngs == null) {
+            return noopStage;
+        }
+
         return ingredientNameRepository.byIds(queryParams.exIngs)
                 .thenAcceptAsync(l -> excludedIngredients = toIngredientNameDtoList(l));
     }
 
     private CompletionStage<Void> collectAdditionalIngredients() {
+        if (queryParams.addIngs == null) {
+            return noopStage;
+        }
+
         return ingredientNameRepository.byIds(queryParams.addIngs)
                 .thenAcceptAsync(l -> additionalIngredients = toIngredientNameDtoList(l));
     }
 
     private CompletionStage<Void> collectIncludedIngredientTags() {
+        if (queryParams.inIngTags == null) {
+            return noopStage;
+        }
+
         return ingredientTagRepository.byIds(queryParams.inIngTags)
                 .thenAcceptAsync(l -> includedIngredientTags = toIngredientTagDtoList(l));
     }
 
     private CompletionStage<Void> collectExcludedIngredientTags() {
+        if (queryParams.exIngTags == null) {
+            return noopStage;
+        }
+
         return ingredientTagRepository.byIds(queryParams.exIngTags)
                 .thenAcceptAsync(l -> excludedIngredientTags = toIngredientTagDtoList(l));
     }
 
     private CompletionStage<Void> collectAdditionalIngredientTags() {
+        if (queryParams.addIngTags == null) {
+            return noopStage;
+        }
+
         return ingredientTagRepository.byIds(queryParams.addIngTags)
                 .thenAcceptAsync(l -> additionalIngredientTags = toIngredientTagDtoList(l));
     }
 
     private CompletionStage<Void> collectSourcePages() {
+        if (queryParams.sourcePages == null) {
+            return noopStage;
+        }
+
         return sourcePageRepository.allSourcePages()
                 .thenAcceptAsync(l -> {
                     RecipesQueryParams.Params query = queryParams;
@@ -109,8 +140,8 @@ class RecipeSearchQueryDtoResolver {
                 });
     }
 
-    private RecipeSearchQueryDto toDto() {
-        return RecipeSearchQueryDto.builder()
+    private RecipeSearchCreateDto toDto() {
+        return RecipeSearchCreateDto.builder()
                 .searchMode(queryParams.searchMode)
                 .minIngs(queryParams.minIngs)
                 .maxIngs(queryParams.maxIngs)

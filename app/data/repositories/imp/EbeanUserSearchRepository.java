@@ -36,16 +36,17 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
 
     @Override
     public CompletionStage<Long> create(String query, String name, Long userId) {
-        return recipeSearchRepository.create(query, true).thenApplyAsync(search -> {
+        return recipeSearchRepository.create(query, true).thenApplyAsync(searchId -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             if (name == null || name.length() == 0) {
                 throw new IllegalArgumentException("name is empty!");
             }
 
             User user = ebean.find(User.class, userId);
+            RecipeSearch recipeSearch = ebean.find(RecipeSearch.class, searchId);
 
             UserSearch userSearch = new UserSearch();
-            userSearch.setSearch(search);
+            userSearch.setSearch(recipeSearch);
             userSearch.setUser(user);
             userSearch.setName(name);
             ebean.save(userSearch);

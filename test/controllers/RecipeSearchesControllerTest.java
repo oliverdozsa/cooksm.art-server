@@ -1,8 +1,9 @@
 package controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import data.entities.RecipeSearch;
@@ -16,14 +17,18 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.test.Helpers;
 import rules.PlayApplicationWithGuiceDbRider;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static play.mvc.Http.HeaderNames.LOCATION;
 import static play.mvc.Http.HttpVerbs.GET;
 import static play.mvc.Http.HttpVerbs.POST;
 import static play.mvc.Http.Status.*;
@@ -67,7 +72,7 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate() throws JsonProcessingException {
+    public void testCreate() throws IOException {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -77,6 +82,8 @@ public class RecipeSearchesControllerTest {
                 "\"searchMode\": \"composed-of-number\"," +
                 "\"goodIngs\": 3," +
                 "\"goodIngsRel\": \"ge\"," +
+                "\"unknownIngs\": \"0\"," +
+                "\"unknownIngsRel\": \"ge\"," +
                 "\"goodAdditionalIngs\": 2," +
                 "\"inIngs\": [1, 2, 3]," +
                 "\"inIngTags\": [1]," +
@@ -94,51 +101,47 @@ public class RecipeSearchesControllerTest {
                 .uri(routes.RecipeSearchesController.create().url());
 
         Result response = route(application.getApplication(), httpCreateRequest);
+        assertEquals("Response status is not CREATED!", CREATED, response.status());
+        assertTrue("Missing Location header!", response.header(LOCATION).isPresent());
+
+        String location = response.header(LOCATION).get();
+
+        // Check if returned id can be queried.
+        Http.RequestBuilder httpGetRequest = new Http.RequestBuilder()
+                .method(GET)
+                .uri(location);
+        response = route(application.getApplication(), httpGetRequest);
         assertEquals("Response status is not OK!", OK, response.status());
 
         String responseStr = contentAsString(response);
         JsonNode responseJson = Json.parse(responseStr);
-        assertNotNull("Content is invalid!", responseJson.get("id"));
-
-        // Check if returned id can be queried.
-        String encodedId = responseJson.get("id").asText();
-        Http.RequestBuilder httpGetRequest = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.RecipeSearchesController.get(encodedId).url());
-        response = route(application.getApplication(), httpGetRequest);
-        assertEquals("Response status is not OK!", OK, response.status());
-
-        responseStr = contentAsString(response);
-        responseJson = Json.parse(responseStr);
-        assertEquals("Ids are not matching", encodedId, responseJson.get("id").asText());
-        JsonNode query = responseJson.get("query");
+        JsonNode query = Json.parse(responseJson.get("query").asText());
         assertEquals("Wrong query in result!", "composed-of-number", query.get("searchMode").asText());
         assertEquals("Good ingredients is wrong", 3, query.get("goodIngs").asInt());
         assertEquals("Number of included ingredients is wrong", 3, query.get("inIngs").size());
         assertEquals("Number of included ingredient tags is wrong", 1, query.get("inIngTags").size());
         assertEquals("Number of excluded ingredients is wrong", 2, query.get("exIngs").size());
-        assertEquals("Number of excluded ingredient tags is wrong", 2, query.get("exIngTags").size());
+        assertEquals("Number of excluded ingredient tags is wrong", 1, query.get("exIngTags").size());
         assertEquals("Number of additional ingredients is wrong", 1, query.get("addIngs").size());
         assertEquals("Number of additional ingredient tags is wrong", 1, query.get("addIngTags").size());
-        assertEquals("Number of source pages is wrong", 1, query.get("sourcePages").size());
+        assertEquals("Number of source pages is wrong", 2, query.get("sourcePages").size());
 
-        List<IngredientNameDto> includedIngredients = Json.mapper().readValue(query.get("inIngs").toString(), new TypeReference<List<IngredientNameDto>>() {
-        });
 
-        List<IngredientTagDto> includedIngredientTags = Json.mapper().readValue(query.get("inIngTags").toString(), new TypeReference<List<IngredientTagDto>>() {
-        });
+        List<String> includedIngredientsNames = extractNames(query.get("inIngs"));
+        List<String> excludedIngredientsNames = extractNames(query.get("exIngs"));
+        List<String> additionalIngredientsNames = extractNames(query.get("addIngs"));
+        List<String> includedIngredientTagNames = extractNames(query.get("inIngTags"));
+        List<String> excludedIngredientTagNames = extractNames(query.get("exIngTags"));
+        List<String> additionalIngredientTagNames = extractNames(query.get("addIngTags"));
+        List<String> sourcePageNames = extractNames(query.get("sourcePages"));
 
-        List<IngredientNameDto> excludedIngredients = Json.mapper().readValue(query.get("exIngs").toString(), new TypeReference<List<IngredientNameDto>>() {
-        });
-
-        List<IngredientTagDto> excludedIngredientTags = Json.mapper().readValue(query.get("exIngTags").toString(), new TypeReference<List<IngredientTagDto>>() {
-        });
-
-        List<IngredientNameDto> additionalIngredients = Json.mapper().readValue(query.get("addIngs").toString(), new TypeReference<List<IngredientNameDto>>() {
-        });
-
-        List<IngredientTagDto> additionalIngredientTags = Json.mapper().readValue(query.get("addIngTags").toString(), new TypeReference<List<IngredientTagDto>>() {
-        });
+        assertTrue(includedIngredientsNames.containsAll(Arrays.asList("ingredient_1", "ingredient_2", "ingredient_3")));
+        assertTrue(excludedIngredientsNames.containsAll(Arrays.asList("ingredient_4", "ingredient_7")));
+        assertTrue(additionalIngredientsNames.containsAll(Arrays.asList("ingredient_5")));
+        assertTrue(includedIngredientTagNames.containsAll(Arrays.asList("ingredient_tag_1")));
+        assertTrue(excludedIngredientTagNames.containsAll(Arrays.asList("ingredient_tag_2")));
+        assertTrue(additionalIngredientTagNames.containsAll(Arrays.asList("ingredient_tag_6")));
+        assertTrue(sourcePageNames.containsAll(Arrays.asList("src_pg_1", "src_pg_2")));
     }
 
     @Test
@@ -241,5 +244,12 @@ public class RecipeSearchesControllerTest {
 
         Result response = route(application.getApplication(), httpCreateRequest);
         assertEquals(BAD_REQUEST, response.status());
+    }
+
+    private List<String> extractNames(JsonNode node){
+        List<String> names = new ArrayList<>();
+        ArrayNode arrayNode = (ArrayNode)node;
+        arrayNode.forEach(n -> names.add(n.get("name").asText()));
+        return names;
     }
 }

@@ -1,11 +1,12 @@
 package controllers.v1;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
-import data.repositories.RecipeSearchRepository;
-import dto.RecipeSearchDto;
+import lombokized.dto.RecipeSearchDto;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
@@ -19,7 +20,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class RecipeSearchesController extends Controller {
     @Inject
@@ -37,12 +37,18 @@ public class RecipeSearchesController extends Controller {
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
-
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesController.class);
 
     public CompletionStage<Result> get(String id) {
-        // TODO
-        return completedFuture(notFound());
+        if (id == null || id.length() == 0) {
+            logger.warn("ID is empty!");
+            ValidationError error = new ValidationError("", "ID is empty");
+            return completedFuture(badRequest(Json.toJson(error.messages())));
+        }
+
+        return service.get(id)
+                .thenApplyAsync(this::toResult)
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> create(Http.Request request) {
@@ -50,11 +56,24 @@ public class RecipeSearchesController extends Controller {
         Form<RecipesQueryParams.Params> form = retriever.retrieve();
 
         if (form.hasErrors()) {
-            return completedFuture(badRequest(form.errorsAsJson()));
+            JsonNode errorsJson = form.errorsAsJson();
+            logger.warn("Query params has errors! error = {}", errorsJson.toPrettyString());
+            return completedFuture(badRequest(errorsJson));
         }
 
         return service.create(form.get(), false)
-                .thenApplyAsync(dto -> ok(Json.toJson(dto)), httpExecutionContext.current())
+                .thenApplyAsync(id -> {
+                    String location = routes.RecipeSearchesController.get(id).absoluteURL(request);
+                    return created().withHeader(LOCATION, location);
+                }, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
+    }
+
+    private Result toResult(RecipeSearchDto dto) {
+        if (dto == null) {
+            return notFound();
+        }
+
+        return ok(Json.toJson(dto));
     }
 }

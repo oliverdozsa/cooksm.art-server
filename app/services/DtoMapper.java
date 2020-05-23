@@ -59,6 +59,10 @@ public class DtoMapper {
         return new IngredientTagDto(entity.getId(), entity.getName(), ingredientsIds);
     }
 
+    public static RecipeSearchDto toDto(RecipeSearch entity) {
+        return new RecipeSearchDto(entity.getQuery());
+    }
+
     public static List<IngredientNameDto> toIngredientNameDtoList(List<IngredientName> ingredientNames) {
         List<IngredientNameDto> dtoList = new ArrayList<>();
         ingredientNames.forEach(e -> dtoList.add(toDto(e)));
