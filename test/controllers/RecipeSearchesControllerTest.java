@@ -274,6 +274,39 @@ public class RecipeSearchesControllerTest {
         assertEquals(BAD_REQUEST, response.status());
     }
 
+    @Test
+    public void testCreate_InvalidEntityDoesntExist() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testCreate_InvalidEntityDoesntExist");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        JsonNode searchJson = Json.parse("" +
+                "{" +
+                "\"searchMode\": \"composed-of-number\"," +
+                "\"goodIngs\": 3," +
+                "\"goodIngsRel\": \"ge\"," +
+                "\"unknownIngs\": \"0\"," +
+                "\"unknownIngsRel\": \"ge\"," +
+                "\"goodAdditionalIngs\": 2," +
+                "\"inIngs\": [1, 2, 3, 42]," +
+                "\"inIngTags\": [1]," +
+                "\"exIngs\": [4, 7]," +
+                "\"exIngTags\": [2]," +
+                "\"addIngs\": [5]," +
+                "\"addIngTags\": [6]," +
+                "\"sourcePages\": [1, 2]" +
+                "}"
+        );
+
+        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
+                .method(POST)
+                .bodyJson(searchJson)
+                .uri(routes.RecipeSearchesController.create().url());
+
+        Result response = route(application.getApplication(), httpCreateRequest);
+        assertEquals(BAD_REQUEST, response.status());
+    }
+
     private List<String> extractNames(JsonNode node) {
         List<String> names = new ArrayList<>();
         ArrayNode arrayNode = (ArrayNode) node;

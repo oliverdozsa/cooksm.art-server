@@ -10,12 +10,14 @@ import play.db.ebean.EbeanConfig;
 import javax.inject.Inject;
 import java.time.Instant;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     private EbeanServer ebean;
     private DatabaseExecutionContext executionContext;
+    private static AtomicInteger count;
 
     @Inject
     public EbeanRecipeSearchRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext) {
@@ -37,13 +39,20 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
             entity.setPermanent(isPermanent);
             entity.setQuery(query);
             ebean.save(entity);
+            count.incrementAndGet();
             return entity.getId();
         }, executionContext);
     }
 
     @Override
     public CompletionStage<Boolean> delete(Long id) {
-        return supplyAsync(() -> ebean.delete(RecipeSearch.class, id) == 1, executionContext);
+        return supplyAsync(() -> {
+            boolean isDeleted = ebean.delete(RecipeSearch.class, id) == 1;
+            if (isDeleted) {
+                count.decrementAndGet();
+            }
+            return isDeleted;
+        }, executionContext);
     }
 
     @Override
@@ -55,5 +64,19 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
             ebean.save(entity);
             return entity;
         }, executionContext);
+    }
+
+    @Override
+    public int getCount() {
+        if(count == null) {
+            initCount(ebean);
+        }
+
+        return count.get();
+    }
+
+    private static synchronized void initCount(EbeanServer ebean) {
+        int countEntities = ebean.createQuery(RecipeSearch.class).findCount();
+        count = new AtomicInteger(countEntities);
     }
 }

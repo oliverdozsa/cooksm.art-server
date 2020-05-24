@@ -27,11 +27,11 @@ public class Module extends AbstractModule {
         bind(SocialTokenVerifier.class).annotatedWith(Names.named("Google")).to(SocialTokenVerifierGoogleImp.class).asEagerSingleton();
         bind(SocialTokenVerifier.class).annotatedWith(Names.named("Facebook")).to(SocialTokenVerifierFacebookImp.class).asEagerSingleton();
         bind(IngredientTagRepository.class).to(EbeanIngredientTagRepository.class).asEagerSingleton();
-        bind(RecipesService.class);
+        bind(RecipesService.class).asEagerSingleton();
         bind(RecipeSearchRepository.class).to(EbeanRecipeSearchRepository.class).asEagerSingleton();
         bind(UserSearchRepository.class).to(EbeanUserSearchRepository.class).asEagerSingleton();
         bind(GlobalSearchRepository.class).to(EbeanGlobalSearchRepository.class).asEagerSingleton();
-        bind(RecipeSearchService.class);
-        bind(LanguageService.class);
+        bind(RecipeSearchService.class).asEagerSingleton();
+        bind(LanguageService.class).asEagerSingleton();
     }
 }

@@ -57,7 +57,14 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
 
     @Override
     public CompletionStage<Boolean> delete(Long id) {
-        return supplyAsync(() -> ebean.delete(UserSearch.class, id) == 1, executionContext);
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
+            UserSearch userSearch = Ebean.find(UserSearch.class, id);
+            recipeSearchRepository.delete(userSearch.getSearch().getId());
+            ebean.delete(userSearch);
+
+            return true;
+        }, executionContext);
     }
 
     @Override
@@ -88,6 +95,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
             UserSearch userSearch = ebean.find(UserSearch.class, searchId);
             userSearch.setName(name);
             userSearch.getSearch().setQuery(query);
+            ebean.save(userSearch.getSearch());
             ebean.save(userSearch);
         }, executionContext);
     }

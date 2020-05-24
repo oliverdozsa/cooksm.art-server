@@ -1,10 +1,12 @@
 package services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.typesafe.config.Config;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.SourcePageRepository;
+import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.NotFoundException;
 import io.seruco.encoding.base62.Base62;
 import lombokized.dto.RecipeSearchDto;
@@ -17,7 +19,9 @@ import javax.inject.Inject;
 import java.math.BigInteger;
 import java.util.concurrent.CompletionStage;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.runAsync;
+import static play.mvc.Results.badRequest;
 
 public class RecipeSearchService {
     @Inject
@@ -35,7 +39,13 @@ public class RecipeSearchService {
     @Inject
     private LanguageService languageService;
 
+    @Inject
+    private Config config;
+
     private Base62 base62 = Base62.createInstance();
+
+    private Integer maxQuerySizeChars;
+    private Integer maxQueryCount;
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
 
@@ -64,10 +74,16 @@ public class RecipeSearchService {
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
         prepareQuery(query);
+        logger.info("create(): query = {}, isPermanent = {}", query, isPermanent);
 
-        return runAsync(() -> checkQueryParams(query))
+        return runAsync(this::checkQueryCount)
+                .thenComposeAsync(v -> checkQueryParams(query))
                 .thenComposeAsync(dto -> {
                     String queryStr = Json.toJson(query).toString();
+                    if (queryStr.length() > getMaxQuerySizeChars()) {
+                        throw new BusinessLogicViolationException("Query is too long! length = " + queryStr.length());
+                    }
+
                     return recipeSearchRepository.create(queryStr, isPermanent);
                 })
                 .thenApplyAsync(id -> {
@@ -76,15 +92,17 @@ public class RecipeSearchService {
                 });
     }
 
-    private void checkQueryParams(RecipesQueryParams.Params query) {
-        RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(query.searchMode);
-        if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
-            RecipeRepositoryParams.QueryTypeNumber queryTypeNumber = RecipesQueryParamsMapping.toQueryTypeNumber(query);
-            RecipeRepositoryQueryCheck.check(queryTypeNumber);
-        } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
-            RecipeRepositoryParams.QueryTypeRatio queryTypeRatio = RecipesQueryParamsMapping.toQueryTypeRatio(query);
-            RecipeRepositoryQueryCheck.check(queryTypeRatio);
-        }
+    private CompletionStage<Void> checkQueryParams(RecipesQueryParams.Params query) {
+        return runAsync(() -> {
+            RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(query.searchMode);
+            if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
+                RecipeRepositoryParams.QueryTypeNumber queryTypeNumber = RecipesQueryParamsMapping.toQueryTypeNumber(query);
+                RecipeRepositoryQueryCheck.check(queryTypeNumber);
+            } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
+                RecipeRepositoryParams.QueryTypeRatio queryTypeRatio = RecipesQueryParamsMapping.toQueryTypeRatio(query);
+                RecipeRepositoryQueryCheck.check(queryTypeRatio);
+            }
+        }).thenComposeAsync(v -> checkEntitiesExist(query));
     }
 
     private void prepareQuery(RecipesQueryParams.Params query) {
@@ -146,5 +164,27 @@ public class RecipeSearchService {
         }
 
         return checkStage;
+    }
+
+    public Integer getMaxQuerySizeChars() {
+        if (maxQuerySizeChars == null) {
+            maxQuerySizeChars = config.getInt("receptnekem.recipesearches.max.query.size");
+        }
+
+        return maxQuerySizeChars;
+    }
+
+    private void checkQueryCount() {
+        if (recipeSearchRepository.getCount() >= getMaxQueryCount()) {
+            throw new BusinessLogicViolationException("Query count limit reached!");
+        }
+    }
+
+    public Integer getMaxQueryCount() {
+        if (maxQueryCount == null) {
+            maxQueryCount = config.getInt("receptnekem.recipesearches.max.query.count");
+        }
+
+        return maxQueryCount;
     }
 }

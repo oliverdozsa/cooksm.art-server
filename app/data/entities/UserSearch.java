@@ -17,7 +17,7 @@ public class UserSearch {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "search_id")
     private RecipeSearch search;
 
