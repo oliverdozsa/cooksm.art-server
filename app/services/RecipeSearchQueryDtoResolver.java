@@ -6,7 +6,7 @@ import data.repositories.IngredientTagRepository;
 import data.repositories.SourcePageRepository;
 import lombokized.dto.IngredientNameDto;
 import lombokized.dto.IngredientTagDto;
-import lombokized.dto.RecipeSearchCreateDto;
+import lombokized.dto.RecipeSearchQueryDto;
 import lombokized.dto.SourcePageDto;
 import queryparams.RecipesQueryParams;
 
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static services.DtoMapper.*;
 
-class RecipeSearchCreateDtoResolver {
+class RecipeSearchQueryDtoResolver {
     private IngredientNameRepository ingredientNameRepository;
     private IngredientTagRepository ingredientTagRepository;
     private SourcePageRepository sourcePageRepository;
@@ -32,13 +32,9 @@ class RecipeSearchCreateDtoResolver {
     private List<IngredientTagDto> additionalIngredientTags;
     private List<SourcePageDto> sourcePages;
 
-    private RecipeSearchCreateDto dto;
+    private RecipeSearchQueryDto dto;
 
     private CompletionStage<Void> noopStage = completedFuture(null);
-
-    public RecipeSearchCreateDtoResolver(RecipesQueryParams.Params queryParams) {
-        this.queryParams = queryParams;
-    }
 
     public void setIngredientNameRepository(IngredientNameRepository ingredientNameRepository) {
         this.ingredientNameRepository = ingredientNameRepository;
@@ -52,7 +48,11 @@ class RecipeSearchCreateDtoResolver {
         this.sourcePageRepository = sourcePageRepository;
     }
 
-    public CompletionStage<RecipeSearchCreateDto> resolve() {
+    public void setQueryParams(RecipesQueryParams.Params queryParams) {
+        this.queryParams = queryParams;
+    }
+
+    public CompletionStage<RecipeSearchQueryDto> resolve() {
         return collectIncludedIngredients()
                 .thenComposeAsync(v -> collectIncludedIngredients())
                 .thenComposeAsync(v -> collectExcludedIngredients())
@@ -67,7 +67,7 @@ class RecipeSearchCreateDtoResolver {
                 });
     }
 
-    public RecipeSearchCreateDto getDto() {
+    public RecipeSearchQueryDto getDto() {
         return dto;
     }
 
@@ -140,8 +140,8 @@ class RecipeSearchCreateDtoResolver {
                 });
     }
 
-    private RecipeSearchCreateDto toDto() {
-        return RecipeSearchCreateDto.builder()
+    private RecipeSearchQueryDto toDto() {
+        return RecipeSearchQueryDto.builder()
                 .searchMode(queryParams.searchMode)
                 .minIngs(queryParams.minIngs)
                 .maxIngs(queryParams.maxIngs)

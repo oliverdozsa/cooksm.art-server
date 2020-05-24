@@ -7,7 +7,7 @@ import java.util.List;
 
 @Value
 @Builder(builderClassName = "Builder")
-public class RecipeSearchCreateDto {
+public class RecipeSearchQueryDto {
     String searchMode;
     Integer minIngs;
     Integer maxIngs;

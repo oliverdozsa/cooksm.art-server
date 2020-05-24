@@ -1,5 +1,6 @@
 package queryparams;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -13,6 +14,7 @@ public class RecipesQueryParams {
     }
 
     @Constraints.Validate
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Params implements Constraints.Validatable<ValidationError> {
         @Constraints.Pattern("(composed-of-number|composed-of-ratio)")
         public String searchMode;

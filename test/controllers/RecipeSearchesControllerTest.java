@@ -1,16 +1,12 @@
 package controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import data.entities.RecipeSearch;
 import io.ebean.Ebean;
 import io.seruco.encoding.base62.Base62;
-import lombokized.dto.IngredientNameDto;
-import lombokized.dto.IngredientTagDto;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
@@ -115,7 +111,7 @@ public class RecipeSearchesControllerTest {
 
         String responseStr = contentAsString(response);
         JsonNode responseJson = Json.parse(responseStr);
-        JsonNode query = Json.parse(responseJson.get("query").asText());
+        JsonNode query = responseJson.get("query");
         assertEquals("Wrong query in result!", "composed-of-number", query.get("searchMode").asText());
         assertEquals("Good ingredients is wrong", 3, query.get("goodIngs").asInt());
         assertEquals("Number of included ingredients is wrong", 3, query.get("inIngs").size());
@@ -198,7 +194,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
-    public void testCreate_InvalidSearchMode(){
+    public void testCreate_InvalidSearchMode() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate_InvalidSearchMode");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -222,7 +218,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
-    public void testCreate_InvalidNotMutuallyExclusive(){
+    public void testCreate_InvalidNotMutuallyExclusive() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate_InvalidNotMutuallyExclusive");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -246,9 +242,42 @@ public class RecipeSearchesControllerTest {
         assertEquals(BAD_REQUEST, response.status());
     }
 
-    private List<String> extractNames(JsonNode node){
+    @Test
+    public void testSizeLimit() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testSizeLimit");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        JsonNode searchJson = Json.parse("" +
+                "{" +
+                "\"searchMode\": \"composed-of-number\"," +
+                "\"goodIngs\": 3," +
+                "\"goodIngsRel\": \"ge\"," +
+                "\"unknownIngs\": \"0\"," +
+                "\"unknownIngsRel\": \"ge\"," +
+                "\"goodAdditionalIngs\": 2," +
+                "\"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
+                "\"inIngTags\": [1, 2, 3, 4, 5]," +
+                "\"exIngs\": [21, 22, 23, 24, 25]," +
+                "\"exIngTags\": [6, 7, 8]," +
+                "\"addIngs\": [26, 27, 28, 29]," +
+                "\"addIngTags\": [9, 10, 11]," +
+                "\"sourcePages\": [1, 2]" +
+                "}"
+        );
+
+        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
+                .method(POST)
+                .bodyJson(searchJson)
+                .uri(routes.RecipeSearchesController.create().url());
+
+        Result response = route(application.getApplication(), httpCreateRequest);
+        assertEquals(BAD_REQUEST, response.status());
+    }
+
+    private List<String> extractNames(JsonNode node) {
         List<String> names = new ArrayList<>();
-        ArrayNode arrayNode = (ArrayNode)node;
+        ArrayNode arrayNode = (ArrayNode) node;
         arrayNode.forEach(n -> names.add(n.get("name").asText()));
         return names;
     }
