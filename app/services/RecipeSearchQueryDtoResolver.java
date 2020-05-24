@@ -36,6 +36,8 @@ class RecipeSearchQueryDtoResolver {
 
     private CompletionStage<Void> noopStage = completedFuture(null);
 
+    private Long usedLanguageId;
+
     public void setIngredientNameRepository(IngredientNameRepository ingredientNameRepository) {
         this.ingredientNameRepository = ingredientNameRepository;
     }
@@ -46,6 +48,10 @@ class RecipeSearchQueryDtoResolver {
 
     public void setSourcePageRepository(SourcePageRepository sourcePageRepository) {
         this.sourcePageRepository = sourcePageRepository;
+    }
+
+    public void setUsedLanguageId(Long usedLanguageId) {
+        this.usedLanguageId = usedLanguageId;
     }
 
     public void setQueryParams(RecipesQueryParams.Params queryParams) {
@@ -76,7 +82,7 @@ class RecipeSearchQueryDtoResolver {
             return noopStage;
         }
 
-        return ingredientNameRepository.byIds(queryParams.inIngs)
+        return ingredientNameRepository.byIngredientIds(queryParams.inIngs, usedLanguageId)
                 .thenAcceptAsync(l -> includedIngredients = toIngredientNameDtoList(l));
     }
 
@@ -85,7 +91,7 @@ class RecipeSearchQueryDtoResolver {
             return noopStage;
         }
 
-        return ingredientNameRepository.byIds(queryParams.exIngs)
+        return ingredientNameRepository.byIngredientIds(queryParams.exIngs, usedLanguageId)
                 .thenAcceptAsync(l -> excludedIngredients = toIngredientNameDtoList(l));
     }
 
@@ -94,7 +100,7 @@ class RecipeSearchQueryDtoResolver {
             return noopStage;
         }
 
-        return ingredientNameRepository.byIds(queryParams.addIngs)
+        return ingredientNameRepository.byIngredientIds(queryParams.addIngs, usedLanguageId)
                 .thenAcceptAsync(l -> additionalIngredients = toIngredientNameDtoList(l));
     }
 

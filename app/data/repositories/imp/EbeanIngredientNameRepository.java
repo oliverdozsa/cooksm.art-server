@@ -1,6 +1,7 @@
 package data.repositories.imp;
 
 import data.DatabaseExecutionContext;
+import data.entities.Ingredient;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
@@ -12,6 +13,7 @@ import play.db.ebean.EbeanConfig;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -47,14 +49,23 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
     }
 
     @Override
-    public CompletionStage<List<IngredientName>> byIds(List<Long> ids) {
+    public CompletionStage<List<IngredientName>> byIngredientIds(List<Long> ids, Long languageId) {
         return supplyAsync(() -> {
             List<IngredientName> names = new ArrayList<>();
             ids.forEach(id -> {
-                IngredientName ingredientName = ebean.find(IngredientName.class, id);
-                if (ingredientName == null) {
+                Ingredient ingredient = ebean.find(Ingredient.class, id);
+
+                if (ingredient == null) {
                     throw new IllegalArgumentException("ID is not valid. ID = " + id);
                 }
+
+                IngredientName ingredientName = ingredient.getNames().stream()
+                        .filter(n -> n.getLanguage().getId().equals(languageId))
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Not found ingredient name with language id. ingredient ID = " + id + ", languageId = " + languageId)
+                        );
 
                 names.add(ingredientName);
             });

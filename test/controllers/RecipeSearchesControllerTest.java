@@ -122,7 +122,6 @@ public class RecipeSearchesControllerTest {
         assertEquals("Number of additional ingredient tags is wrong", 1, query.get("addIngTags").size());
         assertEquals("Number of source pages is wrong", 2, query.get("sourcePages").size());
 
-
         List<String> includedIngredientsNames = extractNames(query.get("inIngs"));
         List<String> excludedIngredientsNames = extractNames(query.get("exIngs"));
         List<String> additionalIngredientsNames = extractNames(query.get("addIngs"));

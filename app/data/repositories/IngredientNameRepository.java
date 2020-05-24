@@ -8,5 +8,5 @@ import java.util.concurrent.CompletionStage;
 
 public interface IngredientNameRepository {
     CompletionStage<Page<IngredientName>> page(String nameLike, Long languageId, int limit, int offset);
-    CompletionStage<List<IngredientName>> byIds(List<Long> ids);
+    CompletionStage<List<IngredientName>> byIngredientIds(List<Long> ids, Long languageId);
 }

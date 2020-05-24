@@ -32,6 +32,9 @@ public class RecipeSearchService {
     @Inject
     private SourcePageRepository sourcePageRepository;
 
+    @Inject
+    private LanguageService languageService;
+
     private Base62 base62 = Base62.createInstance();
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
@@ -53,14 +56,14 @@ public class RecipeSearchService {
                     JsonNode queryJson = Json.parse(entity.getQuery());
                     RecipesQueryParams.Params queryParams = Json.fromJson(queryJson, RecipesQueryParams.Params.class);
                     resolver.setQueryParams(queryParams);
+                    resolver.setUsedLanguageId(languageService.getLanguageIdOrDefault(queryParams.languageId));
                     return resolver.resolve();
                 })
                 .thenApplyAsync(RecipeSearchDto::new);
     }
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
-        query.offset = null;
-        query.limit = null;
+        prepareQuery(query);
 
         return runAsync(() -> checkQueryParams(query))
                 .thenComposeAsync(dto -> {
@@ -82,5 +85,66 @@ public class RecipeSearchService {
             RecipeRepositoryParams.QueryTypeRatio queryTypeRatio = RecipesQueryParamsMapping.toQueryTypeRatio(query);
             RecipeRepositoryQueryCheck.check(queryTypeRatio);
         }
+    }
+
+    private void prepareQuery(RecipesQueryParams.Params query) {
+        query.offset = null;
+        query.limit = null;
+
+        if (query.inIngs != null && query.inIngs.size() == 0) {
+            query.inIngs = null;
+        }
+
+        if (query.exIngs != null && query.exIngs.size() == 0) {
+            query.exIngs = null;
+        }
+
+        if (query.addIngs != null && query.addIngs.size() == 0) {
+            query.addIngs = null;
+        }
+
+        if (query.inIngTags != null && query.inIngTags.size() == 0) {
+            query.inIngTags = null;
+        }
+
+        if (query.exIngTags != null && query.exIngTags.size() == 0) {
+            query.exIngTags = null;
+        }
+
+        if (query.addIngTags != null && query.addIngTags.size() == 0) {
+            query.addIngTags = null;
+        }
+    }
+
+    private CompletionStage<Void> checkEntitiesExist(RecipesQueryParams.Params query) {
+        CompletionStage<Void> checkStage = runAsync(() -> {
+        });
+        Long usedLanguageId = languageService.getLanguageIdOrDefault(query.languageId);
+
+        if (query.inIngs != null) {
+            checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.inIngs, usedLanguageId));
+        }
+
+        if (query.exIngs != null) {
+            checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.exIngs, usedLanguageId));
+        }
+
+        if (query.addIngs != null) {
+            checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.addIngs, usedLanguageId));
+        }
+
+        if (query.inIngTags != null) {
+            checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.inIngTags));
+        }
+
+        if (query.exIngTags != null) {
+            checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.exIngTags));
+        }
+
+        if (query.addIngTags != null) {
+            checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.addIngTags));
+        }
+
+        return checkStage;
     }
 }

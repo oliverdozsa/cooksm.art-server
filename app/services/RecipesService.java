@@ -26,6 +26,9 @@ public class RecipesService {
     @Inject
     private Config config;
 
+    @Inject
+    private LanguageService languageService;
+
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params params) {
         return supplyAsync(supplyQueryTypeNumber(params))
                 .thenCompose(q -> repository.pageOfQueryTypeNumber(q))
@@ -48,7 +51,7 @@ public class RecipesService {
         return repository.single(id)
                 .thenApplyAsync(e -> {
                     if (e != null) {
-                        Long usedLanguageId = getLanguageIdOrDefault(languageId);
+                        Long usedLanguageId = languageService.getLanguageIdOrDefault(languageId);
                         return DtoMapper.toDto(e, usedLanguageId);
                     } else {
                         return null;
@@ -57,24 +60,12 @@ public class RecipesService {
     }
 
     private PageDto<RecipeDto> toPageDto(Page<Recipe> page, Long languageId) {
-        Long usedLanguageId = getLanguageIdOrDefault(languageId);
+        Long usedLanguageId = languageService.getLanguageIdOrDefault(languageId);
         List<RecipeDto> dtos = page.getItems()
                 .stream()
                 .map(entity -> DtoMapper.toDto(entity, usedLanguageId))
                 .collect(Collectors.toList());
         return new PageDto<>(dtos, page.getTotalCount());
-    }
-
-    private Long getLanguageIdOrDefault(Long id) {
-        if (id == null || id == 0L) {
-            return getDefaultLanguageId();
-        }
-
-        return id;
-    }
-
-    private Long getDefaultLanguageId() {
-        return config.getLong("openrecipes.default.languageid");
     }
 
     private Supplier<QueryTypeNumber> supplyQueryTypeNumber(RecipesQueryParams.Params params) {

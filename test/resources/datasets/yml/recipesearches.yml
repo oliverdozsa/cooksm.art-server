@@ -15,52 +15,52 @@ language:
     iso_name: hu
 
 ingredient_name:
-  - id: 1
+  - id: 101
     language_id: 1
     ingredient_id: 1
     name: ingredient_1
 
-  - id: 2
+  - id: 102
     language_id: 1
     ingredient_id: 2
     name: ingredient_2
 
-  - id: 3
+  - id: 103
     language_id: 1
     ingredient_id: 3
     name: ingredient_3
 
-  - id: 4
+  - id: 104
     language_id: 1
     ingredient_id: 4
     name: ingredient_4
 
-  - id: 5
+  - id: 105
     language_id: 1
     ingredient_id: 5
     name: ingredient_5
 
-  - id: 6
+  - id: 106
     language_id: 1
     ingredient_id: 6
     name: ingredient_7
 
-  - id: 7
+  - id: 107
     language_id: 1
     ingredient_id: 7
     name: ingredient_7
 
-  - id: 8
+  - id: 108
     language_id: 1
     ingredient_id: 8
     name: ingredient_8
 
-  - id: 9
+  - id: 109
     language_id: 1
     ingredient_id: 9
     name: ingredient_9
 
-  - id: 10
+  - id: 110
     language_id: 1
     ingredient_id: 10
     name: ingredient_10
