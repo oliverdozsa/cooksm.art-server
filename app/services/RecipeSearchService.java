@@ -82,8 +82,9 @@ public class RecipeSearchService {
                 .thenComposeAsync(v -> checkQueryParams(query))
                 .thenComposeAsync(dto -> {
                     String queryStr = Json.toJson(query).toString();
+                    logger.info("create(): query length = {}", queryStr.length());
                     if (queryStr.length() > getMaxQuerySizeChars()) {
-                        throw new BusinessLogicViolationException("Query is too long! length = " + queryStr.length());
+                        throw new BusinessLogicViolationException("Query is too long!");
                     }
 
                     return recipeSearchRepository.create(queryStr, isPermanent);

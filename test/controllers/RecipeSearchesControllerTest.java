@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
-import data.entities.Ingredient;
-import data.entities.RecipeSearch;
+import data.entities.*;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.imp.EbeanRecipeSearchRepository;
 import io.ebean.Ebean;
@@ -53,9 +52,7 @@ public class RecipeSearchesControllerTest {
         logger.info("-- RUNNING TEST: testGet");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        // TODO: replace app with an app that replaces real cleaner with a mock.
-
-        long id = 239327L;
+        long id = 239329L;
         byte[] encodedBytes = base62.encode(BigInteger.valueOf(id).toByteArray());
         String encodedIdString = new String(encodedBytes);
 
@@ -68,9 +65,8 @@ public class RecipeSearchesControllerTest {
 
         String responseStr = contentAsString(result);
         JsonNode responseJson = Json.parse(responseStr);
-        assertEquals("Ids are not matching", encodedIdString, responseJson.get("id").asText());
         JsonNode query = responseJson.get("query");
-        assertEquals("Wrong query in result!", "composed-of-number", query.get("searchMode").asText());
+        assertEquals("Wrong query in result!", "composed-of-ratio", query.get("searchMode").asText());
     }
 
     @Test
@@ -162,7 +158,7 @@ public class RecipeSearchesControllerTest {
         // See: https://www.playframework.com/documentation/2.8.x/ScheduledTasks
         Thread.sleep(6000L);
         int count = Ebean.createQuery(RecipeSearch.class).findCount();
-        assertEquals("Expired searches are not deleted!", 1, count);
+        assertEquals("Expired searches are not deleted!", 2, count);
 
     }
 
@@ -262,6 +258,25 @@ public class RecipeSearchesControllerTest {
         logger.info("-- RUNNING TEST: testSizeLimit");
         logger.info("------------------------------------------------------------------------------------------------");
 
+        Language language = new Language();
+        language.setIsoName("hu");
+        Ebean.save(language);
+
+        for (int i = 0; i < 60; i++) {
+            Ingredient ingredient = new Ingredient();
+            Ebean.save(ingredient);
+            IngredientName ingredientName = new IngredientName();
+            ingredientName.setLanguage(language);
+            ingredientName.setName("" + i);
+            ingredientName.setIngredient(ingredient);
+            Ebean.save(ingredientName);
+        }
+
+        for (int i = 0; i < 60; i++) {
+            IngredientTag ingredientTag = new IngredientTag();
+            Ebean.save(ingredientTag);
+        }
+
         JsonNode searchJson = Json.parse("" +
                 "{" +
                 "\"searchMode\": \"composed-of-number\"," +
@@ -271,11 +286,11 @@ public class RecipeSearchesControllerTest {
                 "\"unknownIngsRel\": \"ge\"," +
                 "\"goodAdditionalIngs\": 2," +
                 "\"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
-                "\"inIngTags\": [1, 2, 3, 4, 5]," +
+                "\"inIngTags\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]," +
                 "\"exIngs\": [21, 22, 23, 24, 25]," +
                 "\"exIngTags\": [6, 7, 8]," +
-                "\"addIngs\": [26, 27, 28, 29]," +
-                "\"addIngTags\": [9, 10, 11]," +
+                "\"addIngs\": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]," +
+                "\"addIngTags\": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]," +
                 "\"sourcePages\": [1, 2]" +
                 "}"
         );
@@ -287,6 +302,8 @@ public class RecipeSearchesControllerTest {
 
         Result response = route(application.getApplication(), httpCreateRequest);
         assertEquals(BAD_REQUEST, response.status());
+        String respText = contentAsString(response);
+        assertTrue("Wrong error reason!", respText.toLowerCase().contains("too long"));
     }
 
     @Test

@@ -61,8 +61,6 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
                 if (ingredient == null) {
                     logger.warn("byIngredientIds(): ID is not valid. ID = " + id);
                     throw new IllegalArgumentException("ID is not valid. ID = " + id);
-                } else {
-                    logger.info("byIngredientIds(): ID is valid(): ID = ", id);
                 }
 
                 IngredientName ingredientName = ingredient.getNames().stream()
