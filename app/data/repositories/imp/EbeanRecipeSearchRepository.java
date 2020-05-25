@@ -23,6 +23,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     public EbeanRecipeSearchRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext) {
         this.executionContext = executionContext;
         this.ebean = Ebean.getServer(dbConfig.defaultServer());
+        initCount(ebean);
     }
 
     @Override
@@ -68,15 +69,13 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
 
     @Override
     public int getCount() {
-        if(count == null) {
-            initCount(ebean);
-        }
-
         return count.get();
     }
 
     private static synchronized void initCount(EbeanServer ebean) {
-        int countEntities = ebean.createQuery(RecipeSearch.class).findCount();
-        count = new AtomicInteger(countEntities);
+        if (count == null) {
+            int countEntities = ebean.createQuery(RecipeSearch.class).findCount();
+            count = new AtomicInteger(countEntities);
+        }
     }
 }

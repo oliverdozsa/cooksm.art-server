@@ -2,18 +2,18 @@ package data.repositories.imp;
 
 import data.DatabaseExecutionContext;
 import data.entities.Ingredient;
+import data.entities.IngredientName;
+import data.repositories.IngredientNameRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
-import data.entities.IngredientName;
-import data.repositories.IngredientNameRepository;
 import lombokized.repositories.Page;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -21,6 +21,8 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class EbeanIngredientNameRepository implements IngredientNameRepository {
     private EbeanServer ebean;
     private DatabaseExecutionContext executionContext;
+
+    private static final Logger.ALogger logger = Logger.of(EbeanIngredientNameRepository.class);
 
     @Inject
     public EbeanIngredientNameRepository(EbeanConfig config, DatabaseExecutionContext executionContext) {
@@ -52,11 +54,15 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
     public CompletionStage<List<IngredientName>> byIngredientIds(List<Long> ids, Long languageId) {
         return supplyAsync(() -> {
             List<IngredientName> names = new ArrayList<>();
+            logger.info("ids = {}", ids.toString());
             ids.forEach(id -> {
                 Ingredient ingredient = ebean.find(Ingredient.class, id);
 
                 if (ingredient == null) {
+                    logger.warn("byIngredientIds(): ID is not valid. ID = " + id);
                     throw new IllegalArgumentException("ID is not valid. ID = " + id);
+                } else {
+                    logger.info("byIngredientIds(): ID is valid(): ID = ", id);
                 }
 
                 IngredientName ingredientName = ingredient.getNames().stream()

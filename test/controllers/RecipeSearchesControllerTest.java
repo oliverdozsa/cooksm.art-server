@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
+import data.entities.Ingredient;
 import data.entities.RecipeSearch;
+import data.repositories.RecipeSearchRepository;
+import data.repositories.imp.EbeanRecipeSearchRepository;
 import io.ebean.Ebean;
 import io.seruco.encoding.base62.Base62;
 import org.junit.Rule;
@@ -15,12 +18,16 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
+import javax.inject.Inject;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -160,18 +167,21 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
-    public void testLimitReached() {
+    @DataSet(value = "datasets/yml/recipesearches-limit.yml", disableConstraints = true, cleanBefore = true)
+    public void testQueryCountLimitReached() throws ExecutionException, InterruptedException {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testLimitReached");
         logger.info("------------------------------------------------------------------------------------------------");
 
         // Fill DB with max number of searches.
-        int maxSearches = application.getApplication().config().getInt("receptnekem.recipesearches.max");
+        int maxSearches = application.getApplication().config().getInt("receptnekem.recipesearches.maxquerycount");
+        RecipeSearchRepository repository = application.getApplication().injector().instanceOf(RecipeSearchRepository.class);
+        List<Long> createdIds = new ArrayList<>();
         for (int i = 0; i < maxSearches; i++) {
-            RecipeSearch recipeSearch = new RecipeSearch();
-            recipeSearch.setQuery("someQuery" + (i + 1));
-            recipeSearch.setPermanent(true);
-            Ebean.save(recipeSearch);
+            Long id = repository.create("someQuery", true)
+                    .toCompletableFuture()
+                    .get();
+            createdIds.add(id);
         }
 
         JsonNode searchJson = Json.parse("" +
@@ -179,7 +189,9 @@ public class RecipeSearchesControllerTest {
                 "\"searchMode\": \"composed-of-number\"," +
                 "\"goodIngs\": 3," +
                 "\"goodIngsRel\": \"ge\"," +
-                "\"inIngs\": [1, 2, 3]" +
+                "\"inIngs\": [1, 2, 3]," +
+                "\"unknownIngs\": 0," +
+                "\"unknownIngsRel\": \"ge\"" +
                 "}"
         );
 
@@ -190,6 +202,9 @@ public class RecipeSearchesControllerTest {
 
         Result response = route(application.getApplication(), httpCreateRequest);
         assertEquals("Created request above the maximum threshold!", FORBIDDEN, response.status());
+        for (Long id : createdIds) {
+            repository.delete(id).toCompletableFuture().get();
+        }
     }
 
     @Test
@@ -275,6 +290,7 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidEntityDoesntExist() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate_InvalidEntityDoesntExist");

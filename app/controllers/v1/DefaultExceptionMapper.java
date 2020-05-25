@@ -2,6 +2,7 @@ package controllers.v1;
 
 import com.google.common.base.Function;
 import data.repositories.exceptions.BusinessLogicViolationException;
+import data.repositories.exceptions.ForbiddenExeption;
 import data.repositories.exceptions.NotFoundException;
 import play.Logger;
 import play.data.validation.ValidationError;
@@ -30,6 +31,11 @@ class DefaultExceptionMapper implements Function<Throwable, Result> {
         if (input instanceof NotFoundException) {
             logger.warn("Not Found!", input);
             return notFound();
+        }
+
+        if (input instanceof ForbiddenExeption) {
+            logger.warn("Forbidden!", input);
+            return forbidden();
         }
 
         logger.error("Internal Error!", input);

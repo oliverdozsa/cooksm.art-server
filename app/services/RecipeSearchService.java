@@ -7,6 +7,7 @@ import data.repositories.IngredientTagRepository;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.SourcePageRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
+import data.repositories.exceptions.ForbiddenExeption;
 import data.repositories.exceptions.NotFoundException;
 import io.seruco.encoding.base62.Base62;
 import lombokized.dto.RecipeSearchDto;
@@ -19,9 +20,7 @@ import javax.inject.Inject;
 import java.math.BigInteger;
 import java.util.concurrent.CompletionStage;
 
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.runAsync;
-import static play.mvc.Results.badRequest;
 
 public class RecipeSearchService {
     @Inject
@@ -46,6 +45,9 @@ public class RecipeSearchService {
 
     private Integer maxQuerySizeChars;
     private Integer maxQueryCount;
+
+    private CompletionStage<Void> noop = runAsync(() -> {
+    });
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
 
@@ -140,27 +142,33 @@ public class RecipeSearchService {
         Long usedLanguageId = languageService.getLanguageIdOrDefault(query.languageId);
 
         if (query.inIngs != null) {
-            checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.inIngs, usedLanguageId));
+            checkStage = checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.inIngs, usedLanguageId))
+                    .thenComposeAsync(l -> noop);
         }
 
         if (query.exIngs != null) {
-            checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.exIngs, usedLanguageId));
+            checkStage = checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.exIngs, usedLanguageId))
+                    .thenComposeAsync(l -> noop);
         }
 
         if (query.addIngs != null) {
-            checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.addIngs, usedLanguageId));
+            checkStage = checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(query.addIngs, usedLanguageId))
+                    .thenComposeAsync(l -> noop);
         }
 
         if (query.inIngTags != null) {
-            checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.inIngTags));
+            checkStage = checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.inIngTags))
+                    .thenComposeAsync(l -> noop);
         }
 
         if (query.exIngTags != null) {
-            checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.exIngTags));
+            checkStage = checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.exIngTags))
+                    .thenComposeAsync(l -> noop);
         }
 
         if (query.addIngTags != null) {
-            checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.addIngTags));
+            checkStage = checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(query.addIngTags))
+                    .thenComposeAsync(l -> noop);
         }
 
         return checkStage;
@@ -168,7 +176,7 @@ public class RecipeSearchService {
 
     public Integer getMaxQuerySizeChars() {
         if (maxQuerySizeChars == null) {
-            maxQuerySizeChars = config.getInt("receptnekem.recipesearches.max.query.size");
+            maxQuerySizeChars = config.getInt("receptnekem.recipesearches.maxquerysize");
         }
 
         return maxQuerySizeChars;
@@ -176,13 +184,13 @@ public class RecipeSearchService {
 
     private void checkQueryCount() {
         if (recipeSearchRepository.getCount() >= getMaxQueryCount()) {
-            throw new BusinessLogicViolationException("Query count limit reached!");
+            throw new ForbiddenExeption("Query count limit reached!");
         }
     }
 
     public Integer getMaxQueryCount() {
         if (maxQueryCount == null) {
-            maxQueryCount = config.getInt("receptnekem.recipesearches.max.query.count");
+            maxQueryCount = config.getInt("receptnekem.recipesearches.maxquerycount");
         }
 
         return maxQueryCount;
