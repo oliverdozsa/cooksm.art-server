@@ -5,7 +5,7 @@ import static lombokized.repositories.RecipeRepositoryParams.*;
 import java.util.List;
 import java.util.Optional;
 
-public class RecipeRepositoryQueryCheck {
+class RecipeRepositoryQueryCheck {
     public static void check(QueryTypeNumber query) {
         checkMutuallyExclusive(query.getIncludedIngredients(), query.getCommon().getExcludedIngredients());
         checkMutuallyExclusive(query.getAdditionalIngredients(), query.getCommon().getExcludedIngredients());

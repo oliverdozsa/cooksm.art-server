@@ -64,6 +64,7 @@ public class RecipeSearchesController extends Controller {
         return service.create(form.get(), false)
                 .thenApplyAsync(id -> {
                     String location = routes.RecipeSearchesController.get(id).absoluteURL(request);
+                    logger.info("create(): created query with location = {}", location);
                     return created().withHeader(LOCATION, location);
                 }, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);

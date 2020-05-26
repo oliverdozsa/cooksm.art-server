@@ -17,7 +17,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -25,7 +24,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.assertEquals;
@@ -152,11 +150,10 @@ public class RecipeSearchesControllerTest {
         RecipeSearch search = new RecipeSearch();
         search.setQuery("someQuery");
         search.setLastAccessed(Instant.now());
+        search.setPermanent(false);
         Ebean.save(search);
 
-        // TODO
-        // See: https://www.playframework.com/documentation/2.8.x/ScheduledTasks
-        Thread.sleep(6000L);
+        Thread.sleep(15000L);
         int count = Ebean.createQuery(RecipeSearch.class).findCount();
         assertEquals("Expired searches are not deleted!", 2, count);
 
@@ -164,14 +161,20 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches-limit.yml", disableConstraints = true, cleanBefore = true)
-    public void testQueryCountLimitReached() throws ExecutionException, InterruptedException {
+    public void testQueryCountLimitReached() throws Exception {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLimitReached");
+        logger.info("-- RUNNING TEST: testQueryCountLimitReached");
         logger.info("------------------------------------------------------------------------------------------------");
+
+        EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository)(application.getApplication().injector().instanceOf(RecipeSearchRepository.class));
+        Class repoClass = Class.forName("data.repositories.imp.EbeanRecipeSearchRepository");
+        Field countField = repoClass.getDeclaredField("count");
+        countField.setAccessible(true);
+        AtomicInteger count = (AtomicInteger) (countField.get(repository));
+        count.set(0);
 
         // Fill DB with max number of searches.
         int maxSearches = application.getApplication().config().getInt("receptnekem.recipesearches.maxquerycount");
-        RecipeSearchRepository repository = application.getApplication().injector().instanceOf(RecipeSearchRepository.class);
         List<Long> createdIds = new ArrayList<>();
         for (int i = 0; i < maxSearches; i++) {
             Long id = repository.create("someQuery", true)
@@ -253,9 +256,9 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
-    public void testSizeLimit() {
+    public void testQuerySizeLimitReached() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSizeLimit");
+        logger.info("-- RUNNING TEST: testQuerySizeLimitReached");
         logger.info("------------------------------------------------------------------------------------------------");
 
         Language language = new Language();

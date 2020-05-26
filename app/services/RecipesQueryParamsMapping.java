@@ -9,7 +9,7 @@ import static lombokized.repositories.RecipeRepositoryParams.IncludedIngredients
 import static lombokized.repositories.RecipeRepositoryParams.AdditionalIngredients;
 import static lombokized.repositories.RecipeRepositoryParams.Relation;
 
-public class RecipesQueryParamsMapping {
+class RecipesQueryParamsMapping {
     public static QueryTypeNumber toQueryTypeNumber(RecipesQueryParams.Params queryParams) {
         QueryTypeNumber.Builder builder = QueryTypeNumber.builder();
 

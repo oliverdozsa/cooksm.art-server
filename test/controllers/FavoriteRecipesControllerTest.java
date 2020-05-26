@@ -3,12 +3,9 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
+import data.entities.*;
 import lombokized.dto.FavoriteRecipeCreateDto;
 import io.ebean.Ebean;
-import data.entities.FavoriteRecipe;
-import data.entities.Recipe;
-import data.entities.SourcePage;
-import data.entities.User;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -128,12 +125,16 @@ public class FavoriteRecipesControllerTest {
         logger.info("-- RUNNING TEST: testCreate_Invalid_NoJson");
         logger.info("------------------------------------------------------------------------------------------------");
 
+        User user = new User();
+        user.setEmail("some@one.com");
+        Ebean.save(user);
+
         Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
                 .method(POST)
                 .bodyText("{asd")
                 .uri(routes.FavoriteRecipesController.create().url());
 
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+        String token = JwtTestUtils.createToken(10000L, user.getId(), application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
 
         Result result = route(application.getApplication(), httpRequestCreate);
@@ -166,15 +167,28 @@ public class FavoriteRecipesControllerTest {
         logger.info("-- RUNNING TEST: testCreate_Invalid_MaxReached");
         logger.info("------------------------------------------------------------------------------------------------");
 
+        Language language = new Language();
+        language.setIsoName("hu");
+        Ebean.save(language);
+
+        SourcePage sourcePage = new SourcePage();
+        sourcePage.setName("someSourcePage");
+        sourcePage.setLanguage(language);
+        Ebean.save(sourcePage);
+
+        User user = new User();
+        user.setEmail("some@user.com");
+        Ebean.save(user);
+
         int max = application.getApplication().config().getInt("receptnekem.favoriterecipes.maxperuser");
         for (int i = 0; i < max; i++) {
             Recipe recipe = new Recipe();
             recipe.setName("recipe_t_" + i);
-            recipe.setSourcePage(Ebean.find(SourcePage.class, 1L));
+            recipe.setSourcePage(sourcePage);
             Ebean.save(recipe);
 
             FavoriteRecipe favoriteRecipe = new FavoriteRecipe();
-            favoriteRecipe.setUser(Ebean.find(User.class, 1L));
+            favoriteRecipe.setUser(user);
             favoriteRecipe.setRecipe(Ebean.find(Recipe.class, recipe.getId()));
             Ebean.save(favoriteRecipe);
         }
