@@ -7,6 +7,7 @@ import data.entities.User;
 import data.entities.UserSearch;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.UserSearchRepository;
+import data.repositories.exceptions.BusinessLogicViolationException;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
@@ -23,14 +24,12 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     private DatabaseExecutionContext executionContext;
     private EbeanServer ebean;
     private RecipeSearchRepository recipeSearchRepository;
-    private int maxPerUser;
 
     @Inject
     public EbeanUserSearchRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext, Config config,
                                      RecipeSearchRepository recipeSearchRepository) {
         this.executionContext = executionContext;
         ebean = Ebean.getServer(ebeanConfig.defaultServer());
-        maxPerUser = config.getInt("receptnekem.usersearches.maxperuser");
         this.recipeSearchRepository = recipeSearchRepository;
     }
 
@@ -59,12 +58,16 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     public CompletionStage<Boolean> delete(Long id) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
-            UserSearch userSearch = Ebean.find(UserSearch.class, id);
-            recipeSearchRepository.delete(userSearch.getSearch().getId());
-            ebean.delete(userSearch);
+            return ebean.find(UserSearch.class, id);
+        }, executionContext)
+                .thenComposeAsync(e -> recipeSearchRepository.delete(e.getSearch().getId()))
+                .thenApplyAsync(deleteResult -> {
+                    if (deleteResult) {
+                        throw new BusinessLogicViolationException("User search doesn't have recipe search!");
+                    }
 
-            return true;
-        }, executionContext);
+                    return ebean.delete(UserSearch.class, id) == 1;
+                });
     }
 
     @Override
