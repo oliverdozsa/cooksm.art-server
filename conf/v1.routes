@@ -18,6 +18,18 @@ DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delet
 GET   /recipesearches/:id         controllers.v1.RecipeSearchesController.get(id: String)
 POST  /recipesearches/create      controllers.v1.RecipeSearchesController.create(request: Request)
 
+# User searches
++ jwtFilter
+GET  /usersearches/:id            controllers.v1.UserSearchesController.single(id: Long)
++ jwtFilter
+POST /usersearches/create         controllers.v1.UserSearchesController.create(request: Request)
++ jwtFilter
+PUT  /usersearches/update         controllers.v1.UserSearchesController.update(id: Long, request: Request)
++ jwtFilter
+GET  /usersearches/all            controllers.v1.UserSearchesController.all()
++ jwtFilter
+DELETE  /usersearches/delete      controllers.v1.UserSearchesController.delete(id: Long)
+
 # Security
 POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
 POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)

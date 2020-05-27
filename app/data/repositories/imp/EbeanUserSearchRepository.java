@@ -84,10 +84,10 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     }
 
     @Override
-    public CompletionStage<Void> update(String query, String name, Long userId, Long searchId) {
+    public CompletionStage<Void> update(String query, String name, Long userId, Long userSearchId) {
         return CompletableFuture.runAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, searchId);
+            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, userSearchId);
             if (query == null || query.length() == 0) {
                 throw new IllegalArgumentException("query is empty");
             }
@@ -95,7 +95,12 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
                 throw new IllegalArgumentException("name is null!");
             }
 
-            UserSearch userSearch = ebean.find(UserSearch.class, searchId);
+            UserSearch userSearch = ebean.createQuery(UserSearch.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .eq("id", userSearchId)
+                    .findOne();
+
             userSearch.setName(name);
             userSearch.getSearch().setQuery(query);
             ebean.save(userSearch.getSearch());

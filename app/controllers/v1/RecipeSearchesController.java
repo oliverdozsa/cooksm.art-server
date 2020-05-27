@@ -31,9 +31,6 @@ public class RecipeSearchesController extends Controller {
     @Inject
     private HttpExecutionContext httpExecutionContext;
 
-    @Inject
-    private Config config;
-
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
@@ -47,7 +44,7 @@ public class RecipeSearchesController extends Controller {
         }
 
         return service.get(id)
-                .thenApplyAsync(this::toResult)
+                .thenApplyAsync(this::toResult, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
     }
 
