@@ -13,6 +13,9 @@ import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 import utils.JwtTestUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static junit.framework.TestCase.*;
@@ -74,7 +77,7 @@ public class UserSearchesControllerTest {
 
         Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
                 .method(GET)
-                .uri(locationOpt.get());
+                .uri(location);
         JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
 
         result = route(application.getApplication(), httpRequestGet);
@@ -87,18 +90,28 @@ public class UserSearchesControllerTest {
     }
 
     @Test
-    @DataSet(value = "datasets/yml/usersearches-base.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testGetAll() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testGetAll");
         logger.info("------------------------------------------------------------------------------------------------");
 
+        // TODO: At least 3 users in DB, user 2 has 3 searches, and query those.
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(GET)
                 .uri(routes.UserSearchesController.create().url());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
-        // TODO
-        assertTrue(false);
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals(OK, result.status());
+        String jsonResultStr = contentAsString(result);
+        JsonNode jsonResult = Json.parse(jsonResultStr);
+
+        assertEquals(3, jsonResult.size());
+        List<String> queryNames = new ArrayList<>();
+        jsonResult.forEach(q -> queryNames.add(q.get("name").asText()));
+        assertTrue(queryNames.containsAll(Arrays.asList("user2query1", "user2query2", "user2query3")));
     }
 
     @Test
