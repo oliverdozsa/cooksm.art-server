@@ -1,0 +1,89 @@
+users:
+  - id: 1
+    email: user1@example.com
+    full_name: John Doe
+
+  - id: 2
+    email: user2@example.com
+    full_name: Jane Doe
+
+  - id: 3
+    email: user3@example.com
+    full_name: Jack Doe
+
+recipe_search:
+  - id: 239327 # Initial value + 1000
+    query: >
+      {
+        "searchMode": "composed-of-number",
+        "goodIngs": 3,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+  - id: 239328 # Initial value + 1001
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+  - id: 239329 # Initial value + 1002
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+  - id: 239330 # Initial value + 1003
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+  - id: 239331 # Initial value + 1004
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+user_search:
+  - id: 1
+    name: user1query1
+    user_id: 1
+    search_id: 239327
+
+  - id: 2
+      name: user1query2
+      user_id: 1
+      search_id: 239328
+
+  - id: 3
+      name: user2query1
+      user_id: 2
+      search_id: 239329
+
+  - id: 4
+      name: user2query2
+      user_id: 2
+      search_id: 239330
+
+  - id: 5
+      name: user2query3
+      user_id: 2
+      search_id: 239331

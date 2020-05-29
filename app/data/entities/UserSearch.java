@@ -17,7 +17,7 @@ public class UserSearch {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "search_id")
     private RecipeSearch search;
 

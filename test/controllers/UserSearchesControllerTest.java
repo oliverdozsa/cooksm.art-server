@@ -300,6 +300,39 @@ public class UserSearchesControllerTest {
 
     @Test
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testUpdate_OtherUser() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testUpdate_OtherUser");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        // User 2 owns query 3, and user 1 tries to update it
+        String jsonStr = "{" +
+                "  name: \"user1query1renamed\"," +
+                "  query: {" +
+                "    \"searchMode\": \"composed-of-ratio\"," +
+                "    \"goodIngsRatio\": 0.6," +
+                "    \"inIngs\": [1, 2, 3]," +
+                "    \"inIngTags\": [1]," +
+                "    \"exIngs\": [4, 7]," +
+                "    \"exIngTags\": [2]," +
+                "    \"sourcePages\": [1]" +
+                "  }" +
+                "}";
+        JsonNode jsonNode = Json.parse(jsonStr);
+        Long id = 3L;
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(PUT)
+                .bodyJson(jsonNode)
+                .uri(routes.UserSearchesController.update(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
+
+        Result response = route(application.getApplication(), httpRequest);
+        assertEquals(FORBIDDEN, response.status());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testDelete() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testDelete");
@@ -311,6 +344,7 @@ public class UserSearchesControllerTest {
         Http.RequestBuilder httpRequestDelete = new Http.RequestBuilder()
                 .method(DELETE)
                 .uri(routes.UserSearchesController.delete(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestDelete, jwtToken);
 
         Result response = route(application.getApplication(), httpRequestDelete);
         assertEquals(NO_CONTENT, response.status());
@@ -318,6 +352,7 @@ public class UserSearchesControllerTest {
         Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
                 .method(GET)
                 .uri(routes.UserSearchesController.single(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
         response = route(application.getApplication(), httpRequestGet);
         assertEquals(NOT_FOUND, response.status());
     }
@@ -334,8 +369,28 @@ public class UserSearchesControllerTest {
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(DELETE)
                 .uri(routes.UserSearchesController.delete(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
         Result response = route(application.getApplication(), httpRequest);
         assertEquals(NOT_FOUND, response.status());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testDelete_OtherUser() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testDelete_OtherUser");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        // User 2 owns query 3, and user 1 tries to delete it
+        Long id = 3L;
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(DELETE)
+                .uri(routes.UserSearchesController.delete(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
+
+        Result response = route(application.getApplication(), httpRequest);
+        assertEquals(FORBIDDEN, response.status());
     }
 }
