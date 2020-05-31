@@ -2,10 +2,14 @@ package controllers.v1;
 
 import play.Logger;
 import play.data.FormFactory;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import security.SecurityUtils;
+import security.VerifiedJwt;
+import services.UserSearchService;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletionStage;
@@ -18,6 +22,9 @@ public class UserSearchesController extends Controller {
     @Inject
     private HttpExecutionContext httpExecutionContext;
 
+    @Inject
+    private UserSearchService userSearchService;
+
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
@@ -28,7 +35,7 @@ public class UserSearchesController extends Controller {
         return null;
     }
 
-    public CompletionStage<Result> single(Long id) {
+    public CompletionStage<Result> single(Long id, Http.Request request) {
         // TODO: Should return name and query content
         return null;
     }
@@ -38,12 +45,14 @@ public class UserSearchesController extends Controller {
         return null;
     }
 
-    public CompletionStage<Result> all() {
-        // TODO: Should return ids, and names of the queries. All data should be returned
-        return null;
+    public CompletionStage<Result> all(Http.Request request) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        logger.info("all(): user id = {}", jwt.getUserId());
+        return userSearchService.all(jwt.getUserId())
+                .thenApplyAsync(l -> ok(Json.toJson(l)), httpExecutionContext.current());
     }
 
-    public CompletionStage<Result> delete(Long id) {
+    public CompletionStage<Result> delete(Long id, Http.Request request) {
         // TODO
         return null;
     }

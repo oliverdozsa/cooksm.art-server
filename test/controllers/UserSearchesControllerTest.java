@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
+import io.seruco.encoding.base62.Base62;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,8 +12,10 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
+import utils.Base62Utils;
 import utils.JwtTestUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +29,7 @@ public class UserSearchesControllerTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
+    private static Base62 base62 = Base62.createInstance();
     private static final Logger.ALogger logger = Logger.of(UserSearchesControllerTest.class);
 
     String jwtToken;
@@ -96,13 +100,17 @@ public class UserSearchesControllerTest {
         logger.info("-- RUNNING TEST: testGetAll");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        // TODO: At least 3 users in DB, user 2 has 3 searches, and query those.
+        Long userId = 2L;
+        String jwtUser2 = JwtTestUtils.createToken(10000L, userId, application.getApplication().config());
+
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(GET)
-                .uri(routes.UserSearchesController.create().url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
+                .uri(routes.UserSearchesController.all().url());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtUser2);
 
         Result result = route(application.getApplication(), httpRequest);
+
+        logger.warn("result content = {}", contentAsString(result));
 
         assertEquals(OK, result.status());
         String jsonResultStr = contentAsString(result);
@@ -110,8 +118,11 @@ public class UserSearchesControllerTest {
 
         assertEquals(3, jsonResult.size());
         List<String> queryNames = new ArrayList<>();
+        List<String> searchIds = new ArrayList<>();
         jsonResult.forEach(q -> queryNames.add(q.get("name").asText()));
+        jsonResult.forEach(q -> searchIds.add(q.get("searchId").asText()));
         assertTrue(queryNames.containsAll(Arrays.asList("user2query1", "user2query2", "user2query3")));
+        assertTrue(searchIds.containsAll(Arrays.asList(Base62Utils.encode(239329L), Base62Utils.encode(239330L), Base62Utils.encode(239331L))));
     }
 
     @Test

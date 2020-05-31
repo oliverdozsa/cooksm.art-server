@@ -10,6 +10,7 @@ import security.imp.SocialTokenVerifierGoogleImp;
 import services.LanguageService;
 import services.RecipeSearchService;
 import services.RecipesService;
+import services.UserSearchService;
 
 /**
  * Module for bindings.
@@ -33,5 +34,6 @@ public class Module extends AbstractModule {
         bind(GlobalSearchRepository.class).to(EbeanGlobalSearchRepository.class).asEagerSingleton();
         bind(RecipeSearchService.class).asEagerSingleton();
         bind(LanguageService.class).asEagerSingleton();
+        bind(UserSearchService.class).asEagerSingleton();
     }
 }

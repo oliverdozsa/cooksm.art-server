@@ -15,6 +15,7 @@ import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -105,6 +106,17 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
             userSearch.getSearch().setQuery(query);
             ebean.save(userSearch.getSearch());
             ebean.save(userSearch);
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<List<UserSearch>> all(Long userId) {
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            return ebean.createQuery(UserSearch.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .findList();
         }, executionContext);
     }
 }
