@@ -49,7 +49,8 @@ public class UserSearchesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("all(): user id = {}", jwt.getUserId());
         return userSearchService.all(jwt.getUserId())
-                .thenApplyAsync(l -> ok(Json.toJson(l)), httpExecutionContext.current());
+                .thenApplyAsync(l -> ok(Json.toJson(l)), httpExecutionContext.current())
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> delete(Long id, Http.Request request) {

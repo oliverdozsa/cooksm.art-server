@@ -247,6 +247,56 @@ public class UserSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/usersearches-base.yml", disableConstraints = true, cleanBefore = true)
+    public void testCreate_LimitReached() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testCreate_LimitReached");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String jsonStr = "{" +
+                "  name: \"someName\"," +
+                "  query: {" +
+                "    \"searchMode\": \"composed-of-number\"," +
+                "    \"goodIngs\": 3," +
+                "    \"goodIngsRel\": \"ge\"," +
+                "    \"unknownIngs\": \"0\"," +
+                "    \"unknownIngsRel\": \"ge\"," +
+                "    \"goodAdditionalIngs\": 2," +
+                "    \"inIngs\": [1, 2, 3]," +
+                "    \"inIngTags\": [1]," +
+                "    \"exIngs\": [4, 7]," +
+                "    \"exIngTags\": [2]," +
+                "    \"addIngs\": [5]," +
+                "    \"addIngTags\": [6]," +
+                "    \"sourcePages\": [1, 2]" +
+                "  }" +
+                "}";
+        JsonNode jsonNode = Json.parse(jsonStr);
+        int maxSearches = application.getApplication()
+                .config().getInt("receptnekem.usersearches.maxperuser");
+
+        for(int i = 0; i < maxSearches; i++){
+            Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
+                    .method(POST)
+                    .bodyJson(jsonNode)
+                    .uri(routes.UserSearchesController.create().url());
+            JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
+
+            Result result = route(application.getApplication(), httpRequestCreate);
+            assertEquals("Result status is not created.", CREATED, result.status());
+        }
+
+        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
+                .method(POST)
+                .bodyJson(jsonNode)
+                .uri(routes.UserSearchesController.create().url());
+        JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
+
+        Result result = route(application.getApplication(), httpRequestCreate);
+        assertEquals("Created request over limit!", FORBIDDEN, result.status());
+    }
+
+    @Test
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUpdate_InvalidName() {
         logger.info("------------------------------------------------------------------------------------------------");
