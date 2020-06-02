@@ -1,7 +1,11 @@
 package controllers.v1;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import lombokized.dto.UserSearchCreateDto;
 import play.Logger;
+import play.data.Form;
 import play.data.FormFactory;
+import play.i18n.MessagesApi;
 import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
@@ -15,6 +19,8 @@ import javax.inject.Inject;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 public class UserSearchesController extends Controller {
     @Inject
     private FormFactory formFactory;
@@ -25,12 +31,24 @@ public class UserSearchesController extends Controller {
     @Inject
     private UserSearchService userSearchService;
 
+    @Inject
+    private MessagesApi messagesApi;
+
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
     private static final Logger.ALogger logger = Logger.of(UserSearchesController.class);
 
     public CompletionStage<Result> create(Http.Request request) {
+        Form<UserSearchCreateDto> form = formFactory.form(UserSearchCreateDto.class).bindFromRequest(request);
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        UserSearchCreateDto dto = form.get();
+        logger.info("create(): dto = {}", dto);
+        JsonNode queryJson = Json.parse(dto.getQuery());
+        RecipesQueryParamsRetrieve retriever = new RecipesQueryParamsRetrieve(formFactory, messagesApi, request, queryJson);
         // TODO: Input: name, and query
         return null;
     }

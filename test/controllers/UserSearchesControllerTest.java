@@ -3,7 +3,6 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
-import io.seruco.encoding.base62.Base62;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,7 +14,6 @@ import rules.PlayApplicationWithGuiceDbRider;
 import utils.Base62Utils;
 import utils.JwtTestUtils;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +27,6 @@ public class UserSearchesControllerTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
-    private static Base62 base62 = Base62.createInstance();
     private static final Logger.ALogger logger = Logger.of(UserSearchesControllerTest.class);
 
     String jwtToken;
