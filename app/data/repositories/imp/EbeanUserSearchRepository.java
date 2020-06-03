@@ -13,6 +13,7 @@ import io.ebean.EbeanServer;
 import io.ebean.Query;
 import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
+import play.db.ebean.Transactional;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -35,8 +36,9 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     }
 
     @Override
-    public CompletionStage<Long> create(String query, String name, Long userId) {
-        return recipeSearchRepository.create(query, true).thenApplyAsync(searchId -> {
+    @Transactional
+    public CompletionStage<Long> create(String name, Long userId, Long recipeSearchId) {
+        return recipeSearchRepository.read(recipeSearchId).thenApplyAsync(searchId -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             if (name == null || name.length() == 0) {
                 throw new IllegalArgumentException("name is empty!");

@@ -68,6 +68,10 @@ class RecipesQueryParamsRetrieve {
         }
     }
 
+    private boolean isCustomRetrieving() {
+        return messagesApi != null;
+    }
+
     private Form<RecipesQueryParams.Params> bind(){
         return bind(null);
     }
@@ -78,9 +82,5 @@ class RecipesQueryParamsRetrieve {
         } else {
             return formFactory.form(RecipesQueryParams.Params.class);
         }
-    }
-
-    private boolean isCustomRetrieving() {
-        return messagesApi != null;
     }
 }

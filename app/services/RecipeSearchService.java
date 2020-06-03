@@ -53,6 +53,10 @@ public class RecipeSearchService {
         return createHelper.create(query, isPermanent);
     }
 
+    public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
+        return createHelper.createWithLongId(query, isPermanent);
+    }
+
     public void deleteExpired() {
         Instant thresholdDate = Instant.now().minus(validityDays, ChronoUnit.DAYS);
         List<Long> ids = recipeSearchRepository.queryNonPermanentOlderThan(thresholdDate);

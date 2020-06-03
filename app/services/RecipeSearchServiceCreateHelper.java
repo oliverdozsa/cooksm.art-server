@@ -39,8 +39,16 @@ class RecipeSearchServiceCreateHelper {
     private static final Logger.ALogger logger = Logger.of(RecipeSearchServiceCreateHelper.class);
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
+        return createWithLongId(query, isPermanent)
+                .thenApplyAsync(id -> {
+                    byte[] encodedId = base62.encode(BigInteger.valueOf(id).toByteArray());
+                    return new String(encodedId);
+                });
+    }
+
+    public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
         prepareQuery(query);
-        logger.info("create(): query = {}, isPermanent = {}", query, isPermanent);
+        logger.info("createWithLongId(): query = {}, isPermanent = {}", query, isPermanent);
 
         return runAsync(this::checkQueryCount)
                 .thenComposeAsync(v -> checkQueryParams(query))
@@ -52,10 +60,6 @@ class RecipeSearchServiceCreateHelper {
                     }
 
                     return recipeSearchRepository.create(queryStr, isPermanent);
-                })
-                .thenApplyAsync(id -> {
-                    byte[] encodedId = base62.encode(BigInteger.valueOf(id).toByteArray());
-                    return new String(encodedId);
                 });
     }
 

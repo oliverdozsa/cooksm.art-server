@@ -17,7 +17,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.time.Instant;

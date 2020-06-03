@@ -2,16 +2,10 @@ package lombokized.dto;
 
 import lombok.Data;
 import lombok.ToString;
+import play.data.validation.Constraints;
 
 @Data
-@ToString
 public class FavoriteRecipeCreateDto {
-    private Long recipeId;
-
-    public FavoriteRecipeCreateDto() {
-    }
-
-    public FavoriteRecipeCreateDto(Long recipeId) {
-        this.recipeId = recipeId;
-    }
+    @Constraints.Required
+    final Long recipeId;
 }

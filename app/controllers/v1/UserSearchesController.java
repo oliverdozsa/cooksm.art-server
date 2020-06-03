@@ -1,7 +1,7 @@
 package controllers.v1;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombokized.dto.UserSearchCreateDto;
+import dto.UserSearchCreateDto;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -11,6 +11,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import queryparams.RecipesQueryParams;
 import security.SecurityUtils;
 import security.VerifiedJwt;
 import services.UserSearchService;
@@ -40,17 +41,29 @@ public class UserSearchesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(UserSearchesController.class);
 
     public CompletionStage<Result> create(Http.Request request) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         Form<UserSearchCreateDto> form = formFactory.form(UserSearchCreateDto.class).bindFromRequest(request);
         if (form.hasErrors()) {
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 
         UserSearchCreateDto dto = form.get();
-        logger.info("create(): dto = {}", dto);
-        JsonNode queryJson = Json.parse(dto.getQuery());
+        logger.info("create(): dto = {}, userId = {}", dto, jwt.getUserId());
+        JsonNode queryJson = Json.toJson(dto.query);
         RecipesQueryParamsRetrieve retriever = new RecipesQueryParamsRetrieve(formFactory, messagesApi, request, queryJson);
-        // TODO: Input: name, and query
-        return null;
+        Form<RecipesQueryParams.Params> paramsForm = retriever.retrieve();
+
+        if (paramsForm.hasErrors()) {
+            return completedFuture(badRequest(paramsForm.errorsAsJson()));
+        }
+
+        return userSearchService.create(dto, jwt.getUserId())
+                .thenApplyAsync(id -> {
+                    String location = routes.UserSearchesController.single(id).absoluteURL(request);
+                    logger.info("create(): location = {}", location);
+                    return created().withHeader(LOCATION, location);
+                }, httpExecutionContext.current())
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> single(Long id, Http.Request request) {

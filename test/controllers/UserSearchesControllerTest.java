@@ -44,8 +44,8 @@ public class UserSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String jsonStr = "{" +
-                "  name: \"someName\"," +
-                "  query: {" +
+                "  \"name\": \"someName\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
                 "    \"goodIngs\": 3," +
                 "    \"goodIngsRel\": \"ge\"," +
@@ -131,8 +131,8 @@ public class UserSearchesControllerTest {
 
         // TODO: update existing user1query1 to user1query1renamed
         String jsonStr = "{" +
-                "  name: \"user1query1renamed\"," +
-                "  query: {" +
+                "  \"name\": \"user1query1renamed\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
                 "    \"goodIngsRatio\": 0.6," +
                 "    \"inIngs\": [1, 2, 3]," +
@@ -178,8 +178,8 @@ public class UserSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String jsonStr = "{" +
-                "  name: \"s\"," +
-                "  query: {" +
+                "  \"name\": \"s\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
                 "    \"goodIngs\": 3," +
                 "    \"goodIngsRel\": \"ge\"," +
@@ -216,8 +216,8 @@ public class UserSearchesControllerTest {
 
         // Missing included ingredients
         String jsonStr = "{" +
-                "  name: \"someName\"," +
-                "  query: {" +
+                "  \"name\": \"someName\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
                 "    \"goodIngs\": 3," +
                 "    \"goodIngsRel\": \"ge\"," +
@@ -251,8 +251,8 @@ public class UserSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String jsonStr = "{" +
-                "  name: \"someName\"," +
-                "  query: {" +
+                "  \"name\": \"someName\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
                 "    \"goodIngs\": 3," +
                 "    \"goodIngsRel\": \"ge\"," +
@@ -301,8 +301,8 @@ public class UserSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         String jsonStr = "{" +
-                "  name: \"u\"," +
-                "  query: {" +
+                "  \"name\": \"u\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
                 "    \"goodIngsRatio\": 0.6," +
                 "    \"inIngs\": [1, 2, 3]," +
@@ -334,8 +334,8 @@ public class UserSearchesControllerTest {
 
         // Missing included ingredients
         String jsonStr = "{" +
-                "  name: \"user1query1renamed\"," +
-                "  query: {" +
+                "  \"name\": \"user1query1renamed\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
                 "    \"goodIngsRatio\": 0.6," +
                 "    \"exIngs\": [4, 7]," +
@@ -365,8 +365,8 @@ public class UserSearchesControllerTest {
 
         // User 2 owns query 3, and user 1 tries to update it
         String jsonStr = "{" +
-                "  name: \"user1query1renamed\"," +
-                "  query: {" +
+                "  \"name\": \"user1query1renamed\"," +
+                "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
                 "    \"goodIngsRatio\": 0.6," +
                 "    \"inIngs\": [1, 2, 3]," +
