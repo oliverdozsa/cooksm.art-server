@@ -10,7 +10,7 @@ public interface RecipeSearchRepository {
     CompletionStage<Long> create(String query, boolean isPermanent);
     CompletionStage<Boolean> delete(Long id);
     Integer deleteAll(List<Long> ids);
-    CompletionStage<RecipeSearch> read(Long id);
+    CompletionStage<RecipeSearch> single(Long id);
     List<Long> queryNonPermanentOlderThan(Instant instant);
-    int getCount();
+    int countAll();
 }

@@ -67,8 +67,11 @@ public class UserSearchesController extends Controller {
     }
 
     public CompletionStage<Result> single(Long id, Http.Request request) {
-        // TODO: Should return name and query content
-        return null;
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        logger.info("single(): id = {}, userId = ", id, jwt.getUserId());
+        return userSearchService.single(id, jwt.getUserId())
+                .thenApplyAsync(dto -> ok(Json.toJson(dto)), httpExecutionContext.current())
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> update(Long id, Http.Request request) {

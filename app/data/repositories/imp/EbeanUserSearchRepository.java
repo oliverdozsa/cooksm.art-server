@@ -8,6 +8,7 @@ import data.entities.UserSearch;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.UserSearchRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
+import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
@@ -38,14 +39,13 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     @Transactional
     public CompletionStage<Long> create(String name, Long userId, Long recipeSearchId) {
-        return recipeSearchRepository.read(recipeSearchId).thenApplyAsync(searchId -> {
+        return recipeSearchRepository.single(recipeSearchId).thenApplyAsync(recipeSearch -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             if (name == null || name.length() == 0) {
                 throw new IllegalArgumentException("name is empty!");
             }
 
             User user = ebean.find(User.class, userId);
-            RecipeSearch recipeSearch = ebean.find(RecipeSearch.class, searchId);
 
             UserSearch userSearch = new UserSearch();
             userSearch.setSearch(recipeSearch);
@@ -120,5 +120,33 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
                     .eq("user.id", userId)
                     .findList();
         }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<UserSearch> single(Long id, Long userId) {
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
+            UserSearch entity = ebean.createQuery(UserSearch.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .eq("id", id)
+                    .findOne();
+            if (entity == null) {
+                String message = String.format("Not found user search with id = %d, userId = %d",
+                        id, userId);
+                throw new NotFoundException(message);
+            }
+
+            return entity;
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Integer> count(Long userId) {
+        return supplyAsync(() -> ebean.createQuery(UserSearch.class)
+                .where()
+                .eq("user.id", userId)
+                .findCount(), executionContext);
     }
 }

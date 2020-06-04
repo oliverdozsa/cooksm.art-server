@@ -44,9 +44,9 @@ public class RecipeSearchesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testGet() {
+    public void testSingle() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGet");
+        logger.info("-- RUNNING TEST: testSingle");
         logger.info("------------------------------------------------------------------------------------------------");
 
         long id = 239329L;
@@ -55,7 +55,7 @@ public class RecipeSearchesControllerTest {
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(GET)
-                .uri(routes.RecipeSearchesController.get(encodedIdString).url());
+                .uri(routes.RecipeSearchesController.single(encodedIdString).url());
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals("Response status is not OK!", OK, result.status());

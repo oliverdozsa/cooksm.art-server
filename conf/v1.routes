@@ -15,7 +15,7 @@ GET    /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.singl
 DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delete(id: Long, request: Request)
 
 # Recipe searches
-GET   /recipesearches/:id         controllers.v1.RecipeSearchesController.get(id: String)
+GET   /recipesearches/:id         controllers.v1.RecipeSearchesController.single(id: String)
 POST  /recipesearches/create      controllers.v1.RecipeSearchesController.create(request: Request)
 
 # User searches

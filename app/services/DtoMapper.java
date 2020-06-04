@@ -77,7 +77,7 @@ public class DtoMapper {
         return dtoList;
     }
 
-    public static UserSearchDto toDto(UserSearch entity){
+    public static UserSearchDto toDto(UserSearch entity) {
         String encodedSearchId = Base62Conversions.encode(entity.getSearch().getId());
         return new UserSearchDto(entity.getId(), encodedSearchId, entity.getName());
     }

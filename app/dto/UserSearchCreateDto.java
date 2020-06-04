@@ -13,4 +13,12 @@ public class UserSearchCreateDto {
     @Constraints.Required
     @Valid
     public RecipesQueryParams.Params query;
+
+    @Override
+    public String toString() {
+        return "UserSearchCreateDto{" +
+                "name='" + name + '\'' +
+                ", query=" + query +
+                '}';
+    }
 }

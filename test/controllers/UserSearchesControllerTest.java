@@ -272,7 +272,7 @@ public class UserSearchesControllerTest {
         int maxSearches = application.getApplication()
                 .config().getInt("receptnekem.usersearches.maxperuser");
 
-        for(int i = 0; i < maxSearches; i++){
+        for (int i = 0; i < maxSearches; i++) {
             Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
                     .method(POST)
                     .bodyJson(jsonNode)
@@ -386,7 +386,7 @@ public class UserSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
         Result response = route(application.getApplication(), httpRequest);
-        assertEquals(FORBIDDEN, response.status());
+        assertEquals(NOT_FOUND, response.status());
     }
 
     @Test
@@ -449,6 +449,25 @@ public class UserSearchesControllerTest {
         JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
         Result response = route(application.getApplication(), httpRequest);
-        assertEquals(FORBIDDEN, response.status());
+        assertEquals(NOT_FOUND, response.status());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testSingle_OtherUser() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testSingle_OtherUser");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        jwtToken = JwtTestUtils.createToken(10000L, 2L, application.getApplication().config());
+
+        Long id = 1L; // User 1 owns user search 1
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.UserSearchesController.single(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
+
+        Result response = route(application.getApplication(), httpRequest);
+        assertEquals(NOT_FOUND, response.status());
     }
 }

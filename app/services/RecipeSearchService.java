@@ -44,9 +44,9 @@ public class RecipeSearchService {
         initCreateHelper();
     }
 
-    public CompletionStage<RecipeSearchDto> get(String id) {
+    public CompletionStage<RecipeSearchDto> single(String id) {
         logger.info("get(): id = ", id);
-        return getHelper.get(id);
+        return getHelper.single(id);
     }
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {

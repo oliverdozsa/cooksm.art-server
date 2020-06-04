@@ -66,7 +66,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<RecipeSearch> read(Long id) {
+    public CompletionStage<RecipeSearch> single(Long id) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, id);
             RecipeSearch entity = ebean.find(RecipeSearch.class, id);
@@ -77,7 +77,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public int getCount() {
+    public int countAll() {
         return count.get();
     }
 

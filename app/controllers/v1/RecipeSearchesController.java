@@ -1,7 +1,6 @@
 package controllers.v1;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.typesafe.config.Config;
 import lombokized.dto.RecipeSearchDto;
 import play.Logger;
 import play.data.Form;
@@ -36,14 +35,14 @@ public class RecipeSearchesController extends Controller {
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesController.class);
 
-    public CompletionStage<Result> get(String id) {
+    public CompletionStage<Result> single(String id) {
         if (id == null || id.length() == 0) {
             logger.warn("ID is empty!");
             ValidationError error = new ValidationError("", "ID is empty");
             return completedFuture(badRequest(Json.toJson(error.messages())));
         }
 
-        return service.get(id)
+        return service.single(id)
                 .thenApplyAsync(this::toResult, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
     }
@@ -60,7 +59,7 @@ public class RecipeSearchesController extends Controller {
 
         return service.create(form.get(), false)
                 .thenApplyAsync(id -> {
-                    String location = routes.RecipeSearchesController.get(id).absoluteURL(request);
+                    String location = routes.RecipeSearchesController.single(id).absoluteURL(request);
                     logger.info("create(): created query with location = {}", location);
                     return created().withHeader(LOCATION, location);
                 }, httpExecutionContext.current())

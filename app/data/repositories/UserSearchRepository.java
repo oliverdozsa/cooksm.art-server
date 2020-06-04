@@ -12,4 +12,6 @@ public interface UserSearchRepository {
     CompletionStage<Page<UserSearch>> page(Long userId, int limit, int offset);
     CompletionStage<Void> update(String query, String name, Long userId, Long searchId);
     CompletionStage<List<UserSearch>> all(Long userId);
+    CompletionStage<UserSearch> single(Long id, Long userId);
+    CompletionStage<Integer> count(Long userId);
 }

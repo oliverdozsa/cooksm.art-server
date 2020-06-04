@@ -23,7 +23,7 @@ class RecipeSearchServiceGetHelper {
 
     private Base62 base62 = Base62.createInstance();
 
-    public CompletionStage<RecipeSearchDto> get(String id) {
+    public CompletionStage<RecipeSearchDto> single(String id) {
         byte[] idBytes = base62.decode(id.getBytes());
         long decodedId = new BigInteger(idBytes).longValue();
         RecipeSearchQueryDtoResolver resolver = new RecipeSearchQueryDtoResolver();
@@ -31,7 +31,7 @@ class RecipeSearchServiceGetHelper {
         resolver.setIngredientTagRepository(ingredientTagRepository);
         resolver.setSourcePageRepository(sourcePageRepository);
 
-        return recipeSearchRepository.read(decodedId)
+        return recipeSearchRepository.single(decodedId)
                 .thenComposeAsync(entity -> {
                     if (entity == null) {
                         throw new NotFoundException("RecipeSearch not found. decodedId = " + decodedId);

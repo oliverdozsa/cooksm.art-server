@@ -1,6 +1,5 @@
 package services;
 
-import com.typesafe.config.Config;
 import data.entities.SourcePage;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
@@ -150,7 +149,7 @@ class RecipeSearchServiceCreateHelper {
     }
 
     private void checkQueryCount() {
-        if (recipeSearchRepository.getCount() >= maxQueryCount) {
+        if (recipeSearchRepository.countAll() >= maxQueryCount) {
             throw new ForbiddenExeption("Query count limit reached!");
         }
     }
