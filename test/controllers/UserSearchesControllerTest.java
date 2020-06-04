@@ -396,7 +396,6 @@ public class UserSearchesControllerTest {
         logger.info("-- RUNNING TEST: testDelete");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        // TODO
         Long id = 2L;
 
         Http.RequestBuilder httpRequestDelete = new Http.RequestBuilder()

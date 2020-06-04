@@ -43,4 +43,8 @@ public class UserSearchService {
         return userSearchRepository.single(id, userId)
                 .thenApplyAsync(DtoMapper::toDto);
     }
+
+    public CompletionStage<Boolean> delete(Long id, Long userId) {
+        return userSearchRepository.delete(id, userId);
+    }
 }

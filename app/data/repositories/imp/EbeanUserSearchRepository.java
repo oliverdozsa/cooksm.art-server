@@ -37,7 +37,6 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     }
 
     @Override
-    @Transactional
     public CompletionStage<Long> create(String name, Long userId, Long recipeSearchId) {
         return recipeSearchRepository.single(recipeSearchId).thenApplyAsync(recipeSearch -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
@@ -58,14 +57,25 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     }
 
     @Override
-    public CompletionStage<Boolean> delete(Long id) {
+    public CompletionStage<Boolean> delete(Long id, Long userId) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            UserSearch entity = ebean.createQuery(UserSearch.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .eq("id", id)
+                    .findOne();
+            if(entity == null){
+                String message = String.format("Not found user search with id = %d, userId = %d",
+                        id, userId);
+                throw new NotFoundException(message);
+            }
             return ebean.find(UserSearch.class, id);
         }, executionContext)
                 .thenComposeAsync(e -> recipeSearchRepository.delete(e.getSearch().getId()))
-                .thenApplyAsync(deleteResult -> {
-                    if (deleteResult) {
+                .thenApplyAsync(deleteSuccess -> {
+                    if (!deleteSuccess) {
                         throw new BusinessLogicViolationException("User search doesn't have recipe search!");
                     }
 

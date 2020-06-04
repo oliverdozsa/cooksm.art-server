@@ -88,7 +88,16 @@ public class UserSearchesController extends Controller {
     }
 
     public CompletionStage<Result> delete(Long id, Http.Request request) {
-        // TODO
-        return null;
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        logger.info("delete(): id = {}, user id = {}", id, jwt.getUserId());
+        return userSearchService.delete(id, jwt.getUserId())
+                .thenApplyAsync(success -> {
+                    if(!success){
+                        return internalServerError("Failed to delete!");
+                    }
+
+                    return noContent();
+                })
+                .exceptionally(mapExceptionWithUnpack);
     }
 }
