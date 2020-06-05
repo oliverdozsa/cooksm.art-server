@@ -7,5 +7,5 @@ import play.data.validation.Constraints;
 @Data
 public class FavoriteRecipeCreateDto {
     @Constraints.Required
-    final Long recipeId;
+    Long recipeId;
 }

@@ -58,7 +58,8 @@ public class FavoriteRecipesControllerTest {
         logger.info("-- RUNNING TEST: testCreate_Get");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto(1L);
+        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
+        favoriteRecipe.setRecipeId(1L);
 
         Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
                 .method(POST)
@@ -147,7 +148,8 @@ public class FavoriteRecipesControllerTest {
         logger.info("-- RUNNING TEST: testCreate_Invalid_RecipeNotExisting");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto(4284L);
+        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
+        favoriteRecipe.setRecipeId(4284L);
 
         Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
                 .method(POST)
@@ -193,7 +195,8 @@ public class FavoriteRecipesControllerTest {
             Ebean.save(favoriteRecipe);
         }
 
-        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto(1L);
+        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
+        favoriteRecipe.setRecipeId(1L);
 
         Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
                 .method(POST)
@@ -219,7 +222,8 @@ public class FavoriteRecipesControllerTest {
         favoriteRecipe.setRecipe(Ebean.find(Recipe.class, 1L));
         Ebean.save(favoriteRecipe);
 
-        FavoriteRecipeCreateDto favoriteRecipeDTO = new FavoriteRecipeCreateDto(1L);
+        FavoriteRecipeCreateDto favoriteRecipeDTO = new FavoriteRecipeCreateDto();
+        favoriteRecipeDTO.setRecipeId(1L);
 
         Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
                 .method(POST)
