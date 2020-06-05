@@ -5,7 +5,7 @@ import queryparams.RecipesQueryParams;
 
 import javax.validation.Valid;
 
-public class UserSearchCreateDto {
+public class UserSearchCreateUpdateDto {
     @Constraints.MinLength(3)
     @Constraints.Required
     public String name;

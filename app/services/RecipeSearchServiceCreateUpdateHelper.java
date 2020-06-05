@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 
-class RecipeSearchServiceCreateHelper {
+class RecipeSearchServiceCreateUpdateHelper {
     RecipeSearchRepository recipeSearchRepository;
     IngredientNameRepository ingredientNameRepository;
     IngredientTagRepository ingredientTagRepository;
@@ -35,7 +35,7 @@ class RecipeSearchServiceCreateHelper {
     private CompletionStage<Void> noop = runAsync(() -> {
     });
 
-    private static final Logger.ALogger logger = Logger.of(RecipeSearchServiceCreateHelper.class);
+    private static final Logger.ALogger logger = Logger.of(RecipeSearchServiceCreateUpdateHelper.class);
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
         return createWithLongId(query, isPermanent)
@@ -53,12 +53,21 @@ class RecipeSearchServiceCreateHelper {
                 .thenComposeAsync(v -> checkQueryParams(query))
                 .thenComposeAsync(dto -> {
                     String queryStr = Json.toJson(query).toString();
-                    logger.info("create(): query length = {}", queryStr.length());
-                    if (queryStr.length() > maxQuerySizeChars) {
-                        throw new BusinessLogicViolationException("Query is too long!");
-                    }
-
+                    checkQueryLength(queryStr);
                     return recipeSearchRepository.create(queryStr, isPermanent);
+                });
+    }
+
+    public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id) {
+        prepareQuery(query);
+        logger.info("update(): query = {}, isPermanent = {}, id = {}", query, isPermanent, id);
+        return checkQueryParams(query)
+                .thenComposeAsync(dto -> {
+                    String queryStr = Json.toJson(query).toString();
+                    checkQueryLength(queryStr);
+                    return recipeSearchRepository.update(queryStr, isPermanent, id);
+                })
+                .thenAccept(e -> {
                 });
     }
 
@@ -151,6 +160,13 @@ class RecipeSearchServiceCreateHelper {
     private void checkQueryCount() {
         if (recipeSearchRepository.countAll() >= maxQueryCount) {
             throw new ForbiddenExeption("Query count limit reached!");
+        }
+    }
+
+    private void checkQueryLength(String queryStr) {
+        logger.info("checkQueryLength(): query length = {}", queryStr.length());
+        if (queryStr.length() > maxQuerySizeChars) {
+            throw new BusinessLogicViolationException("Query is too long!");
         }
     }
 }

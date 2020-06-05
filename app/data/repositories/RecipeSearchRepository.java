@@ -13,4 +13,5 @@ public interface RecipeSearchRepository {
     CompletionStage<RecipeSearch> single(Long id);
     List<Long> queryNonPermanentOlderThan(Instant instant);
     int countAll();
+    CompletionStage<RecipeSearch> update(String query, boolean isPermanent, Long id);
 }

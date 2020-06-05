@@ -108,6 +108,22 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
         return deleted;
     }
 
+    @Override
+    public CompletionStage<RecipeSearch> update(String query, boolean isPermanent, Long id) {
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, id);
+            RecipeSearch entity = ebean.find(RecipeSearch.class, id);
+
+            entity.setQuery(query);
+            entity.setPermanent(isPermanent);
+            if (!isPermanent) {
+                entity.setLastAccessed(Instant.now());
+            }
+            ebean.save(entity);
+            return entity;
+        });
+    }
+
     private static synchronized void initCount(EbeanServer ebean) {
         if (count == null) {
             int countEntities = ebean.createQuery(RecipeSearch.class).findCount();

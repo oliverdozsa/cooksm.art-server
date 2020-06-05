@@ -165,7 +165,21 @@ public class UserSearchesControllerTest {
         String resultJsonStr = contentAsString(response);
         JsonNode resultJson = Json.parse(resultJsonStr);
         assertEquals("user1query1renamed", resultJson.get("name").asText());
-        JsonNode queryJson = resultJson.get("query");
+        String searchId = resultJson.get("searchId").asText();
+
+        Http.RequestBuilder httpRequestGetRecipeSearch = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeSearchesController.single(searchId).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
+
+        response = route(application.getApplication(), httpRequestGetRecipeSearch);
+
+        assertEquals(OK, response.status());
+
+        resultJsonStr = contentAsString(response);
+        JsonNode responseJson = Json.parse(resultJsonStr);
+        JsonNode queryJson = responseJson.get("query");
+
         assertEquals("composed-of-ratio", queryJson.get("searchMode").asText());
         assertEquals(0.6, queryJson.get("goodIngsRatio").asDouble());
     }

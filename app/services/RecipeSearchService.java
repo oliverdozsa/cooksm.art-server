@@ -26,7 +26,7 @@ public class RecipeSearchService {
     private Integer validityDays;
 
     private RecipeSearchServiceGetHelper getHelper;
-    private RecipeSearchServiceCreateHelper createHelper;
+    private RecipeSearchServiceCreateUpdateHelper createHelper;
 
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
 
@@ -65,6 +65,10 @@ public class RecipeSearchService {
         logger.info("deleteExpired(): deleted {} / {}", deletedCount, ids.size());
     }
 
+    public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id){
+        return createHelper.update(query, isPermanent, id);
+    }
+
     private void initGetHelper() {
         getHelper = new RecipeSearchServiceGetHelper();
         getHelper.recipeSearchRepository = recipeSearchRepository;
@@ -75,7 +79,7 @@ public class RecipeSearchService {
     }
 
     private void initCreateHelper() {
-        createHelper = new RecipeSearchServiceCreateHelper();
+        createHelper = new RecipeSearchServiceCreateUpdateHelper();
         createHelper.maxQuerySizeChars = config.getInt("receptnekem.recipesearches.maxquerysize");
         createHelper.maxQueryCount = config.getInt("receptnekem.recipesearches.maxquerycount");
         createHelper.ingredientNameRepository = ingredientNameRepository;

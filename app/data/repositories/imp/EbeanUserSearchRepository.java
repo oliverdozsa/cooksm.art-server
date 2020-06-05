@@ -66,10 +66,8 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
                     .eq("user.id", userId)
                     .eq("id", id)
                     .findOne();
-            if(entity == null){
-                String message = String.format("Not found user search with id = %d, userId = %d",
-                        id, userId);
-                throw new NotFoundException(message);
+            if (entity == null) {
+                throwNotFoundException(id, userId);
             }
             return ebean.find(UserSearch.class, id);
         }, executionContext)
@@ -97,28 +95,23 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     }
 
     @Override
-    public CompletionStage<Void> update(String query, String name, Long userId, Long userSearchId) {
-        return CompletableFuture.runAsync(() -> {
+    public CompletionStage<UserSearch> update(String name, Long userId, Long id) {
+        return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, userSearchId);
-            if (query == null || query.length() == 0) {
-                throw new IllegalArgumentException("query is empty");
-            }
-            if (name == null || name.length() == 0) {
-                throw new IllegalArgumentException("name is null!");
-            }
-
-            UserSearch userSearch = ebean.createQuery(UserSearch.class)
+            EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
+            UserSearch entity = ebean.createQuery(UserSearch.class)
                     .where()
                     .eq("user.id", userId)
-                    .eq("id", userSearchId)
+                    .eq("id", id)
                     .findOne();
+            if (entity == null) {
+                throwNotFoundException(id, userId);
+            }
 
-            userSearch.setName(name);
-            userSearch.getSearch().setQuery(query);
-            ebean.save(userSearch.getSearch());
-            ebean.save(userSearch);
-        }, executionContext);
+            entity.setName(name);
+            ebean.save(entity);
+            return entity;
+        });
     }
 
     @Override
@@ -143,9 +136,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
                     .eq("id", id)
                     .findOne();
             if (entity == null) {
-                String message = String.format("Not found user search with id = %d, userId = %d",
-                        id, userId);
-                throw new NotFoundException(message);
+                throwNotFoundException(id, userId);
             }
 
             return entity;
@@ -158,5 +149,11 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
                 .where()
                 .eq("user.id", userId)
                 .findCount(), executionContext);
+    }
+
+    private void throwNotFoundException(Long id, Long userId) {
+        String message = String.format("Not found user search with id = %d, userId = %d",
+                id, userId);
+        throw new NotFoundException(message);
     }
 }

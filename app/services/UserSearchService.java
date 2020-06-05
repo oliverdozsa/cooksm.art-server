@@ -3,7 +3,7 @@ package services;
 import com.typesafe.config.Config;
 import data.repositories.UserSearchRepository;
 import data.repositories.exceptions.ForbiddenExeption;
-import dto.UserSearchCreateDto;
+import dto.UserSearchCreateUpdateDto;
 import lombokized.dto.UserSearchDto;
 
 import javax.inject.Inject;
@@ -29,7 +29,7 @@ public class UserSearchService {
                         .collect(Collectors.toList()));
     }
 
-    public CompletionStage<Long> create(UserSearchCreateDto dto, Long userId) {
+    public CompletionStage<Long> create(UserSearchCreateUpdateDto dto, Long userId) {
         return userSearchRepository.count(userId).thenAcceptAsync(c -> {
             if (c >= maxPerUser) {
                 throw new ForbiddenExeption("User reached max limit! userId = " + userId);
@@ -46,5 +46,11 @@ public class UserSearchService {
 
     public CompletionStage<Boolean> delete(Long id, Long userId) {
         return userSearchRepository.delete(id, userId);
+    }
+
+    public CompletionStage<Void> update(Long id, Long userId, UserSearchCreateUpdateDto dto){
+        return userSearchRepository.update(dto.name, userId, id)
+                .thenApplyAsync(entity -> entity.getSearch().getId())
+                .thenComposeAsync(searchId -> recipeSearchService.update(dto.query, true, searchId));
     }
 }
