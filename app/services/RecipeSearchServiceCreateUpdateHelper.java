@@ -8,7 +8,6 @@ import data.repositories.RecipeSearchRepository;
 import data.repositories.SourcePageRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.ForbiddenExeption;
-import io.seruco.encoding.base62.Base62;
 import lombokized.repositories.RecipeRepositoryParams;
 import play.Logger;
 import play.libs.Json;
@@ -31,8 +30,6 @@ class RecipeSearchServiceCreateUpdateHelper {
     Integer maxQuerySizeChars;
     Integer maxQueryCount;
 
-    private Base62 base62 = Base62.createInstance();
-
     private CompletionStage<Void> noop = runAsync(() -> {
     });
 
@@ -40,10 +37,7 @@ class RecipeSearchServiceCreateUpdateHelper {
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
         return createWithLongId(query, isPermanent)
-                .thenApplyAsync(id -> {
-                    byte[] encodedId = base62.encode(BigInteger.valueOf(id).toByteArray());
-                    return new String(encodedId);
-                });
+                .thenApplyAsync(Base62Conversions::encode);
     }
 
     public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {

@@ -21,11 +21,8 @@ class RecipeSearchServiceGetHelper {
     SourcePageRepository sourcePageRepository;
     LanguageService languageService;
 
-    private Base62 base62 = Base62.createInstance();
-
     public CompletionStage<RecipeSearchDto> single(String id) {
-        byte[] idBytes = base62.decode(id.getBytes());
-        long decodedId = new BigInteger(idBytes).longValue();
+        long decodedId = Base62Conversions.decode(id);
         RecipeSearchQueryDtoResolver resolver = new RecipeSearchQueryDtoResolver();
         resolver.setIngredientNameRepository(ingredientNameRepository);
         resolver.setIngredientTagRepository(ingredientTagRepository);

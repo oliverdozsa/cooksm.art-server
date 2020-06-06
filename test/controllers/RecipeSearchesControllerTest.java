@@ -16,6 +16,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
+import utils.Base62Utils;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -38,8 +39,6 @@ public class RecipeSearchesControllerTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
-    private static Base62 base62 = Base62.createInstance();
-
     private static final Logger.ALogger logger = Logger.of(RecipeSearchesControllerTest.class);
 
     @Test
@@ -50,8 +49,8 @@ public class RecipeSearchesControllerTest {
         logger.info("------------------------------------------------------------------------------------------------");
 
         long id = 239329L;
-        byte[] encodedBytes = base62.encode(BigInteger.valueOf(id).toByteArray());
-        String encodedIdString = new String(encodedBytes);
+        String encodedIdString = Base62Utils.encode(id);
+
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
                 .method(GET)
