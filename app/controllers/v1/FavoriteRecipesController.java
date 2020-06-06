@@ -81,9 +81,9 @@ public class FavoriteRecipesController extends Controller {
             VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
             logger.info("create(): user id = {}, dto = {}", jwt.getUserId(), dto);
             return repository.create(jwt.getUserId(), dto.getRecipeId())
-                    .thenApplyAsync(p -> {
+                    .thenApplyAsync(e -> {
                                 String location = routes.FavoriteRecipesController
-                                        .single(p).absoluteURL(request);
+                                        .single(e.getId()).absoluteURL(request);
                                 return created().withHeader(LOCATION, location);
                             },
                             httpExecutionContext.current())

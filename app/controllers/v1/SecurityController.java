@@ -101,8 +101,8 @@ public class SecurityController extends Controller {
 
     private CompletionStage<Result> toResult(VerifiedUserInfo verifiedUserInfo) {
         return repository.createOrUpdate(convertFrom(verifiedUserInfo))
-                .thenApplyAsync(id -> {
-                    String token = jwtCenter.create(id);
+                .thenApplyAsync(e -> {
+                    String token = jwtCenter.create(e.getId());
                     UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
                     return ok(Json.toJson(result));
                 }, httpExecutionContext.current());

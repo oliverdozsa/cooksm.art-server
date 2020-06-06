@@ -63,7 +63,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     }
 
     @Override
-    public CompletionStage<Long> create(Long userId, Long recipeId) {
+    public CompletionStage<FavoriteRecipe> create(Long userId, Long recipeId) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, Recipe.class, recipeId);
@@ -75,7 +75,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
             fr.setRecipe(ebean.find(Recipe.class, recipeId));
             ebean.save(fr);
 
-            return fr.getId();
+            return fr;
         }, executionContext);
     }
 

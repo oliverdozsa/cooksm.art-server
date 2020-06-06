@@ -1,6 +1,7 @@
 package services;
 
 import com.typesafe.config.Config;
+import data.entities.UserSearch;
 import data.repositories.UserSearchRepository;
 import data.repositories.exceptions.ForbiddenExeption;
 import dto.UserSearchCreateUpdateDto;
@@ -35,7 +36,8 @@ public class UserSearchService {
                 throw new ForbiddenExeption("User reached max limit! userId = " + userId);
             }
         }).thenComposeAsync(v -> recipeSearchService.createWithLongId(dto.query, true))
-                .thenComposeAsync(searchId -> userSearchRepository.create(dto.name, userId, searchId));
+                .thenComposeAsync(searchId -> userSearchRepository.create(dto.name, userId, searchId))
+                .thenApply(UserSearch::getId);
 
     }
 

@@ -178,7 +178,7 @@ public class RecipeSearchesControllerTest {
         for (int i = 0; i < maxSearches; i++) {
             Long id = repository.create("someQuery", true)
                     .toCompletableFuture()
-                    .get();
+                    .get().getId();
             createdIds.add(id);
         }
 

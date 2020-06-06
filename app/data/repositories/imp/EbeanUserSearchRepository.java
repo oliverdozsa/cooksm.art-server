@@ -37,7 +37,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     }
 
     @Override
-    public CompletionStage<Long> create(String name, Long userId, Long recipeSearchId) {
+    public CompletionStage<UserSearch> create(String name, Long userId, Long recipeSearchId) {
         return recipeSearchRepository.single(recipeSearchId).thenApplyAsync(recipeSearch -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             if (name == null || name.length() == 0) {
@@ -52,7 +52,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
             userSearch.setName(name);
             ebean.save(userSearch);
 
-            return userSearch.getId();
+            return userSearch;
         }, executionContext);
     }
 

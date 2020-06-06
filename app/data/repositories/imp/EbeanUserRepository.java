@@ -35,7 +35,7 @@ public class EbeanUserRepository implements UserRepository {
     }
 
     @Override
-    public CompletionStage<Long> createOrUpdate(UserCreateUpdateDto dto) {
+    public CompletionStage<User> createOrUpdate(UserCreateUpdateDto dto) {
         logger.debug("createOrUpdate(): dto = {}", dto.toString());
         return supplyAsync(() -> {
             User existing = findByDto(dto);
@@ -55,7 +55,7 @@ public class EbeanUserRepository implements UserRepository {
         }, executionContext);
     }
 
-    private Long create(UserCreateUpdateDto dto) {
+    private User create(UserCreateUpdateDto dto) {
         logger.debug("create(): dto = {}", dto.toString());
 
         validate(dto);
@@ -68,10 +68,10 @@ public class EbeanUserRepository implements UserRepository {
 
         ebean.save(entity);
 
-        return entity.getId();
+        return entity;
     }
 
-    private Long update(UserCreateUpdateDto dto, Long entityId) {
+    private User update(UserCreateUpdateDto dto, Long entityId) {
         logger.debug("update(): dto = {}", dto.toString());
 
         validate(dto);
@@ -85,7 +85,7 @@ public class EbeanUserRepository implements UserRepository {
 
         ebean.update(entity);
 
-        return entity.getId();
+        return entity;
     }
 
     private User findByDto(UserCreateUpdateDto dto) {

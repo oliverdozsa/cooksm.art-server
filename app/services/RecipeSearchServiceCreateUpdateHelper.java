@@ -1,5 +1,6 @@
 package services;
 
+import data.entities.RecipeSearch;
 import data.entities.SourcePage;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
@@ -55,7 +56,8 @@ class RecipeSearchServiceCreateUpdateHelper {
                     String queryStr = Json.toJson(query).toString();
                     checkQueryLength(queryStr);
                     return recipeSearchRepository.create(queryStr, isPermanent);
-                });
+                })
+                .thenApplyAsync(RecipeSearch::getId);
     }
 
     public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id) {

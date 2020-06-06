@@ -34,7 +34,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     }
 
     @Override
-    public CompletionStage<Long> create(String query, boolean isPermanent) {
+    public CompletionStage<RecipeSearch> create(String query, boolean isPermanent) {
         return supplyAsync(() -> {
             if (query == null || query.length() == 0) {
                 throw new IllegalArgumentException("query is empty!");
@@ -49,7 +49,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
             ebean.save(entity);
             count.incrementAndGet();
             logger.info("create(): count = {}", count.get());
-            return entity.getId();
+            return entity;
         }, executionContext);
     }
 
