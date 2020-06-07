@@ -25,12 +25,9 @@ public class EbeanGlobalSearchRepository implements GlobalSearchRepository {
     }
 
     @Override
-    public CompletionStage<Page<GlobalSearch>> page(int limit, int offset) {
+    public CompletionStage<Page<GlobalSearch>> all() {
         return supplyAsync(() -> {
-            Query<GlobalSearch> query = ebean.createQuery(GlobalSearch.class)
-                    .setFirstRow(offset)
-                    .setMaxRows(limit);
-
+            Query<GlobalSearch> query = ebean.createQuery(GlobalSearch.class);
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);
     }

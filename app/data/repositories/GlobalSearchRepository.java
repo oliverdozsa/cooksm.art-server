@@ -6,5 +6,5 @@ import data.entities.GlobalSearch;
 import java.util.concurrent.CompletionStage;
 
 public interface GlobalSearchRepository {
-    CompletionStage<Page<GlobalSearch>> page(int limit, int offset);
+    CompletionStage<Page<GlobalSearch>> all();
 }

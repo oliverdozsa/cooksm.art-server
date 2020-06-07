@@ -1,0 +1,81 @@
+ingredient:
+  - id: 1
+  - id: 2
+  - id: 3
+
+language:
+  - id: 1
+    iso_name: hu
+
+ingredient_name:
+  - id: 101
+    language_id: 1
+    ingredient_id: 1
+    name: ingredient_1
+
+  - id: 102
+    language_id: 1
+    ingredient_id: 2
+    name: ingredient_2
+
+  - id: 103
+    language_id: 1
+    ingredient_id: 3
+    name: ingredient_3
+
+
+recipe_search:
+  - id: 239327 # Initial value + 1000
+    query: >
+      {
+        "searchMode": "composed-of-number",
+        "goodIngs": 3,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    last_accessed: 2020-01-11 04:02:00
+    is_permanent: true
+
+  - id: 239328 # Initial value + 1001
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    last_accessed: 2020-01-12 04:02:00
+    is_permanent: false
+
+  - id: 239329 # Initial value + 1002
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+  - id: 239330 # Initial value + 1003
+    query: >
+      {
+        "searchMode": "composed-of-ratio",
+        "goodIngsRatio": 0.5,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3]
+      }
+    is_permanent: true
+
+global_search:
+  - id: 1
+    name: globalQuery1
+    search_id: 239328
+
+  - id: 2
+    name: globalQuery2
+    search_id: 239329
+
+  - id: 3
+    name: globalQuery3
+    search_id: 239330
