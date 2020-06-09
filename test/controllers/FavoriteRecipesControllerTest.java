@@ -40,7 +40,7 @@ public class FavoriteRecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetEmpty");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().uri(routes.FavoriteRecipesController.allOfUser().url());
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().uri(routes.FavoriteRecipesController.all().url());
 
         String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
         JwtTestUtils.addJwtTokenTo(httpRequest, token);
@@ -48,7 +48,7 @@ public class FavoriteRecipesControllerTest {
         Result result = route(application.getApplication(), httpRequest);
         assertEquals("Result of request is wrong!", OK, result.status());
         JsonNode resultJson = Json.parse(contentAsString(result));
-        assertEquals("Total count is wrong!", 0, resultJson.get("totalCount").asInt());
+        assertEquals("Total count is wrong!", 0, resultJson.size());
     }
 
     @Test
@@ -85,15 +85,15 @@ public class FavoriteRecipesControllerTest {
 
         // Get all
         httpRequestGet = new Http.RequestBuilder()
-                .uri(routes.FavoriteRecipesController.allOfUser().url());
+                .uri(routes.FavoriteRecipesController.all().url());
         JwtTestUtils.addJwtTokenTo(httpRequestGet, token);
 
         result = route(application.getApplication(), httpRequestGet);
         JsonNode resultJson = Json.parse(contentAsString(result));
 
-        assertEquals("Total count is wrong!", 1, resultJson.get("totalCount").asInt());
-        assertEquals("Recipe name is wrong!", "recipe_1", resultJson.get("items").get(0).get("name").asText());
-        assertEquals("Recipe url is wrong!", "recipe_1_url", resultJson.get("items").get(0).get("url").asText());
+        assertEquals("Total count is wrong!", 1, resultJson.size());
+        assertEquals("Recipe name is wrong!", "recipe_1", resultJson.get(0).get("name").asText());
+        assertEquals("Recipe url is wrong!", "recipe_1_url", resultJson.get(0).get("url").asText());
     }
 
     @Test

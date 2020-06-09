@@ -8,7 +8,7 @@ GET    /ingredienttags                controllers.v1.IngredientTagsController.pa
 + jwtFilter
 POST   /favoriterecipes           controllers.v1.FavoriteRecipesController.create(request: Request)
 + jwtFilter
-GET    /favoriterecipes           controllers.v1.FavoriteRecipesController.allOfUser(request: Request)
+GET    /favoriterecipes           controllers.v1.FavoriteRecipesController.all(request: Request)
 + jwtFilter
 GET    /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.single(id: Long, request: Request)
 + jwtFilter

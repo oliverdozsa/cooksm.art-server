@@ -43,14 +43,12 @@ public class GlobalSearchesControllerTest {
         String jsonStr = contentAsString(response);
         JsonNode json = Json.parse(jsonStr);
 
-        assertEquals(3, json.get("items").size());
-        assertEquals(3, json.get("totalCount").asInt());
+        assertEquals(3, json.size());
 
-        JsonNode itemsJson = json.get("items");
         List<String> names = new ArrayList<>();
         List<String> searchIds = new ArrayList<>();
-        itemsJson.forEach(n -> names.add(n.get("name").asText()));
-        itemsJson.forEach(n -> searchIds.add(n.get("searchId").asText()));
+        json.forEach(n -> names.add(n.get("name").asText()));
+        json.forEach(n -> searchIds.add(n.get("searchId").asText()));
         assertTrue(names.containsAll(Arrays.asList("globalQuery1", "globalQuery2", "globalQuery3")));
         assertTrue(searchIds.containsAll(Arrays.asList(Base62Utils.encode(239328L), Base62Utils.encode(239329L), Base62Utils.encode(239330L))));
     }

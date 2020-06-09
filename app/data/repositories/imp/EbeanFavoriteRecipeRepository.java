@@ -49,16 +49,14 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     }
 
     @Override
-    public CompletionStage<Page<FavoriteRecipe>> allOfUser(Long userId) {
+    public CompletionStage<List<FavoriteRecipe>> all(Long userId) {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
-            List<FavoriteRecipe> result = ebean.createQuery(FavoriteRecipe.class)
+            return ebean.createQuery(FavoriteRecipe.class)
                     .where()
                     .eq("user.id", userId)
                     .findList();
-
-            return new Page<>(result, result.size());
         }, executionContext);
     }
 

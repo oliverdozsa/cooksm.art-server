@@ -28,16 +28,12 @@ public class GlobalSearchesController extends Controller {
     private static final Logger.ALogger logger = Logger.of(GlobalSearchesController.class);
 
     public CompletionStage<Result> all() {
+        logger.info("all()");
         return repository.all()
-                .thenApply(this::toResult);
-    }
-
-    private Result toResult(Page<GlobalSearch> page){
-        List<GlobalSearchDto> dtos = page.getItems().stream()
-                .map(DtoMapper::toDto)
-                .collect(Collectors.toList());
-
-        PageDto<GlobalSearchDto> pageDto = new PageDto<>(dtos, page.getTotalCount());
-        return ok(Json.toJson(pageDto));
+                .thenApply(l -> {
+                    List<GlobalSearchDto> dtoList = l.stream().map(DtoMapper::toDto)
+                            .collect(Collectors.toList());
+                    return ok(Json.toJson(dtoList));
+                });
     }
 }

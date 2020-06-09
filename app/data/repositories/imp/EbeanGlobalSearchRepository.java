@@ -10,6 +10,7 @@ import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -25,10 +26,10 @@ public class EbeanGlobalSearchRepository implements GlobalSearchRepository {
     }
 
     @Override
-    public CompletionStage<Page<GlobalSearch>> all() {
+    public CompletionStage<List<GlobalSearch>> all() {
         return supplyAsync(() -> {
             Query<GlobalSearch> query = ebean.createQuery(GlobalSearch.class);
-            return new Page<>(query.findList(), query.findCount());
+            return query.findList();
         }, executionContext);
     }
 }

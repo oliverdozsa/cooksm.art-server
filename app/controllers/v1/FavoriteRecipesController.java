@@ -61,10 +61,10 @@ public class FavoriteRecipesController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
-    public CompletionStage<Result> allOfUser(Http.Request request) {
+    public CompletionStage<Result> all(Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("allOfUser(): user id = {}", jwt.getUserId());
-        return repository.allOfUser(jwt.getUserId())
+        return repository.all(jwt.getUserId())
                 .thenApplyAsync(FavoriteRecipesController::toResult, httpExecutionContext.current())
                 .exceptionally(mapExceptionWithUnpack);
     }
@@ -107,14 +107,11 @@ public class FavoriteRecipesController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
-    private static Result toResult(Page<FavoriteRecipe> page) {
-        List<FavoriteRecipeDto> favoriteRecipes = page.getItems()
+    private static Result toResult(List<FavoriteRecipe> items) {
+        List<FavoriteRecipeDto> dtoList = items
                 .stream()
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());
-
-        PageDto<FavoriteRecipeDto> pageDto = new PageDto<>(favoriteRecipes, page.getTotalCount());
-
-        return ok(Json.toJson(pageDto));
+        return ok(Json.toJson(dtoList));
     }
 }
