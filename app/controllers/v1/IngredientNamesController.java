@@ -9,15 +9,18 @@ import lombokized.repositories.Page;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import services.DtoMapper;
+import services.LanguageService;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -32,6 +35,12 @@ public class IngredientNamesController extends Controller {
 
     @Inject
     private HttpExecutionContext executionContext;
+
+    @Inject
+    private LanguageService languageService;
+
+    private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
+    private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesController.class);
 
@@ -52,6 +61,12 @@ public class IngredientNamesController extends Controller {
             return repository.page(params.getNameLike(), params.getLanguageId(), params.getLimit(), params.getOffset())
                     .thenApplyAsync(this::toResult, executionContext.current());
         }
+    }
+
+    public CompletionStage<Result> single(Long id, Long languageId) {
+        return repository.singleByIngredientId(id, languageService.getLanguageIdOrDefault(languageId))
+                .thenApplyAsync(e -> ok(Json.toJson(DtoMapper.toDto(e))))
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     private Result toResult(Page<IngredientName> page) {

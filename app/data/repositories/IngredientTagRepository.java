@@ -9,4 +9,5 @@ import java.util.concurrent.CompletionStage;
 public interface IngredientTagRepository {
     CompletionStage<Page<IngredientTag>> page(String nameLike, Long languageId, int limit, int offset);
     CompletionStage<List<IngredientTag>> byIds(List<Long> ids);
+    CompletionStage<IngredientTag> single(Long id);
 }

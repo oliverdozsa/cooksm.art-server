@@ -9,6 +9,7 @@ import data.repositories.IngredientTagRepository;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
+import play.libs.Json;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -18,6 +19,7 @@ import services.DtoMapper;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -32,6 +34,9 @@ public class IngredientTagsController extends Controller {
 
     @Inject
     private HttpExecutionContext executionContext;
+
+    private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
+    private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
     private static final Logger.ALogger logger = Logger.of(IngredientTagsController.class);
 
@@ -52,6 +57,12 @@ public class IngredientTagsController extends Controller {
             return repository.page(queryParams.getNameLike(), queryParams.getLanguageId(), queryParams.getLimit(), queryParams.getOffset())
                     .thenApplyAsync(this::toResult, executionContext.current());
         }
+    }
+
+    public CompletionStage<Result> single(Long id) {
+        return repository.single(id)
+                .thenApplyAsync(e -> ok(Json.toJson(DtoMapper.toDto(e))))
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     private Result toResult(Page<IngredientTag> page) {
