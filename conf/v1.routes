@@ -1,10 +1,8 @@
 GET    /ingredientnames               controllers.v1.IngredientNamesController.pageNames(request: Request)
-GET    /ingredientnames/:id           controllers.v1.IngredientNamesController.single(id: Long, language: Long ?= 0)
 GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
 GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
 GET    /ingredienttags                controllers.v1.IngredientTagsController.pageTags(request: Request)
-GET    /ingredienttags/:id            controllers.v1.IngredientTagsController.single(id: Long)
 
 # Favorite recipes
 + jwtFilter

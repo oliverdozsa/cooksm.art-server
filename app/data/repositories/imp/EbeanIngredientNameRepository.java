@@ -4,7 +4,6 @@ import data.DatabaseExecutionContext;
 import data.entities.Ingredient;
 import data.entities.IngredientName;
 import data.repositories.IngredientNameRepository;
-import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
@@ -76,23 +75,6 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
             });
 
             return names;
-        }, executionContext);
-    }
-
-    @Override
-    public CompletionStage<IngredientName> singleByIngredientId(Long id, Long languageId) {
-        return supplyAsync(() -> {
-            IngredientName entity = ebean.createQuery(IngredientName.class)
-                    .where()
-                    .eq("ingredient.id", id)
-                    .eq("language.id", languageId)
-                    .findOne();
-            if (entity == null) {
-                throw new NotFoundException("Not found ingredient name with ingredient id =" + id +
-                        ",languageId = " + languageId);
-            }
-
-            return entity;
         }, executionContext);
     }
 }

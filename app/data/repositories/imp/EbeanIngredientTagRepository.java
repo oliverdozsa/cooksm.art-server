@@ -3,7 +3,6 @@ package data.repositories.imp;
 import data.DatabaseExecutionContext;
 import data.entities.IngredientTag;
 import data.repositories.IngredientTagRepository;
-import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
@@ -12,8 +11,6 @@ import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -55,18 +52,6 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 tags.add(entity);
             });
             return tags;
-        }, executionContext);
-    }
-
-    @Override
-    public CompletionStage<IngredientTag> single(Long id) {
-        return supplyAsync(() -> {
-            IngredientTag entity = ebean.find(IngredientTag.class, id);
-            if (entity == null) {
-                throw new NotFoundException("Not found tag with id = " + id);
-            }
-
-            return entity;
         }, executionContext);
     }
 }

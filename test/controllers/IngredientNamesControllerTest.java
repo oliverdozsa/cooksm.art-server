@@ -11,12 +11,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static play.mvc.Http.HttpVerbs.GET;
 import static play.test.Helpers.*;
 
@@ -41,7 +36,7 @@ public class IngredientNamesControllerTest {
         String resultContentStr = contentAsString(result);
         JsonNode resultJson = Json.parse(resultContentStr);
 
-        assertEquals("Number of ingredients is wrong!", 5, resultJson.get("items").size());
+        assertEquals("Number of ingredients is wrong!",5, resultJson.get("items").size());
     }
 
     @Test
@@ -53,7 +48,7 @@ public class IngredientNamesControllerTest {
 
         String reqParams = "languageId=1&nameLike=hu&offset=0&limit=2";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
-                routes.IngredientNamesController.pageNames().url() + "?" + reqParams);
+                routes.IngredientNamesController.pageNames().url()+ "?" + reqParams);
         Result result = route(application.getApplication(), httpRequest);
 
         String resultContentStr = contentAsString(result);
@@ -61,12 +56,12 @@ public class IngredientNamesControllerTest {
         JsonNode resultNamesJson = resultJson.get("items");
 
         assertEquals("Number of elements in the page is wrong!", 2, resultNamesJson.size());
-        assertEquals("Total number of ingredients is wrong!", 5, resultJson.get("totalCount").asInt());
+        assertEquals("Total number of ingredients is wrong!",5, resultJson.get("totalCount").asInt());
 
         // Next page
         reqParams = "languageId=1&nameLike=hu&offset=2&limit=6";
         httpRequest = new Http.RequestBuilder().method(GET).uri(
-                routes.IngredientNamesController.pageNames().url() + "?" + reqParams);
+                routes.IngredientNamesController.pageNames().url()+ "?" + reqParams);
         result = route(application.getApplication(), httpRequest);
 
         resultContentStr = contentAsString(result);
@@ -108,39 +103,5 @@ public class IngredientNamesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         JsonNode resultAltNamesJson = resultJson.get("items").get(0).get("altNames");
         assertEquals("Number of items is wrong!", 0, resultAltNamesJson.size());
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
-    public void testSingle() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientNamesController.single(3L, 0L).url());
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals(OK, result.status());
-        String jsonStr = contentAsString(result);
-        JsonNode json = Json.parse(jsonStr);
-
-        assertEquals(3L, json.get("id").asLong());
-        assertEquals("hu_3", json.get("name").asText());
-        List<String> altNames = new ArrayList<>();
-        json.get("altNames").forEach(node -> altNames.add(node.asText()));
-        assertTrue(altNames.containsAll(Collections.singletonList("ingr_3_alt_1")));
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
-    public void testSingle_NotFound() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle_NotFound");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientNamesController.single(42L, 0L).url());
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, result.status());
     }
 }

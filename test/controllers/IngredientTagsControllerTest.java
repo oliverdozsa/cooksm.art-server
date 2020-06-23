@@ -11,10 +11,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import static junit.framework.TestCase.*;
 import static play.test.Helpers.*;
 
@@ -42,7 +38,7 @@ public class IngredientTagsControllerTest {
         String jsonStr = contentAsString(result);
         JsonNode json = Json.parse(jsonStr);
 
-        assertEquals("Total count is incorrect!", 7, json.get("totalCount").asInt());
+        assertEquals("Total count is incorrect!",7, json.get("totalCount").asInt());
     }
 
     @Test
@@ -68,7 +64,7 @@ public class IngredientTagsControllerTest {
             String jsonStr = contentAsString(result);
             JsonNode json = Json.parse(jsonStr);
 
-            assertEquals("Total count is incorrect!", 7, json.get("totalCount").asInt());
+            assertEquals("Total count is incorrect!",7, json.get("totalCount").asInt());
             assertTrue("Items' size is not <= limit!", json.get("items").size() <= limit);
 
             int totalCount = json.get("totalCount").asInt();
@@ -94,7 +90,7 @@ public class IngredientTagsControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
-    public void testIngredientsOfTags() {
+    public void testIngredientsOfTags(){
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testIngredientsOfTags");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -116,41 +112,5 @@ public class IngredientTagsControllerTest {
 
         assertNotNull("Ingredients field is not present!", jsonTag.get("ingredients"));
         assertEquals("Number of ingredients of tags is wrong!", 2, jsonTag.get("ingredients").size());
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
-    public void testSingle() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.single(3L).url());
-
-        Result response = route(application.getApplication(), request);
-        assertEquals(OK, response.status());
-
-        String jsonStr = contentAsString(response);
-        JsonNode json = Json.parse(jsonStr);
-        assertEquals(3L, json.get("id").asLong());
-        assertEquals("ingredient_2_tag_2", json.get("name").asText());
-        List<Long> ingredientIds = new ArrayList<>();
-        json.get("ingredients").forEach(n -> ingredientIds.add(n.asLong()));
-        assertTrue(ingredientIds.containsAll(Arrays.asList(1L, 2L)));
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
-    public void testSingle_NotFound() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle_NotFound");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.single(42L).url());
-
-        Result response = route(application.getApplication(), request);
-        assertEquals(NOT_FOUND, response.status());
     }
 }
