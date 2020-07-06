@@ -16,14 +16,14 @@ DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delet
 
 # Recipe searches
 GET   /recipesearches/:id         controllers.v1.RecipeSearchesController.single(id: String)
-POST  /recipesearches/create      controllers.v1.RecipeSearchesController.create(request: Request)
+POST  /recipesearches/            controllers.v1.RecipeSearchesController.create(request: Request)
 
 # Global searches
 GET   /globalsearches/all         controllers.v1.GlobalSearchesController.all()
 
 # User searches
 + jwtFilter
-POST /usersearches/create         controllers.v1.UserSearchesController.create(request: Request)
+POST /usersearches/               controllers.v1.UserSearchesController.create(request: Request)
 + jwtFilter
 PUT  /usersearches/:id            controllers.v1.UserSearchesController.update(id: Long, request: Request)
 + jwtFilter
