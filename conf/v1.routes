@@ -25,11 +25,11 @@ GET   /globalsearches/all         controllers.v1.GlobalSearchesController.all()
 + jwtFilter
 POST /usersearches/create         controllers.v1.UserSearchesController.create(request: Request)
 + jwtFilter
-PUT  /usersearches/update         controllers.v1.UserSearchesController.update(id: Long, request: Request)
+PUT  /usersearches/:id            controllers.v1.UserSearchesController.update(id: Long, request: Request)
 + jwtFilter
 GET  /usersearches/all            controllers.v1.UserSearchesController.all(request: Request)
 + jwtFilter
-DELETE  /usersearches/delete      controllers.v1.UserSearchesController.delete(id: Long, request: Request)
+DELETE  /usersearches/:id         controllers.v1.UserSearchesController.delete(id: Long, request: Request)
 + jwtFilter
 GET  /usersearches/:id            controllers.v1.UserSearchesController.single(id: Long, request: Request)
 # Security
