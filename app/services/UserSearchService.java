@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
+
 public class UserSearchService {
     private UserSearchRepository userSearchRepository;
     private RecipeSearchService recipeSearchService;
@@ -50,9 +52,20 @@ public class UserSearchService {
         return userSearchRepository.delete(id, userId);
     }
 
-    public CompletionStage<Void> update(Long id, Long userId, UserSearchCreateUpdateDto dto){
-        return userSearchRepository.update(dto.name, userId, id)
+    public CompletionStage<Void> update(Long id, Long userId, UserSearchCreateUpdateDto dto) {
+        CompletionStage<UserSearch> userSearchCompletionStage;
+        if (dto.name != null) {
+            userSearchCompletionStage = userSearchRepository.update(dto.name, userId, id);
+        } else {
+            userSearchCompletionStage = userSearchRepository.single(id, userId);
+        }
+        return userSearchCompletionStage
                 .thenApplyAsync(entity -> entity.getSearch().getId())
-                .thenComposeAsync(searchId -> recipeSearchService.update(dto.query, true, searchId));
+                .thenComposeAsync(searchId -> {
+                    if (dto.query != null) {
+                        return recipeSearchService.update(dto.query, true, searchId);
+                    }
+                    return runAsync(() -> {});
+                });
     }
 }

@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static junit.framework.TestCase.*;
 import static play.mvc.Http.HttpVerbs.GET;
+import static play.mvc.Http.HttpVerbs.PATCH;
 import static play.test.Helpers.*;
 
 public class UserSearchesControllerTest {
@@ -482,5 +483,101 @@ public class UserSearchesControllerTest {
 
         Result response = route(application.getApplication(), httpRequest);
         assertEquals(NOT_FOUND, response.status());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testPatchName() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testPatchName");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        // update existing user1query1 to user1query1renamed
+        String jsonStr = "{" +
+                "  \"name\": \"user1query1renamed\"" +
+                "}";
+        JsonNode jsonNode = Json.parse(jsonStr);
+        Long id = 1L;
+
+        Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
+                .method(PUT)
+                .bodyJson(jsonNode)
+                .uri(routes.UserSearchesController.update(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
+
+        Result response = route(application.getApplication(), httpRequestUpdate);
+        assertEquals(NO_CONTENT, response.status());
+
+        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.UserSearchesController.single(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
+
+        response = route(application.getApplication(), httpRequestGet);
+
+        assertEquals(OK, response.status());
+        String resultJsonStr = contentAsString(response);
+        JsonNode resultJson = Json.parse(resultJsonStr);
+        assertEquals("user1query1renamed", resultJson.get("name").asText());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testPatchQuery() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testPatchQuery");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String jsonStr = "{" +
+                "  \"query\": {" +
+                "    \"searchMode\": \"composed-of-ratio\"," +
+                "    \"goodIngsRatio\": 0.6," +
+                "    \"inIngs\": [1, 2, 3]," +
+                "    \"inIngTags\": [1]," +
+                "    \"exIngs\": [4, 7]," +
+                "    \"exIngTags\": [2]," +
+                "    \"sourcePages\": [1]" +
+                "  }" +
+                "}";
+        JsonNode jsonNode = Json.parse(jsonStr);
+        Long id = 1L;
+
+        Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
+                .method(PUT)
+                .bodyJson(jsonNode)
+                .uri(routes.UserSearchesController.update(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
+
+        Result response = route(application.getApplication(), httpRequestUpdate);
+        assertEquals(NO_CONTENT, response.status());
+
+        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.UserSearchesController.single(id).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
+
+        response = route(application.getApplication(), httpRequestGet);
+
+        assertEquals(OK, response.status());
+        String resultJsonStr = contentAsString(response);
+        JsonNode resultJson = Json.parse(resultJsonStr);
+        assertEquals("user1query1", resultJson.get("name").asText());
+        String searchId = resultJson.get("searchId").asText();
+
+        Http.RequestBuilder httpRequestGetRecipeSearch = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeSearchesController.single(searchId).url());
+        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
+
+        response = route(application.getApplication(), httpRequestGetRecipeSearch);
+
+        assertEquals(OK, response.status());
+
+        resultJsonStr = contentAsString(response);
+        JsonNode responseJson = Json.parse(resultJsonStr);
+        JsonNode queryJson = responseJson.get("query");
+
+        assertEquals("composed-of-ratio", queryJson.get("searchMode").asText());
+        assertEquals(0.6, queryJson.get("goodIngsRatio").asDouble());
     }
 }

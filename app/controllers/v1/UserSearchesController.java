@@ -47,7 +47,9 @@ public class UserSearchesController extends Controller {
             return errorResult;
         }
 
-        Form<UserSearchCreateUpdateDto> form = formFactory.form(UserSearchCreateUpdateDto.class).bindFromRequest(request);
+        Form<UserSearchCreateUpdateDto> form = formFactory
+                .form(UserSearchCreateUpdateDto.class, UserSearchCreateUpdateDto.ValidationGroupForCreate.class)
+                .bindFromRequest(request);
         UserSearchCreateUpdateDto dto = form.get();
         logger.info("create(): dto = {}, userId = {}", dto, jwt.getUserId());
 
