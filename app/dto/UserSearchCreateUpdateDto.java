@@ -39,7 +39,4 @@ public class UserSearchCreateUpdateDto implements Constraints.Validatable<Valida
 
     public interface ValidationGroupForCreate {
     }
-
-    public interface ValidationGroupForUpdate {
-    }
 }

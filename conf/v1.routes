@@ -25,13 +25,14 @@ GET   /globalsearches/all         controllers.v1.GlobalSearchesController.all()
 + jwtFilter
 POST /usersearches/               controllers.v1.UserSearchesController.create(request: Request)
 + jwtFilter
-PUT  /usersearches/:id            controllers.v1.UserSearchesController.update(id: Long, request: Request)
+PATCH  /usersearches/:id          controllers.v1.UserSearchesController.patch(id: Long, request: Request)
 + jwtFilter
 GET  /usersearches/all            controllers.v1.UserSearchesController.all(request: Request)
 + jwtFilter
 DELETE  /usersearches/:id         controllers.v1.UserSearchesController.delete(id: Long, request: Request)
 + jwtFilter
 GET  /usersearches/:id            controllers.v1.UserSearchesController.single(id: Long, request: Request)
+
 # Security
 POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
 POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)

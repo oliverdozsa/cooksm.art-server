@@ -125,12 +125,12 @@ public class UserSearchesControllerTest {
 
     @Test
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
-    public void testUpdate() {
+    public void testPatchFully() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUpdate");
+        logger.info("-- RUNNING TEST: testPatchFully");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        // TODO: update existing user1query1 to user1query1renamed
+        // update existing user1query1 to user1query1renamed
         String jsonStr = "{" +
                 "  \"name\": \"user1query1renamed\"," +
                 "  \"query\": {" +
@@ -147,9 +147,9 @@ public class UserSearchesControllerTest {
         Long id = 1L;
 
         Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
-                .method(PUT)
+                .method(PATCH)
                 .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.update(id).url());
+                .uri(routes.UserSearchesController.patch(id).url());
         JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
 
         Result response = route(application.getApplication(), httpRequestUpdate);
@@ -310,9 +310,9 @@ public class UserSearchesControllerTest {
 
     @Test
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
-    public void testUpdate_InvalidName() {
+    public void testPatch_InvalidName() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUpdate_InvalidName");
+        logger.info("-- RUNNING TEST: testPatch_InvalidName");
         logger.info("------------------------------------------------------------------------------------------------");
 
         String jsonStr = "{" +
@@ -331,9 +331,9 @@ public class UserSearchesControllerTest {
         Long id = 1L;
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(PUT)
+                .method(PATCH)
                 .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.update(id).url());
+                .uri(routes.UserSearchesController.patch(id).url());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
         Result response = route(application.getApplication(), httpRequest);
@@ -342,9 +342,9 @@ public class UserSearchesControllerTest {
 
     @Test
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
-    public void testUpdate_InvalidQuery() {
+    public void testPatch_InvalidQuery() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUpdate_InvalidQuery");
+        logger.info("-- RUNNING TEST: testPatch_InvalidQuery");
         logger.info("------------------------------------------------------------------------------------------------");
 
         // Missing included ingredients
@@ -362,9 +362,9 @@ public class UserSearchesControllerTest {
         Long id = 1L;
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(PUT)
+                .method(PATCH)
                 .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.update(id).url());
+                .uri(routes.UserSearchesController.patch(id).url());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
         Result response = route(application.getApplication(), httpRequest);
@@ -373,7 +373,7 @@ public class UserSearchesControllerTest {
 
     @Test
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
-    public void testUpdate_OtherUser() {
+    public void testPatch_OtherUser() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testUpdate_OtherUser");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -395,9 +395,9 @@ public class UserSearchesControllerTest {
         Long id = 3L;
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(PUT)
+                .method(PATCH)
                 .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.update(id).url());
+                .uri(routes.UserSearchesController.patch(id).url());
         JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
 
         Result response = route(application.getApplication(), httpRequest);
@@ -500,9 +500,9 @@ public class UserSearchesControllerTest {
         Long id = 1L;
 
         Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
-                .method(PUT)
+                .method(PATCH)
                 .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.update(id).url());
+                .uri(routes.UserSearchesController.patch(id).url());
         JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
 
         Result response = route(application.getApplication(), httpRequestUpdate);
@@ -543,9 +543,9 @@ public class UserSearchesControllerTest {
         Long id = 1L;
 
         Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
-                .method(PUT)
+                .method(PATCH)
                 .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.update(id).url());
+                .uri(routes.UserSearchesController.patch(id).url());
         JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
 
         Result response = route(application.getApplication(), httpRequestUpdate);

@@ -70,17 +70,20 @@ public class UserSearchesController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
-    public CompletionStage<Result> update(Long id, Http.Request request) {
+    public CompletionStage<Result> patch(Long id, Http.Request request){
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         CompletionStage<Result> errorResult = checkUpdateCreateRequestForErrors(request);
         if (errorResult != null) {
             return errorResult;
         }
 
-        Form<UserSearchCreateUpdateDto> form = formFactory.form(UserSearchCreateUpdateDto.class).bindFromRequest(request);
+        Form<UserSearchCreateUpdateDto> form = formFactory
+                .form(UserSearchCreateUpdateDto.class)
+                .bindFromRequest(request);
+
         UserSearchCreateUpdateDto dto = form.get();
-        logger.info("update(): dto = {}, userId = {}, id = {}", dto, jwt.getUserId(), id);
-        return userSearchService.update(id, jwt.getUserId(), dto)
+        logger.info("patch(): dto = {}, userId = {}, id = {}", dto, jwt.getUserId(), id);
+        return userSearchService.patch(id, jwt.getUserId(), dto)
                 .thenApplyAsync(success -> (Result) noContent())
                 .exceptionally(mapExceptionWithUnpack);
     }
@@ -123,5 +126,29 @@ public class UserSearchesController extends Controller {
         }
 
         return null;
+    }
+
+    private CompletionStage<Result> patch(Long id, Http.Request request, boolean shouldPatchFully) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        CompletionStage<Result> errorResult = checkUpdateCreateRequestForErrors(request);
+        if (errorResult != null) {
+            return errorResult;
+        }
+
+        Form<UserSearchCreateUpdateDto> form;
+        if(shouldPatchFully){
+            form = formFactory
+                    .form(UserSearchCreateUpdateDto.class, UserSearchCreateUpdateDto.ValidationGroupForCreate.class);
+        } else {
+            form = formFactory.form(UserSearchCreateUpdateDto.class);
+        }
+
+        form = form.bindFromRequest(request);
+
+        UserSearchCreateUpdateDto dto = form.get();
+        logger.info("patch(): dto = {}, userId = {}, id = {}", dto, jwt.getUserId(), id);
+        return userSearchService.patch(id, jwt.getUserId(), dto)
+                .thenApplyAsync(success -> (Result) noContent())
+                .exceptionally(mapExceptionWithUnpack);
     }
 }

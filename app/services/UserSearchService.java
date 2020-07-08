@@ -52,7 +52,7 @@ public class UserSearchService {
         return userSearchRepository.delete(id, userId);
     }
 
-    public CompletionStage<Void> update(Long id, Long userId, UserSearchCreateUpdateDto dto) {
+    public CompletionStage<Void> patch(Long id, Long userId, UserSearchCreateUpdateDto dto) {
         CompletionStage<UserSearch> userSearchCompletionStage;
         if (dto.name != null) {
             userSearchCompletionStage = userSearchRepository.update(dto.name, userId, id);
