@@ -71,14 +71,11 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
             }
             return ebean.find(UserSearch.class, id);
         }, executionContext)
-                .thenComposeAsync(e -> recipeSearchRepository.delete(e.getSearch().getId()))
-                .thenApplyAsync(deleteSuccess -> {
-                    if (!deleteSuccess) {
-                        throw new BusinessLogicViolationException("User search doesn't have recipe search!");
-                    }
-
-                    return ebean.delete(UserSearch.class, id) == 1;
-                });
+                .thenApplyAsync(e -> {
+                    Long recipeSearchId = e.getSearch().getId();
+                    ebean.delete(UserSearch.class, id);
+                    return recipeSearchId;
+                }).thenApplyAsync(recipeSearchId -> ebean.delete(RecipeSearch.class, recipeSearchId) == 1);
     }
 
     @Override
