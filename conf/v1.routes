@@ -27,7 +27,7 @@ POST /usersearches/               controllers.v1.UserSearchesController.create(r
 + jwtFilter
 PATCH  /usersearches/:id          controllers.v1.UserSearchesController.patch(id: Long, request: Request)
 + jwtFilter
-GET  /usersearches/all            controllers.v1.UserSearchesController.all(request: Request)
+GET  /usersearches/               controllers.v1.UserSearchesController.all(request: Request)
 + jwtFilter
 DELETE  /usersearches/:id         controllers.v1.UserSearchesController.delete(id: Long, request: Request)
 + jwtFilter
