@@ -3,11 +3,11 @@ package controllers.v1;
 import com.fasterxml.jackson.databind.JsonNode;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.i18n.MessagesApi;
 import play.mvc.Http;
 import queryparams.RecipesQueryParams;
-
-import java.util.Optional;
+import security.SecurityUtils;
 
 class RecipesQueryParamsRetrieve {
     private final FormFactory formFactory;
@@ -61,26 +61,40 @@ class RecipesQueryParamsRetrieve {
     private Form<RecipesQueryParams.Params> bind(Class<?> validationGroup) {
         Form<RecipesQueryParams.Params> form = getBaseForm(validationGroup);
 
-        if(isCustomRetrieving()){
-            return form.bind(messagesApi.preferred(request).lang(), request.attrs(), data);
+        if (isCustomRetrieving()) {
+            form = form.bind(messagesApi.preferred(request).lang(), request.attrs(), data);
         } else {
-            return form.bindFromRequest(request);
+            form = form.bindFromRequest(request);
         }
+
+        if (!form.hasErrors() && isUseFavoritesOnlyInvalid(form.get())) {
+            form = form.withError(new ValidationError("", "Favorites only is set, but JWT is not present!"));
+        }
+
+        return form;
     }
 
     private boolean isCustomRetrieving() {
         return messagesApi != null;
     }
 
-    private Form<RecipesQueryParams.Params> bind(){
+    private Form<RecipesQueryParams.Params> bind() {
         return bind(null);
     }
 
-    private Form<RecipesQueryParams.Params> getBaseForm(Class<?> validationGroup){
-        if(validationGroup != null){
+    private Form<RecipesQueryParams.Params> getBaseForm(Class<?> validationGroup) {
+        if (validationGroup != null) {
             return formFactory.form(RecipesQueryParams.Params.class, validationGroup);
         } else {
             return formFactory.form(RecipesQueryParams.Params.class);
         }
+    }
+
+    private boolean isUseFavoritesOnlyInvalid(RecipesQueryParams.Params params) {
+        return Boolean.TRUE.equals(params.useFavoritesOnly) && hasNoVerifiedJwt();
+    }
+
+    private boolean hasNoVerifiedJwt() {
+        return !SecurityUtils.hasVerifiedJwt(request);
     }
 }

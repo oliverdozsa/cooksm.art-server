@@ -79,6 +79,8 @@ public class RecipesQueryParams {
 
         public Long languageId;
 
+        public Boolean useFavoritesOnly;
+
         @Override
         public ValidationError validate() {
             SearchMode searchModeEnum = null;

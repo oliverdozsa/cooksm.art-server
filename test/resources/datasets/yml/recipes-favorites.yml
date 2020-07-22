@@ -1,0 +1,9 @@
+users:
+  - id: 1
+    email: user1@example.com
+    full_name: John Doe
+
+favorite_recipe:
+  - id: 1
+    recipe_id: 2
+    user_id: 1

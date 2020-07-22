@@ -13,6 +13,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
+import utils.JwtTestUtils;
 
 import java.time.Instant;
 
@@ -461,7 +462,7 @@ public class RecipesControllerTest {
         // Backward paging.
         for (i = 4; i >= 0; i--) {
             Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
-                    routes.RecipesController.pageRecipes().url()  + queryParams);
+                    routes.RecipesController.pageRecipes().url() + queryParams);
             Result result = route(application.getApplication(), httpRequest);
 
             String resultContentStr = contentAsString(result);
@@ -551,5 +552,71 @@ public class RecipesControllerTest {
         Result result = route(application.getApplication(), httpRequest);
 
         assertEquals("Unexpected status!", BAD_REQUEST, result.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testFavoriteRecipes_ComposedOf() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testFavoriteRecipes_ComposedOf");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "useFavoritesOnly=true&searchMode=composed-of-number&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
+        String jwtToken = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
+
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(1).get("id").asLong());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-favorites.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testFavoriteRecipes_All() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testFavoriteRecipes_ComposedOf");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "useFavoritesOnly=true&searchMode=composed-of-number&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
+        String jwtToken = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
+        Result result = route(application.getApplication(), httpRequest);
+
+        String resultContentStr = contentAsString(result);
+        JsonNode resultJson = Json.parse(resultContentStr);
+        resultJson = resultJson.get("items");
+
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(1).get("id").asLong());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-favorites.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testFavoriteRecipes_UseFavoriteTrueJwtNotPresent() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testFavoriteRecipes_UseFavoriteTrueJwtNotPresent");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String reqParams = "useFavoritesOnly=true&searchMode=composed-of-number&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
+                routes.RecipesController.pageRecipes().url() + "?" + reqParams);
+        Result result = route(application.getApplication(), httpRequest);
+
+        assertEquals(BAD_REQUEST, result.status());
+        String errorResponseStr = contentAsString(result);
+        assertTrue(errorResponseStr.contains("Favorites only is set, but JWT is not present!"));
     }
 }

@@ -8,4 +8,8 @@ public class SecurityUtils {
     public static VerifiedJwt getFromRequest(Http.Request httpRequest) {
         return httpRequest.attrs().get(Attrs.VERIFIED_JWT);
     }
+
+    public static boolean hasVerifiedJwt(Http.Request request) {
+        return request.attrs().containsKey(Attrs.VERIFIED_JWT);
+    }
 }
