@@ -2,35 +2,33 @@ package services;
 
 import queryparams.RecipesQueryParams;
 
-import static lombokized.repositories.RecipeRepositoryParams.QueryTypeNumber;
-import static lombokized.repositories.RecipeRepositoryParams.QueryTypeRatio;
-import static lombokized.repositories.RecipeRepositoryParams.Common;
-import static lombokized.repositories.RecipeRepositoryParams.IncludedIngredients;
-import static lombokized.repositories.RecipeRepositoryParams.AdditionalIngredients;
-import static lombokized.repositories.RecipeRepositoryParams.Relation;
+import static lombokized.repositories.RecipeRepositoryParams.*;
 
 class RecipesQueryParamsMapping {
     public static QueryTypeNumber toQueryTypeNumber(RecipesQueryParams.Params queryParams) {
-        QueryTypeNumber.Builder builder = QueryTypeNumber.builder();
+        Common commonParams = toCommon(queryParams);
+        return toQueryTypeNumber(queryParams, commonParams);
+    }
 
-        builder.common(toCommon(queryParams));
-        builder.includedIngredients(toIncludedIngredients(queryParams));
-        builder.goodIngredients(queryParams.goodIngs);
-        builder.goodIngredientsRelation(Relation.fromString(queryParams.goodIngsRel));
-        builder.unknownIngredients(queryParams.unknownIngs);
-        builder.unknownIngredientsRelation(Relation.fromString(queryParams.unknownIngsRel));
-        builder.additionalIngredients(toAdditionalIngredients(queryParams));
-
-        return builder.build();
+    public static QueryTypeNumber toQueryTypeNumber(RecipesQueryParams.Params queryParams, Long userId){
+        Common commonParams = toCommon(queryParams, userId);
+        return toQueryTypeNumber(queryParams, commonParams);
     }
 
     public static QueryTypeRatio toQueryTypeRatio(RecipesQueryParams.Params queryParams) {
-        QueryTypeRatio.Builder builder = QueryTypeRatio.builder();
+        Common commonParams = toCommon(queryParams);
+        return toQueryTypeRatio(queryParams, commonParams);
+    }
 
-        builder.common(toCommon(queryParams));
-        builder.goodIngredientsRatio(queryParams.goodIngsRatio);
-        builder.includedIngredients(toIncludedIngredients(queryParams));
+    public static QueryTypeRatio toQueryTypeRatio(RecipesQueryParams.Params queryParams, Long userId){
+        Common commonParams = toCommon(queryParams, userId);
+        return toQueryTypeRatio(queryParams, commonParams);
+    }
 
+    public static Common toCommon(RecipesQueryParams.Params queryParams, Long userId){
+        Common params = toCommon(queryParams);
+        Common.Builder builder = params.toBuilder();
+        builder.userId(userId);
         return builder.build();
     }
 
@@ -83,6 +81,30 @@ class RecipesQueryParamsMapping {
             builder.additionalIngredients(queryParams.addIngs);
         }
         builder.additionalIngredientTags(queryParams.addIngTags);
+
+        return builder.build();
+    }
+
+    private static QueryTypeRatio toQueryTypeRatio(RecipesQueryParams.Params queryParams, Common commonParams){
+        QueryTypeRatio.Builder builder = QueryTypeRatio.builder();
+
+        builder.common(commonParams);
+        builder.goodIngredientsRatio(queryParams.goodIngsRatio);
+        builder.includedIngredients(toIncludedIngredients(queryParams));
+
+        return builder.build();
+    }
+
+    private static QueryTypeNumber toQueryTypeNumber(RecipesQueryParams.Params queryParams, Common commonParams) {
+        QueryTypeNumber.Builder builder = QueryTypeNumber.builder();
+
+        builder.common(commonParams);
+        builder.includedIngredients(toIncludedIngredients(queryParams));
+        builder.goodIngredients(queryParams.goodIngs);
+        builder.goodIngredientsRelation(Relation.fromString(queryParams.goodIngsRel));
+        builder.unknownIngredients(queryParams.unknownIngs);
+        builder.unknownIngredientsRelation(Relation.fromString(queryParams.unknownIngsRel));
+        builder.additionalIngredients(toAdditionalIngredients(queryParams));
 
         return builder.build();
     }

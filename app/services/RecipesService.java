@@ -1,6 +1,7 @@
 package services;
 
 import com.typesafe.config.Config;
+import lombokized.repositories.RecipeRepositoryParams;
 import queryparams.RecipesQueryParams;
 import data.entities.Recipe;
 import data.repositories.RecipeRepository;
@@ -29,22 +30,34 @@ public class RecipesService {
     @Inject
     private LanguageService languageService;
 
-    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params params) {
-        return supplyAsync(supplyQueryTypeNumber(params))
-                .thenCompose(q -> repository.pageOfQueryTypeNumber(q))
-                .thenApplyAsync(p -> toPageDto(p, params.languageId));
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams) {
+        Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams);
+        return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
     }
 
-    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params params) {
-        return supplyAsync(supplyQueryTypeRatio(params))
-                .thenCompose(q -> repository.pageOfQueryTypeRatio(q))
-                .thenApplyAsync(p -> toPageDto(p, params.languageId));
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams, Long userId) {
+        Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams, userId);
+        return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
     }
 
-    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params params) {
-        return supplyAsync(() -> toCommon(params))
-                .thenCompose(p -> repository.pageOfQueryTypeNone(p))
-                .thenApplyAsync(p -> toPageDto(p, params.languageId));
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params queryParams) {
+        Supplier<QueryTypeRatio> repositoryParamsSupplier = () -> toQueryTypeRatio(queryParams);
+        return pageOfQueryTypeRatio(repositoryParamsSupplier, queryParams.languageId);
+    }
+
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params queryParams, Long userId) {
+        Supplier<QueryTypeRatio> repositoryParamsSupplier = () -> toQueryTypeRatio(queryParams, userId);
+        return pageOfQueryTypeRatio(repositoryParamsSupplier, queryParams.languageId);
+    }
+
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params queryParams) {
+        CompletionStage<RecipeRepositoryParams.Common> repositoryParams = supplyAsync(() -> toCommon(queryParams));
+        return queryRecipesByCommonParams(repositoryParams, queryParams.languageId);
+    }
+
+    public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params queryParams, Long userId) {
+        CompletionStage<RecipeRepositoryParams.Common> repositoryParams = supplyAsync(() -> toCommon(queryParams, userId));
+        return queryRecipesByCommonParams(repositoryParams, queryParams.languageId);
     }
 
     public CompletionStage<RecipeDto> single(Long id, Long languageId) {
@@ -59,6 +72,18 @@ public class RecipesService {
                 });
     }
 
+    private CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(Supplier<QueryTypeRatio> querySupplier, Long languageId) {
+        Supplier<QueryTypeRatio> checkedSupplier = decorateQueryTypeRatioSupplierWithCheck(querySupplier);
+        CompletionStage<QueryTypeRatio> repositoryParams = supplyAsync(checkedSupplier);
+        return queryRecipesByQueryTypeRatio(repositoryParams, languageId);
+    }
+
+    private CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(Supplier<QueryTypeNumber> querySupplier, Long languageId) {
+        Supplier<QueryTypeNumber> checkedSupplier = decorateQueryTypeNumberSupplierWithCheck(querySupplier);
+        CompletionStage<QueryTypeNumber> repositoryParams = supplyAsync(checkedSupplier);
+        return queryRecipesByQueryTypeNumber(repositoryParams, languageId);
+    }
+
     private PageDto<RecipeDto> toPageDto(Page<Recipe> page, Long languageId) {
         Long usedLanguageId = languageService.getLanguageIdOrDefault(languageId);
         List<RecipeDto> dtos = page.getItems()
@@ -68,19 +93,34 @@ public class RecipesService {
         return new PageDto<>(dtos, page.getTotalCount());
     }
 
-    private Supplier<QueryTypeNumber> supplyQueryTypeNumber(RecipesQueryParams.Params params) {
+    private Supplier<QueryTypeNumber> decorateQueryTypeNumberSupplierWithCheck(Supplier<QueryTypeNumber> querySupplier) {
         return () -> {
-            QueryTypeNumber query = toQueryTypeNumber(params);
+            QueryTypeNumber query = querySupplier.get();
             RecipeRepositoryQueryCheck.check(query);
             return query;
         };
     }
 
-    private Supplier<QueryTypeRatio> supplyQueryTypeRatio(RecipesQueryParams.Params params) {
+    private Supplier<QueryTypeRatio> decorateQueryTypeRatioSupplierWithCheck(Supplier<QueryTypeRatio> querySupplier) {
         return () -> {
-            QueryTypeRatio query = toQueryTypeRatio(params);
+            QueryTypeRatio query = querySupplier.get();
             RecipeRepositoryQueryCheck.check(query);
             return query;
         };
+    }
+
+    private CompletionStage<PageDto<RecipeDto>> queryRecipesByCommonParams(CompletionStage<Common> paramsStage, Long languageId) {
+        return paramsStage.thenCompose(p -> repository.pageOfQueryTypeNone(p))
+                .thenApplyAsync(p -> toPageDto(p, languageId));
+    }
+
+    private CompletionStage<PageDto<RecipeDto>> queryRecipesByQueryTypeRatio(CompletionStage<QueryTypeRatio> paramsStage, Long languageId) {
+        return paramsStage.thenCompose(q -> repository.pageOfQueryTypeRatio(q))
+                .thenApplyAsync(p -> toPageDto(p, languageId));
+    }
+
+    private CompletionStage<PageDto<RecipeDto>> queryRecipesByQueryTypeNumber(CompletionStage<QueryTypeNumber> paramsStage, Long languageId) {
+        return paramsStage.thenCompose(q -> repository.pageOfQueryTypeNumber(q))
+                .thenApplyAsync(p -> toPageDto(p, languageId));
     }
 }

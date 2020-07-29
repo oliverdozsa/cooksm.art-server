@@ -56,7 +56,7 @@ public class RecipeRepositoryParams {
     }
 
     @Value
-    @Builder(builderClassName = "Builder")
+    @Builder(builderClassName = "Builder", toBuilder = true)
     public static class Common {
         Integer minimumNumberOfIngredients;
         Integer maximumNumberOfIngredients;
@@ -68,6 +68,7 @@ public class RecipeRepositoryParams {
         Integer limit;
         String nameLike;
         List<Long> sourcePageIds;
+        Long userId;
     }
 
     @Value
