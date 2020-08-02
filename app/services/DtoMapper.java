@@ -47,8 +47,6 @@ public class DtoMapper {
     public static FavoriteRecipeDto toDto(FavoriteRecipe entity) {
         return new FavoriteRecipeDto(
                 entity.getId(),
-                entity.getRecipe().getName(),
-                entity.getRecipe().getUrl(),
                 entity.getRecipe().getId()
         );
     }

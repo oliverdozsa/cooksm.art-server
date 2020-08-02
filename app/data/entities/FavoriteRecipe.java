@@ -14,7 +14,7 @@ public class FavoriteRecipe {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

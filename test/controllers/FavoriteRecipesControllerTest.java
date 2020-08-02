@@ -80,8 +80,7 @@ public class FavoriteRecipesControllerTest {
         result = route(application.getApplication(), httpRequestGet);
         JsonNode favoriteRecipesJson = Json.parse(contentAsString(result));
 
-        assertEquals("Unexpected recipe name!", "recipe_1", favoriteRecipesJson.get("name").asText());
-        assertEquals("Unexpected recipe url!", "recipe_1_url", favoriteRecipesJson.get("url").asText());
+        assertEquals("Unexpected recipe id!", 1L, favoriteRecipesJson.get("recipeId").asLong());
 
         // Get all
         httpRequestGet = new Http.RequestBuilder()
@@ -91,9 +90,9 @@ public class FavoriteRecipesControllerTest {
         result = route(application.getApplication(), httpRequestGet);
         JsonNode resultJson = Json.parse(contentAsString(result));
 
+
         assertEquals("Total count is wrong!", 1, resultJson.size());
-        assertEquals("Recipe name is wrong!", "recipe_1", resultJson.get(0).get("name").asText());
-        assertEquals("Recipe url is wrong!", "recipe_1_url", resultJson.get(0).get("url").asText());
+        assertEquals("Unexpected recipe id!", 1L, resultJson.get(0).get("recipeId").asLong());
     }
 
     @Test
