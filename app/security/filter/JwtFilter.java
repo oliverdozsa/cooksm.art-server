@@ -53,6 +53,7 @@ public class JwtFilter extends Filter {
     private String jwtFilterTag;
     private String headerAuthorization;
     private String bearer;
+    private String jwtOptionalFilterTag;
 
     @Inject
     public JwtFilter(Materializer mat, JwtCenter jwtCenter, Config config) {
@@ -62,6 +63,7 @@ public class JwtFilter extends Filter {
         jwtFilterTag = config.getString("receptnekem.jwt.filtertag");
         headerAuthorization = config.getString("receptnekem.jwt.header.authorization");
         bearer = config.getString("receptnekem.jwt.header.bearer");
+        jwtOptionalFilterTag = config.getString("receptnekem.jwt.optionalfiltertag");
     }
 
     @Override
@@ -73,13 +75,19 @@ public class JwtFilter extends Filter {
         HandlerDef handler = requestHeader.attrs().get(Router.Attrs.HANDLER_DEF);
         List<String> modifiers = handler.getModifiers();
 
-        if (!modifiers.contains(jwtFilterTag)) {
+        if (hasNoFilterTag(modifiers)) {
             return nextFilter.apply(requestHeader);
         }
 
         Optional<String> authHeader = requestHeader.getHeaders().get(headerAuthorization);
+        boolean isBearerNotPresent = !authHeader.filter(ah -> ah.contains(bearer)).isPresent();
+        boolean shouldOptionallyFilter = modifiers.contains(jwtOptionalFilterTag);
 
-        if (!authHeader.filter(ah -> ah.contains(bearer)).isPresent()) {
+        if (isBearerNotPresent && shouldOptionallyFilter) {
+            return nextFilter.apply(requestHeader);
+        }
+
+        if (isBearerNotPresent) {
             logger.error("f=JwtFilter, error=authHeaderNotPresent");
             return CompletableFuture.completedFuture(forbidden(ERR_AUTHORIZATION_HEADER));
         }
@@ -92,5 +100,9 @@ public class JwtFilter extends Filter {
         }
 
         return nextFilter.apply(requestHeader.withAttrs(requestHeader.attrs().put(Attrs.VERIFIED_JWT, res.right.get())));
+    }
+
+    private boolean hasNoFilterTag(List<String> modifiers) {
+        return !modifiers.contains(jwtFilterTag) && !modifiers.contains(jwtOptionalFilterTag);
     }
 }

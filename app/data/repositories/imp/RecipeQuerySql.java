@@ -6,10 +6,12 @@ class RecipeQuerySql {
         String otherFields = createOtherFieldsSelections(config);
         String includedIngredientsJoin = createIncludedIngredientsJoin(config);
         String excludedJoin = createExcludedJoin(config);
+        String useFavoritesJoin = createUseFavoritesJoin(config);
         String where = createWhereClause(config);
         String includedIngredientsCondition = createIncludedIngredientsCondition(config);
         String excludedCondition = createExcludedCondition(config);
-        String havingConditon = createHavingCondition(config);
+        String havingCondition = createHavingCondition(config);
+        String useFavoritesCondition = createUseFavoritesCondition(config);
 
         return "" +
                 "" +
@@ -20,28 +22,25 @@ class RecipeQuerySql {
                 "  recipe " +
                 includedIngredientsJoin +
                 excludedJoin + " " +
+                useFavoritesJoin + " " +
                 where +
                 includedIngredientsCondition +
                 excludedCondition + " " +
-                havingConditon;
+                useFavoritesCondition + " " +
+                havingCondition;
     }
 
     static class Configuration {
         public boolean selectOtherFields;
         public boolean useExclude;
         public QueryType queryType;
-        public boolean putExcludedAnd;
         public boolean useAdditionalIngrs;
+        public boolean useFavoritesOnly;
 
         public Configuration(boolean selectOtherFields, boolean useExclude, QueryType queryType) {
-            this(selectOtherFields, useExclude, queryType, true);
-        }
-
-        public Configuration(boolean selectOtherFields, boolean useExclude, QueryType queryType, boolean putExcludedAnd) {
             this.selectOtherFields = selectOtherFields;
             this.useExclude = useExclude;
             this.queryType = queryType;
-            this.putExcludedAnd = putExcludedAnd;
         }
     }
 
@@ -75,15 +74,16 @@ class RecipeQuerySql {
     }
 
     private static String createExcludedCondition(Configuration config) {
-        String excludedCondition = "";
-        if (config.useExclude) {
-            excludedCondition = " (badIngs IS NULL) ";
-            if (config.putExcludedAnd) {
-                excludedCondition = " AND " + excludedCondition;
-            }
+        if (!config.useExclude) {
+            return "";
         }
 
-        return excludedCondition;
+        String condition = " (badIngs IS NULL) ";
+        if (config.queryType == QueryType.NUMBER || config.queryType == QueryType.RATIO) {
+            condition = " AND " + condition;
+        }
+
+        return condition;
     }
 
     private static String createHavingCondition(Configuration config) {
@@ -130,8 +130,8 @@ class RecipeQuerySql {
             join = " JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id ";
         }
 
-        if(QueryType.NUMBER.equals(config.queryType) && config.useAdditionalIngrs){
-            join = join + " JOIN ("+ createAdditionalIngredientsQuery() +") AS additionals " +
+        if (QueryType.NUMBER.equals(config.queryType) && config.useAdditionalIngrs) {
+            join = join + " JOIN (" + createAdditionalIngredientsQuery() + ") AS additionals " +
                     " ON recipe.id = additionals.recipe_id ";
         }
 
@@ -143,7 +143,8 @@ class RecipeQuerySql {
 
         if (QueryType.RATIO.equals(config.queryType) ||
                 QueryType.NUMBER.equals(config.queryType) ||
-                config.useExclude) {
+                config.useExclude ||
+                config.useFavoritesOnly) {
             whereClause = "WHERE ";
         }
 
@@ -168,5 +169,29 @@ class RecipeQuerySql {
                 " GROUP BY recipe.id " +
                 " HAVING " +
                 "   COUNT(recipe_ingredient.ingredient_id) >= :goodAdditionalIngredientIds ";
+    }
+
+    private static String createUseFavoritesJoin(Configuration config) {
+        if (!config.useFavoritesOnly) {
+            return "";
+        }
+
+        return " JOIN favorite_recipe ON recipe.id = favorite_recipe.recipe_id ";
+    }
+
+    private static String createUseFavoritesCondition(Configuration config) {
+        if (!config.useFavoritesOnly) {
+            return "";
+        }
+
+        String condition = " favorite_recipe.user_id = :userId ";
+
+        if (config.queryType == QueryType.NUMBER ||
+                config.queryType == QueryType.RATIO ||
+                config.useExclude) {
+            condition = " AND " + condition;
+        }
+
+        return condition;
     }
 }

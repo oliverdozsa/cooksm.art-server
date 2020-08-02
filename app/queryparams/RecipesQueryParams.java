@@ -119,6 +119,7 @@ public class RecipesQueryParams {
                     ", unknownIngs=" + unknownIngs +
                     ", unknownIngsRel='" + unknownIngsRel + '\'' +
                     ", goodIngs=" + goodIngs +
+                    ", goodAdditionalIngs=" + goodAdditionalIngs +
                     ", goodIngsRel='" + goodIngsRel + '\'' +
                     ", offset=" + offset +
                     ", limit=" + limit +
@@ -132,6 +133,7 @@ public class RecipesQueryParams {
                     ", addIngTags=" + addIngTags +
                     ", sourcePages=" + sourcePages +
                     ", languageId=" + languageId +
+                    ", useFavoritesOnly=" + useFavoritesOnly +
                     '}';
         }
 

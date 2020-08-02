@@ -23,7 +23,7 @@ public class RecipeResultsByQueryTypeNone extends RecipeResultsByQuery {
         producers.unauth = this::getRecipesForQueryTypeNone;
         producers.auth = this::getRecipesForQueryTypeNone;
         Function<RecipesQueryParams.Params, CompletionStage<Result>> resultFunction =
-                RecipesResults.determine(form, request, producers);
+                RecipesResults.determine(form.get(), request, producers);
 
         return pageOrBadRequest(form, resultFunction);
     }

@@ -63,8 +63,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
             RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
                     true,
                     useExclude(params),
-                    RecipeQuerySql.QueryType.NONE,
-                    false);
+                    RecipeQuerySql.QueryType.NONE);
+            setUseFavoritesOnly(config, params);
 
             String sqlString = RecipeQuerySql.create(config);
             Query<Recipe> query = prepare(sqlString, params);
@@ -122,6 +122,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         setNameLikeCondition(query, params);
         setPagingCondition(query, params);
         setExcludedIngredientsCondition(query, params);
+        setUseFavoritesOnlyCondition(query, params);
     }
 
     private void setNumberOfIngredientsCondition(Query<Recipe> query, Common params) {
@@ -200,6 +201,10 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
+    private void setUseFavoritesOnlyCondition(Query<Recipe> query, Common params){
+        query.setParameter("userId", params.getUserId());
+    }
+
     private List<Long> getIngredientIdsForTags(List<Long> ingredientTagIds) {
         List<Long> result = new ArrayList<>();
         if (ingredientTagIds != null && ingredientTagIds.size() > 0) {
@@ -246,10 +251,19 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     private static RecipeQuerySql.Configuration createConfigForIncludedIngredients(RecipeQuerySql.QueryType queryType, Common params) {
-        return new RecipeQuerySql.Configuration(
+        RecipeQuerySql.Configuration configuration = new RecipeQuerySql.Configuration(
                 true,
                 useExclude(params),
                 queryType
         );
+        setUseFavoritesOnly(configuration, params);
+
+        return configuration;
+    }
+
+    private static void setUseFavoritesOnly(RecipeQuerySql.Configuration config, Common params) {
+        if (params.getUserId() != null) {
+            config.useFavoritesOnly = true;
+        }
     }
 }

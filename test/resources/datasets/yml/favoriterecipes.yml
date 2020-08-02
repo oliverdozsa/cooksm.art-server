@@ -27,4 +27,4 @@ recipe:
 favorite_recipe:
   - id: 1
     recipe_id: 2
-    users_id: 2
+    user_id: 2

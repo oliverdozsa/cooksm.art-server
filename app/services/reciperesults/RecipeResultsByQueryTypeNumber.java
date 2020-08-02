@@ -23,7 +23,7 @@ public class RecipeResultsByQueryTypeNumber extends RecipeResultsByQuery {
         producers.unauth = this::getRecipesForQueryTypeNumber;
         producers.auth = this::getRecipesForQueryTypeNumber;
         Function<RecipesQueryParams.Params, CompletionStage<Result>> resultFunction =
-                RecipesResults.determine(form, request, producers);
+                RecipesResults.determine(form.get(), request, producers);
 
         return pageOrBadRequest(form, resultFunction);
     }

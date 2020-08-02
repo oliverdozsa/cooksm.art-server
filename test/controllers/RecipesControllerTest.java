@@ -555,7 +555,7 @@ public class RecipesControllerTest {
     }
 
     @Test
-    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-favorites.yml"}, disableConstraints = true, cleanBefore = true)
     public void testFavoriteRecipes_ComposedOf() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testFavoriteRecipes_ComposedOf");
@@ -574,19 +574,18 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals("Number of items is wrong!", 2, resultJson.size());
-        assertEquals("Unexpected recipe!", 1L, resultJson.get(0).get("id").asLong());
-        assertEquals("Unexpected recipe!", 2L, resultJson.get(1).get("id").asLong());
+        assertEquals("Number of items is wrong!", 1, resultJson.size());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(0).get("id").asLong());
     }
 
     @Test
     @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-favorites.yml"}, disableConstraints = true, cleanBefore = true)
     public void testFavoriteRecipes_All() {
         logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testFavoriteRecipes_ComposedOf");
+        logger.info("-- RUNNING TEST: testFavoriteRecipes_All");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "useFavoritesOnly=true&searchMode=composed-of-number&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&offset=0&orderBy=name&orderBySort=asc&&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=3&exIngs[0]=5";
+        String reqParams = "useFavoritesOnly=true&limit=50&offset=0&orderBy=name&orderBySort=asc";
         String jwtToken = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
 
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
@@ -598,8 +597,9 @@ public class RecipesControllerTest {
         JsonNode resultJson = Json.parse(resultContentStr);
         resultJson = resultJson.get("items");
 
-        assertEquals("Number of items is wrong!", 1, resultJson.size());
-        assertEquals("Unexpected recipe!", 2L, resultJson.get(1).get("id").asLong());
+        assertEquals("Number of items is wrong!", 2, resultJson.size());
+        assertEquals("Unexpected recipe!", 2L, resultJson.get(0).get("id").asLong());
+        assertEquals("Unexpected recipe!", 4L, resultJson.get(1).get("id").asLong());
     }
 
     @Test

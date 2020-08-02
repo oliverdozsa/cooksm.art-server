@@ -1,4 +1,5 @@
 GET    /ingredientnames               controllers.v1.IngredientNamesController.pageNames(request: Request)
++ jwtOptionalFilter
 GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
 GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()

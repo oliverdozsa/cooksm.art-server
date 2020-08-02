@@ -45,14 +45,6 @@ public abstract class RecipeResultsByQuery {
         return ok(toJson(pageDto));
     }
 
-    protected Result toResult(RecipeDto dto) {
-        if (dto == null) {
-            return notFound();
-        } else {
-            return ok(toJson(dto));
-        }
-    }
-
     protected <T> CompletionStage<Result> pageOrBadRequest(Form<T> form, Function<T, CompletionStage<Result>> resultProducer) {
         if (form.hasErrors()) {
             logger.warn("pageOrBadRequest(): form has error!");
