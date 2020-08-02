@@ -127,28 +127,4 @@ public class UserSearchesController extends Controller {
 
         return null;
     }
-
-    private CompletionStage<Result> patch(Long id, Http.Request request, boolean shouldPatchFully) {
-        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
-        CompletionStage<Result> errorResult = checkUpdateCreateRequestForErrors(request);
-        if (errorResult != null) {
-            return errorResult;
-        }
-
-        Form<UserSearchCreateUpdateDto> form;
-        if(shouldPatchFully){
-            form = formFactory
-                    .form(UserSearchCreateUpdateDto.class, UserSearchCreateUpdateDto.ValidationGroupForCreate.class);
-        } else {
-            form = formFactory.form(UserSearchCreateUpdateDto.class);
-        }
-
-        form = form.bindFromRequest(request);
-
-        UserSearchCreateUpdateDto dto = form.get();
-        logger.info("patch(): dto = {}, userId = {}, id = {}", dto, jwt.getUserId(), id);
-        return userSearchService.patch(id, jwt.getUserId(), dto)
-                .thenApplyAsync(success -> (Result) noContent())
-                .exceptionally(mapExceptionWithUnpack);
-    }
 }
