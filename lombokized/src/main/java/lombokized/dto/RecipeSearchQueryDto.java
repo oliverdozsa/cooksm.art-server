@@ -20,6 +20,7 @@ public class RecipeSearchQueryDto {
     String goodIngsRel;
     Float goodIngsRatio;
     String nameLike;
+    Boolean useFavoritesOnly;
 
     List<IngredientNameDto> exIngs;
     List<IngredientTagDto> exIngTags;

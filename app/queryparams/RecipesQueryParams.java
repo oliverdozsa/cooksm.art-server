@@ -83,7 +83,7 @@ public class RecipesQueryParams {
 
         @Override
         public ValidationError validate() {
-            SearchMode searchModeEnum = null;
+            SearchMode searchModeEnum;
             try {
                 searchModeEnum = toEnum(searchMode);
             } catch (IllegalArgumentException e) {

@@ -17,6 +17,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
 import utils.Base62Utils;
+import utils.JwtTestUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -26,8 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static play.mvc.Http.HeaderNames.LOCATION;
 import static play.mvc.Http.HttpVerbs.GET;
 import static play.mvc.Http.HttpVerbs.POST;
@@ -164,7 +164,7 @@ public class RecipeSearchesControllerTest {
         logger.info("-- RUNNING TEST: testQueryCountLimitReached");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository)(application.getApplication().injector().instanceOf(RecipeSearchRepository.class));
+        EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository) (application.getApplication().injector().instanceOf(RecipeSearchRepository.class));
         Class repoClass = Class.forName("data.repositories.imp.EbeanRecipeSearchRepository");
         Field countField = repoClass.getDeclaredField("count");
         countField.setAccessible(true);
@@ -339,6 +339,55 @@ public class RecipeSearchesControllerTest {
 
         Result response = route(application.getApplication(), httpCreateRequest);
         assertEquals(BAD_REQUEST, response.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void testCreate_UseFavoritesOnly() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testCreate_UseFavoritesOnly");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        JsonNode searchJson = Json.parse("" +
+                "{" +
+                "  \"searchMode\": \"composed-of-number\"," +
+                "  \"goodIngs\": 3," +
+                "  \"goodIngsRel\": \"ge\"," +
+                "  \"unknownIngs\": \"0\"," +
+                "  \"unknownIngsRel\": \"ge\"," +
+                "  \"inIngs\": [1, 2, 3]," +
+                "  \"inIngTags\": [1]," +
+                "  \"exIngs\": [4, 7]," +
+                "  \"exIngTags\": [2]," +
+                "  \"useFavoritesOnly\": true" +
+                "}"
+        );
+
+        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
+                .method(POST)
+                .bodyJson(searchJson)
+                .uri(routes.RecipeSearchesController.create().url());
+        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpCreateRequest, token);
+
+        Result response = route(application.getApplication(), httpCreateRequest);
+        assertEquals("Response status is not CREATED!", CREATED, response.status());
+        assertTrue("Missing Location header!", response.header(LOCATION).isPresent());
+
+        String location = response.header(LOCATION).get();
+
+        Http.RequestBuilder httpGetRequest = new Http.RequestBuilder()
+                .method(GET)
+                .uri(location);
+
+
+        response = route(application.getApplication(), httpGetRequest);
+        assertEquals("Response status is not OK!", OK, response.status());
+
+        String responseStr = contentAsString(response);
+        JsonNode responseJson = Json.parse(responseStr);
+        JsonNode query = responseJson.get("query");
+        assertTrue("Use favorites only shouldn't be present!", query.get("useFavoritesOnly").isNull());
     }
 
     private List<String> extractNames(JsonNode node) {

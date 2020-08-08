@@ -161,6 +161,7 @@ class RecipeSearchQueryDtoResolver {
                 .goodAdditionalIngs(queryParams.goodAdditionalIngs)
                 .nameLike(queryParams.nameLike)
                 .languageId(queryParams.languageId)
+                .useFavoritesOnly(queryParams.useFavoritesOnly)
                 .addIngs(additionalIngredients)
                 .addIngTags(additionalIngredientTags)
                 .inIngs(includedIngredients)

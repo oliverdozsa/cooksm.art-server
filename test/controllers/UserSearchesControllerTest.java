@@ -59,7 +59,8 @@ public class UserSearchesControllerTest {
                 "    \"exIngTags\": [2]," +
                 "    \"addIngs\": [5]," +
                 "    \"addIngTags\": [6]," +
-                "    \"sourcePages\": [1, 2]" +
+                "    \"sourcePages\": [1, 2]," +
+                "    \"useFavoritesOnly\": true" +
                 "  }" +
                 "}";
         JsonNode jsonNode = Json.parse(jsonStr);
@@ -89,6 +90,17 @@ public class UserSearchesControllerTest {
         JsonNode resultJson = Json.parse(resultJsonStr);
         assertEquals("someName", resultJson.get("name").asText());
         assertNotNull("ID field is missing!", resultJson.get("id"));
+
+        String searchId = resultJson.get("searchId").asText();
+        httpRequestGet = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeSearchesController.single(searchId).url());
+
+        result = route(application.getApplication(), httpRequestGet);
+        resultJsonStr = contentAsString(result);
+        resultJson = Json.parse(resultJsonStr);
+        JsonNode queryJson = resultJson.get("query");
+        assertTrue("Use favorites only is not true!", queryJson.get("useFavoritesOnly").asBoolean());
     }
 
     @Test

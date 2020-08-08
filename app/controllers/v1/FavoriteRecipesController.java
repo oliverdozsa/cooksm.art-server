@@ -3,8 +3,6 @@ package controllers.v1;
 import com.typesafe.config.Config;
 import lombokized.dto.FavoriteRecipeCreateDto;
 import lombokized.dto.FavoriteRecipeDto;
-import lombokized.dto.PageDto;
-import lombokized.repositories.Page;
 import data.entities.FavoriteRecipe;
 import data.repositories.FavoriteRecipeRepository;
 import play.Logger;
@@ -44,7 +42,7 @@ public class FavoriteRecipesController extends Controller {
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
-    private static final Logger.ALogger logger = Logger.of(RecipesController.class);
+    private static final Logger.ALogger logger = Logger.of(FavoriteRecipesController.class);
 
     public CompletionStage<Result> single(Long id, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);

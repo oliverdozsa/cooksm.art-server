@@ -57,7 +57,10 @@ public class RecipeSearchesController extends Controller {
             return completedFuture(badRequest(errorsJson));
         }
 
-        return service.create(form.get(), false)
+        RecipesQueryParams.Params params = form.get();
+        nullifyUseFavoritesOnly(params);
+
+        return service.create(params, false)
                 .thenApplyAsync(id -> {
                     String location = routes.RecipeSearchesController.single(id).absoluteURL(request);
                     logger.info("create(): created query with location = {}", location);
@@ -72,5 +75,11 @@ public class RecipeSearchesController extends Controller {
         }
 
         return ok(Json.toJson(dto));
+    }
+
+    private void nullifyUseFavoritesOnly(RecipesQueryParams.Params params) {
+        if (params.useFavoritesOnly != null && params.useFavoritesOnly) {
+            params.useFavoritesOnly = null;
+        }
     }
 }
