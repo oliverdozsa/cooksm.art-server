@@ -29,6 +29,7 @@ class RecipeSearchServiceCreateUpdateHelper {
     LanguageService languageService;
     Integer maxQuerySizeChars;
     Integer maxQueryCount;
+    RecipeRepositoryQueryCheck queryCheck;
 
     private CompletionStage<Void> noop = runAsync(() -> {
     });
@@ -101,10 +102,10 @@ class RecipeSearchServiceCreateUpdateHelper {
             RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(query.searchMode);
             if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
                 RecipeRepositoryParams.QueryTypeNumber queryTypeNumber = RecipesQueryParamsMapping.toQueryTypeNumber(query);
-                RecipeRepositoryQueryCheck.check(queryTypeNumber);
+                queryCheck.check(queryTypeNumber);
             } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
                 RecipeRepositoryParams.QueryTypeRatio queryTypeRatio = RecipesQueryParamsMapping.toQueryTypeRatio(query);
-                RecipeRepositoryQueryCheck.check(queryTypeRatio);
+                queryCheck.check(queryTypeRatio);
             }
         }).thenComposeAsync(v -> checkEntitiesExist(query));
     }

@@ -1,18 +1,29 @@
 package services;
 
+import com.typesafe.config.Config;
+
+import javax.inject.Inject;
+
 import static lombokized.repositories.RecipeRepositoryParams.*;
 
 import java.util.List;
 import java.util.Optional;
 
-class RecipeRepositoryQueryCheck {
-    public static void check(QueryTypeNumber query) {
+public class RecipeRepositoryQueryCheck {
+    private static boolean SHOULD_DISABLE_CHECK = true;
+
+    @Inject
+    public RecipeRepositoryQueryCheck(Config config) {
+        SHOULD_DISABLE_CHECK = !config.getBoolean("receptnekem.disable.mutual.exclusion.check");
+    }
+
+    public void check(QueryTypeNumber query) {
         checkMutuallyExclusive(query.getIncludedIngredients(), query.getCommon().getExcludedIngredients());
         checkMutuallyExclusive(query.getAdditionalIngredients(), query.getCommon().getExcludedIngredients());
         checkMutuallyExclusive(query.getAdditionalIngredients(), query.getIncludedIngredients());
     }
 
-    public static void check(QueryTypeRatio query) {
+    public void check(QueryTypeRatio query) {
         checkMutuallyExclusive(query.getIncludedIngredients(), query.getCommon().getExcludedIngredients());
     }
 
@@ -35,7 +46,7 @@ class RecipeRepositoryQueryCheck {
     }
 
     private static boolean areMutuallyExclusive(List<Long> included, List<Long> excluded) {
-        if (included == null || excluded == null) {
+        if (included == null || excluded == null || SHOULD_DISABLE_CHECK) {
             return true;
         }
 

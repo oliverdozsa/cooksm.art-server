@@ -229,16 +229,24 @@ public class RecipeSearchesControllerTest {
     }
 
     @Test
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidNotMutuallyExclusive() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testCreate_InvalidNotMutuallyExclusive");
         logger.info("------------------------------------------------------------------------------------------------");
+
+        boolean shouldSkip = !application.getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+        if (shouldSkip) {
+            return;
+        }
 
         JsonNode searchJson = Json.parse("" +
                 "{" +
                 "  \"searchMode\": \"composed-of-number\"," +
                 "  \"goodIngs\": 3," +
                 "  \"goodIngsRel\": \"ge\"," +
+                "  \"unknownIngs\": \"0\"," +
+                "  \"unknownIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3]," +
                 "  \"exIngs\": [1, 5, 6]" +
                 "}"

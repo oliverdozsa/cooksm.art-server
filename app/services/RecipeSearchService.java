@@ -22,6 +22,7 @@ public class RecipeSearchService {
     private SourcePageRepository sourcePageRepository;
     private LanguageService languageService;
     private Config config;
+    private RecipeRepositoryQueryCheck queryCheck;
 
     private Integer validityDays;
 
@@ -31,13 +32,14 @@ public class RecipeSearchService {
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
 
     @Inject
-    public RecipeSearchService(RecipeSearchRepository recipeSearchRepository, IngredientNameRepository ingredientNameRepository, IngredientTagRepository ingredientTagRepository, SourcePageRepository sourcePageRepository, LanguageService languageService, Config config) {
+    public RecipeSearchService(RecipeSearchRepository recipeSearchRepository, IngredientNameRepository ingredientNameRepository, IngredientTagRepository ingredientTagRepository, SourcePageRepository sourcePageRepository, LanguageService languageService, Config config, RecipeRepositoryQueryCheck queryCheck) {
         this.recipeSearchRepository = recipeSearchRepository;
         this.ingredientNameRepository = ingredientNameRepository;
         this.ingredientTagRepository = ingredientTagRepository;
         this.sourcePageRepository = sourcePageRepository;
         this.languageService = languageService;
         this.config = config;
+        this.queryCheck = queryCheck;
 
         validityDays = config.getInt("receptnekem.recipesearches.validity.days");
         initGetHelper();
@@ -87,5 +89,6 @@ public class RecipeSearchService {
         createHelper.languageService = languageService;
         createHelper.recipeSearchRepository = recipeSearchRepository;
         createHelper.sourcePageRepository = sourcePageRepository;
+        createHelper.queryCheck = queryCheck;
     }
 }

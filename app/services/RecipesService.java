@@ -30,6 +30,9 @@ public class RecipesService {
     @Inject
     private LanguageService languageService;
 
+    @Inject
+    private RecipeRepositoryQueryCheck queryCheck;
+
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams) {
         Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams);
         return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
@@ -96,7 +99,7 @@ public class RecipesService {
     private Supplier<QueryTypeNumber> decorateQueryTypeNumberSupplierWithCheck(Supplier<QueryTypeNumber> querySupplier) {
         return () -> {
             QueryTypeNumber query = querySupplier.get();
-            RecipeRepositoryQueryCheck.check(query);
+            queryCheck.check(query);
             return query;
         };
     }
@@ -104,7 +107,7 @@ public class RecipesService {
     private Supplier<QueryTypeRatio> decorateQueryTypeRatioSupplierWithCheck(Supplier<QueryTypeRatio> querySupplier) {
         return () -> {
             QueryTypeRatio query = querySupplier.get();
-            RecipeRepositoryQueryCheck.check(query);
+            queryCheck.check(query);
             return query;
         };
     }

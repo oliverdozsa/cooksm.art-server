@@ -7,10 +7,7 @@ import security.SocialTokenVerifier;
 import security.imp.JwtCenterImp;
 import security.imp.SocialTokenVerifierFacebookImp;
 import security.imp.SocialTokenVerifierGoogleImp;
-import services.LanguageService;
-import services.RecipeSearchService;
-import services.RecipesService;
-import services.UserSearchService;
+import services.*;
 
 /**
  * Module for bindings.
@@ -35,5 +32,6 @@ public class Module extends AbstractModule {
         bind(RecipeSearchService.class).asEagerSingleton();
         bind(LanguageService.class).asEagerSingleton();
         bind(UserSearchService.class).asEagerSingleton();
+        bind(RecipeRepositoryQueryCheck.class).asEagerSingleton();
     }
 }

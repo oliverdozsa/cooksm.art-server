@@ -60,6 +60,11 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testGetByIngredients_IncludedExcludedNotMutEx");
         logger.info("------------------------------------------------------------------------------------------------");
 
+        boolean shouldSkip = !application.getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+        if (shouldSkip) {
+            return;
+        }
+
         String reqParams = "searchMode=composed-of-number&unknownIngs=4&unknownIngsRel=le&goodIngs=2&goodIngsRel=ge&limit=50&unknownIngs=4&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=1&inIngs[1]=2&exIngs[0]=4&exIngs[1]=2";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
                 routes.RecipesController.pageRecipes().url() + "?" + reqParams);
