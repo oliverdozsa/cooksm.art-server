@@ -143,7 +143,7 @@ public class RecipesQueryParams {
             } else if (searchMode == SearchMode.COMPOSED_OF_RATIO) {
                 return checkGoodIngsRatio();
             } else if (searchMode == SearchMode.COMPOSED_OF_NUMBER) {
-                return checkAdditionaIngs();
+                return checkAdditionalIngs();
             }
 
             return null;
@@ -157,7 +157,7 @@ public class RecipesQueryParams {
             return null;
         }
 
-        private ValidationError checkAdditionaIngs() {
+        private ValidationError checkAdditionalIngs() {
             if (goodAdditionalIngs == null) {
                 return null;
             }

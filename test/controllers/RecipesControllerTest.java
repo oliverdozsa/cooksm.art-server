@@ -507,7 +507,7 @@ public class RecipesControllerTest {
         logger.info("-- RUNNING TEST: testComposedOfNumber_WithAdditionals");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        String reqParams = "?searchMode=composed-of-number&limit=50&unknownIngs=0&unknownIngsRel=ge&goodIngs=1&goodIngsRel=eq&goodAdditionalIngs=1&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=4&addIngs[0]=9&addIngs[1]=5";
+        String reqParams = "?searchMode=composed-of-number&limit=50&unknownIngs=0&unknownIngsRel=ge&goodIngs=1&goodIngsRel=eq&goodAdditionalIngs=1&offset=0&orderBy=name&orderBySort=asc&minIngs=1&maxIngs=5&inIngs[0]=4&addIngs[0]=9&addIngs[1]=5&addIngs[2]=4";
         Http.RequestBuilder httpRequest = new Http.RequestBuilder().method(GET).uri(
                 routes.RecipesController.pageRecipes().url() + reqParams);
         Result result = route(application.getApplication(), httpRequest);

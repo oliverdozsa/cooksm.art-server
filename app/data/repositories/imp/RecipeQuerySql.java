@@ -165,7 +165,8 @@ class RecipeQuerySql {
         return " SELECT recipe.id AS recipe_id " +
                 " FROM recipe " +
                 " JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id " +
-                " WHERE recipe_ingredient.ingredient_id IN (:additionalIngredientIds) " +
+                " WHERE recipe_ingredient.ingredient_id IN (:additionalIngredientIds) AND " +
+                "  recipe_ingredient.ingredient_id NOT IN (:includedIngredients) " +
                 " GROUP BY recipe.id " +
                 " HAVING " +
                 "   COUNT(recipe_ingredient.ingredient_id) >= :goodAdditionalIngredientIds ";
