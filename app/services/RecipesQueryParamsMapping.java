@@ -77,6 +77,7 @@ class RecipesQueryParamsMapping {
         AdditionalIngredients.Builder builder = AdditionalIngredients.builder();
 
         builder.goodAdditionalIngredients(queryParams.goodAdditionalIngs);
+        builder.goodAdditionalIngredientsRelation(Relation.fromString(queryParams.goodAdditionalIngsRel));
         if (queryParams.addIngs != null) {
             builder.additionalIngredients(queryParams.addIngs);
         }

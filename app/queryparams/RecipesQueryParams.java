@@ -47,6 +47,9 @@ public class RecipesQueryParams {
         public Integer goodAdditionalIngs;
 
         @Constraints.Pattern("(eq|gt|lt|ge|le)")
+        public String goodAdditionalIngsRel;
+
+        @Constraints.Pattern("(eq|gt|lt|ge|le)")
         @Constraints.Required(groups = {VGRecSearchModeComposedOf.class})
         public String goodIngsRel;
 
@@ -120,6 +123,7 @@ public class RecipesQueryParams {
                     ", unknownIngsRel='" + unknownIngsRel + '\'' +
                     ", goodIngs=" + goodIngs +
                     ", goodAdditionalIngs=" + goodAdditionalIngs +
+                    ", goodAdditionalIngsRel=" + goodAdditionalIngsRel +
                     ", goodIngsRel='" + goodIngsRel + '\'' +
                     ", offset=" + offset +
                     ", limit=" + limit +
@@ -164,6 +168,10 @@ public class RecipesQueryParams {
 
             if (goodAdditionalIngs <= 0) {
                 return new ValidationError("", "Invalid good additional ingredients number!");
+            }
+
+            if (goodAdditionalIngsRel == null) {
+                return new ValidationError("", "Missing good additional ingredients relation!");
             }
 
             if (addIngTags == null && addIngs == null) {

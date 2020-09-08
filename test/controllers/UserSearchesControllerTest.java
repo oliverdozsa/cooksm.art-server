@@ -53,6 +53,7 @@ public class UserSearchesControllerTest {
                 "    \"unknownIngs\": \"0\"," +
                 "    \"unknownIngsRel\": \"ge\"," +
                 "    \"goodAdditionalIngs\": 2," +
+                "    \"goodAdditionalIngsRel\": \"ge\"," +
                 "    \"inIngs\": [1, 2, 3]," +
                 "    \"inIngTags\": [1]," +
                 "    \"exIngs\": [4, 7]," +
@@ -213,6 +214,7 @@ public class UserSearchesControllerTest {
                 "    \"unknownIngs\": \"0\"," +
                 "    \"unknownIngsRel\": \"ge\"," +
                 "    \"goodAdditionalIngs\": 2," +
+                "    \"goodAdditionalIngsRel\": \"ge\"," +
                 "    \"inIngs\": [1, 2, 3]," +
                 "    \"inIngTags\": [1]," +
                 "    \"exIngs\": [4, 7]," +
@@ -251,6 +253,7 @@ public class UserSearchesControllerTest {
                 "    \"unknownIngs\": \"0\"," +
                 "    \"unknownIngsRel\": \"ge\"," +
                 "    \"goodAdditionalIngs\": 2," +
+                "    \"goodAdditionalIngsRel\": \"ge\"," +
                 "    \"exIngs\": [4, 7]," +
                 "    \"exIngTags\": [2]," +
                 "    \"addIngs\": [5]," +
@@ -286,6 +289,7 @@ public class UserSearchesControllerTest {
                 "    \"unknownIngs\": \"0\"," +
                 "    \"unknownIngsRel\": \"ge\"," +
                 "    \"goodAdditionalIngs\": 2," +
+                "    \"goodAdditionalIngsRel\": \"ge\"," +
                 "    \"inIngs\": [1, 2, 3]," +
                 "    \"inIngTags\": [1]," +
                 "    \"exIngs\": [4, 7]," +

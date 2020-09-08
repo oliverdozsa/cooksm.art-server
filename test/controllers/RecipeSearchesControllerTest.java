@@ -80,6 +80,7 @@ public class RecipeSearchesControllerTest {
                 "  \"unknownIngs\": \"0\"," +
                 "  \"unknownIngsRel\": \"ge\"," +
                 "  \"goodAdditionalIngs\": 2," +
+                "  \"goodAdditionalIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3]," +
                 "  \"inIngTags\": [1]," +
                 "  \"exIngs\": [4, 7]," +
@@ -247,6 +248,7 @@ public class RecipeSearchesControllerTest {
                 "  \"goodIngsRel\": \"ge\"," +
                 "  \"unknownIngs\": \"0\"," +
                 "  \"unknownIngsRel\": \"ge\"," +
+                "  \"unknownIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3]," +
                 "  \"exIngs\": [1, 5, 6]" +
                 "}"
@@ -294,6 +296,7 @@ public class RecipeSearchesControllerTest {
                 "  \"unknownIngs\": \"0\"," +
                 "  \"unknownIngsRel\": \"ge\"," +
                 "  \"goodAdditionalIngs\": 2," +
+                "  \"goodAdditionalIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
                 "  \"inIngTags\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]," +
                 "  \"exIngs\": [21, 22, 23, 24, 25]," +
@@ -330,6 +333,7 @@ public class RecipeSearchesControllerTest {
                 "  \"unknownIngs\": \"0\"," +
                 "  \"unknownIngsRel\": \"ge\"," +
                 "  \"goodAdditionalIngs\": 2," +
+                "  \"goodAdditionalIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3, 42]," +
                 "  \"inIngTags\": [1]," +
                 "  \"exIngs\": [4, 7]," +

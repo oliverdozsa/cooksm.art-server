@@ -169,7 +169,7 @@ class RecipeQuerySql {
                 "  recipe_ingredient.ingredient_id NOT IN (:includedIngredients) " +
                 " GROUP BY recipe.id " +
                 " HAVING " +
-                "   COUNT(recipe_ingredient.ingredient_id) >= :goodAdditionalIngredientIds ";
+                "   COUNT(recipe_ingredient.ingredient_id) :goodAdditionalIngredientRelation :goodAdditionalIngredientIds ";
     }
 
     private static String createUseFavoritesJoin(Configuration config) {

@@ -82,6 +82,7 @@ public class RecipeRepositoryParams {
     @Builder(builderClassName = "Builder")
     public static class AdditionalIngredients {
         Integer goodAdditionalIngredients;
+        Relation goodAdditionalIngredientsRelation;
         @lombok.Builder.Default List<Long> additionalIngredients = new ArrayList<>();
         List<Long> additionalIngredientTags;
     }

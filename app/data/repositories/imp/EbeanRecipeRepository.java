@@ -89,6 +89,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
         if (params.getAdditionalIngredients().isPresent()) {
             Integer goodAdditionalIngredients = params.getAdditionalIngredients().get().getGoodAdditionalIngredients();
             replaced = replaced.replace(":goodAdditionalIngredientIds", goodAdditionalIngredients.toString());
+            String relation = params.getAdditionalIngredients().get().getGoodAdditionalIngredientsRelation().getStringRep();
+            replaced = replaced.replace(":goodAdditionalIngredientRelation", relation);
         }
 
         return replaced;
