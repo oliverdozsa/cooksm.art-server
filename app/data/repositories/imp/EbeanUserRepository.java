@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanUserRepository implements UserRepository {
@@ -52,6 +53,17 @@ public class EbeanUserRepository implements UserRepository {
         return supplyAsync(() -> {
             EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
             return ebean.find(User.class, id);
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Void> delete(Long id) {
+        return runAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
+            int count = ebean.delete(User.class, id);
+            if (count != 1) {
+                throw new BusinessLogicViolationException("Failed to delete user with id = " + id);
+            }
         }, executionContext);
     }
 

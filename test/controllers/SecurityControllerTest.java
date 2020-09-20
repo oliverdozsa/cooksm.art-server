@@ -5,6 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
+import data.entities.FavoriteRecipe;
+import data.entities.UserSearch;
 import lombokized.dto.UserSocialLoginDto;
 import io.ebean.Ebean;
 import lombokized.security.VerifiedFacebookUserInfo;
@@ -26,14 +28,15 @@ import utils.MockSocialTokenVerifier;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
+import static io.ebean.Expr.eq;
 import static junit.framework.TestCase.*;
 import static play.inject.Bindings.bind;
 import static play.mvc.Http.HttpVerbs.POST;
 import static play.mvc.Http.Status.*;
-import static play.test.Helpers.contentAsString;
-import static play.test.Helpers.route;
+import static play.test.Helpers.*;
 
 public class SecurityControllerTest {
     @Rule
@@ -221,5 +224,48 @@ public class SecurityControllerTest {
 
         Result result = route(application.getApplication(), httpRequest);
         assertEquals("Result of request is wrong!", FORBIDDEN, result.status());
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/delete-registration.yml", disableConstraints = true, cleanBefore = true)
+    public void testDeleteRegistration() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testDeleteRegistration");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        List<FavoriteRecipe> favoriteRecipesBeforeDelete = Ebean.createQuery(FavoriteRecipe.class)
+                .where(eq("user.id", 1L))
+                .findList();
+        assertEquals("Favorite recipes before delete is wrong!", 2, favoriteRecipesBeforeDelete.size());
+
+        List<UserSearch> userSearchesBeforeDelete = Ebean.createQuery(UserSearch.class)
+                .where(eq("user.id", 1L))
+                .findList();
+        assertEquals("User searches before delete is wrong!",2, userSearchesBeforeDelete.size());
+
+        User user = Ebean.find(User.class, 1L);
+        assertNotNull("User to delete not found!", user);
+
+        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
+                .method(DELETE)
+                .uri(routes.SecurityController.deregister().url());
+        String jwt = JwtTestUtils.createToken(4000L, 1L, application.getApplication().config());
+        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
+
+        Result result = route(application.getApplication(), httpRequest);
+        assertEquals("Failed to delete user!", NO_CONTENT, result.status());
+
+        List<FavoriteRecipe> favoriteRecipesAfterDelete = Ebean.createQuery(FavoriteRecipe.class)
+                .where(eq("user.id", 1L))
+                .findList();
+        assertEquals("Favorite recipes still exist after deletion!", 0, favoriteRecipesAfterDelete.size());
+
+        List<UserSearch> userSearchesAfterDelete = Ebean.createQuery(UserSearch.class)
+                .where(eq("user.id", 1L))
+                .findList();
+        assertEquals("User searches still exist after deletion!",0, userSearchesAfterDelete.size());
+
+        user = Ebean.find(User.class, 1L);
+        assertNull("Deleted user still exists!", user);
     }
 }

@@ -40,3 +40,5 @@ POST  /security/logingoogle       controllers.v1.SecurityController.loginThrough
 POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)
 + jwtFilter
 POST  /security/renew             controllers.v1.SecurityController.renew(request: Request)
++ jwtFilter
+DELETE /security/deregister       controllers.v1.SecurityController.deregister(request: Request)

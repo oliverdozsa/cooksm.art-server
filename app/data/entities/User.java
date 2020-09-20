@@ -30,6 +30,12 @@ public class User {
     @Column(name = "facebook_user_id")
     private String facebookUserId;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<FavoriteRecipe> favoriteRecipes;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<UserSearch> userSearches;
+
     public String getEmail() {
         return email;
     }

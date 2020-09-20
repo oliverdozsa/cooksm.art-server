@@ -84,6 +84,16 @@ public class SecurityController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> deregister(Http.Request request) {
+        VerifiedJwt verifiedJwt = SecurityUtils.getFromRequest(request);
+        Long userId = verifiedJwt.getUserId();
+        logger.info("deregister(): user id = {}", userId);
+
+        return repository.delete(userId)
+                .thenApplyAsync(v -> (Result)noContent())
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
     private CompletionStage<Result> loginThroughSocial(SocialTokenVerifier verifier, Http.Request request) {
         Form<UserSocialLoginDto> form = formFactory.form(UserSocialLoginDto.class).bindFromRequest(request);
 
