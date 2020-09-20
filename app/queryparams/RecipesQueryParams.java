@@ -123,7 +123,7 @@ public class RecipesQueryParams {
                     ", unknownIngsRel='" + unknownIngsRel + '\'' +
                     ", goodIngs=" + goodIngs +
                     ", goodAdditionalIngs=" + goodAdditionalIngs +
-                    ", goodAdditionalIngsRel=" + goodAdditionalIngsRel +
+                    ", goodAdditionalIngsRel='" + goodAdditionalIngsRel +  '\'' +
                     ", goodIngsRel='" + goodIngsRel + '\'' +
                     ", offset=" + offset +
                     ", limit=" + limit +

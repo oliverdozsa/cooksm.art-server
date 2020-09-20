@@ -159,6 +159,7 @@ class RecipeSearchQueryDtoResolver {
                 .goodIngsRel(queryParams.goodIngsRel)
                 .goodIngsRatio(queryParams.goodIngsRatio)
                 .goodAdditionalIngs(queryParams.goodAdditionalIngs)
+                .goodAdditionalIngsRel(queryParams.goodAdditionalIngsRel)
                 .nameLike(queryParams.nameLike)
                 .languageId(queryParams.languageId)
                 .useFavoritesOnly(queryParams.useFavoritesOnly)

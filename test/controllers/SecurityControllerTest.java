@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import data.entities.FavoriteRecipe;
+import data.entities.RecipeSearch;
 import data.entities.UserSearch;
 import lombokized.dto.UserSocialLoginDto;
 import io.ebean.Ebean;
@@ -29,7 +30,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.ebean.Expr.eq;
 import static junit.framework.TestCase.*;
@@ -241,7 +244,11 @@ public class SecurityControllerTest {
         List<UserSearch> userSearchesBeforeDelete = Ebean.createQuery(UserSearch.class)
                 .where(eq("user.id", 1L))
                 .findList();
+        List<RecipeSearch> recipesSearchesOfUserSearch = userSearchesBeforeDelete.stream()
+                .map(UserSearch::getSearch)
+                .collect(Collectors.toList());
         assertEquals("User searches before delete is wrong!",2, userSearchesBeforeDelete.size());
+        assertEquals("Recipe searches of user before delete is wrong!",2, recipesSearchesOfUserSearch.size());
 
         User user = Ebean.find(User.class, 1L);
         assertNotNull("User to delete not found!", user);
@@ -264,6 +271,13 @@ public class SecurityControllerTest {
                 .where(eq("user.id", 1L))
                 .findList();
         assertEquals("User searches still exist after deletion!",0, userSearchesAfterDelete.size());
+
+        List<Long> recipeSearchIdsInDbAfterDelete = recipesSearchesOfUserSearch.stream()
+                .map(r -> Ebean.find(RecipeSearch.class, r.getId()))
+                .filter(Objects::nonNull)
+                .map(RecipeSearch::getId)
+                .collect(Collectors.toList());
+        assertEquals("Recipe searches left in DB after delete profile!",0, recipeSearchIdsInDbAfterDelete.size());
 
         user = Ebean.find(User.class, 1L);
         assertNull("Deleted user still exists!", user);

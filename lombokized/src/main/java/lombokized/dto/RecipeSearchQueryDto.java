@@ -17,6 +17,7 @@ public class RecipeSearchQueryDto {
     String unknownIngsRel;
     Integer goodIngs;
     Integer goodAdditionalIngs;
+    String goodAdditionalIngsRel;
     String goodIngsRel;
     Float goodIngsRatio;
     String nameLike;

@@ -17,7 +17,7 @@ public class UserSearch {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "search_id")
     private RecipeSearch search;
 

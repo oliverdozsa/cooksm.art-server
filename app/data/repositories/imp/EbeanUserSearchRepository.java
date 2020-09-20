@@ -71,11 +71,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
             }
             return ebean.find(UserSearch.class, id);
         }, executionContext)
-                .thenApplyAsync(e -> {
-                    Long recipeSearchId = e.getSearch().getId();
-                    ebean.delete(UserSearch.class, id);
-                    return recipeSearchId;
-                }).thenApplyAsync(recipeSearchId -> ebean.delete(RecipeSearch.class, recipeSearchId) == 1);
+                .thenApplyAsync(e -> ebean.delete(UserSearch.class, id) == 1);
     }
 
     @Override
