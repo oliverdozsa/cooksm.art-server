@@ -22,7 +22,7 @@ public class IngredientTag {
     @JoinColumn(name = "language_id")
     private Language language;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "ingredient_tag_ingredient",
             joinColumns = {
                     @JoinColumn(name = "ingredient_tag_id", referencedColumnName = "id")

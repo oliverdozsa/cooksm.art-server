@@ -13,8 +13,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 public class RecipeResultsByQueryTypeNone extends RecipeResultsByQuery {
-    public RecipeResultsByQueryTypeNone(RecipesService service, HttpExecutionContext executionContext) {
-        super(service, executionContext);
+    public RecipeResultsByQueryTypeNone(RecipesService service) {
+        super(service);
     }
 
     @Override

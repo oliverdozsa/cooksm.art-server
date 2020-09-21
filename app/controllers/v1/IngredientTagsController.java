@@ -30,9 +30,6 @@ public class IngredientTagsController extends Controller {
     @Inject
     private FormFactory formFactory;
 
-    @Inject
-    private HttpExecutionContext executionContext;
-
     private static final Logger.ALogger logger = Logger.of(IngredientTagsController.class);
 
     public CompletionStage<Result> pageTags(Http.Request request) {
@@ -50,7 +47,7 @@ public class IngredientTagsController extends Controller {
             logger.info("pageTags(): queryParams = {}", queryParams);
 
             return repository.page(queryParams.getNameLike(), queryParams.getLanguageId(), queryParams.getLimit(), queryParams.getOffset())
-                    .thenApplyAsync(this::toResult, executionContext.current());
+                    .thenApplyAsync(this::toResult);
         }
     }
 

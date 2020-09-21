@@ -27,9 +27,6 @@ public class RecipeSearchesController extends Controller {
     @Inject
     private FormFactory formFactory;
 
-    @Inject
-    private HttpExecutionContext httpExecutionContext;
-
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
@@ -43,7 +40,7 @@ public class RecipeSearchesController extends Controller {
         }
 
         return service.single(id)
-                .thenApplyAsync(this::toResult, httpExecutionContext.current())
+                .thenApplyAsync(this::toResult)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -65,7 +62,7 @@ public class RecipeSearchesController extends Controller {
                     String location = routes.RecipeSearchesController.single(id).absoluteURL(request);
                     logger.info("create(): created query with location = {}", location);
                     return created().withHeader(LOCATION, location);
-                }, httpExecutionContext.current())
+                })
                 .exceptionally(mapExceptionWithUnpack);
     }
 

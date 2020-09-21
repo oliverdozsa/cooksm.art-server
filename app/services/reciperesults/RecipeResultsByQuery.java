@@ -23,7 +23,6 @@ public abstract class RecipeResultsByQuery {
     private static final Logger.ALogger logger = Logger.of(RecipeResultsByQuery.class);
 
     protected RecipesService service;
-    private HttpExecutionContext executionContext;
     private Function<Throwable, Result> mapException = t -> {
         logger.error("Internal Error!", t.getCause());
 
@@ -34,9 +33,8 @@ public abstract class RecipeResultsByQuery {
         return internalServerError();
     };
 
-    public RecipeResultsByQuery(RecipesService service, HttpExecutionContext executionContext) {
+    public RecipeResultsByQuery(RecipesService service) {
         this.service = service;
-        this.executionContext = executionContext;
     }
 
     public abstract CompletionStage<Result> page(Form<RecipesQueryParams.Params> form, Http.Request request);
@@ -57,7 +55,7 @@ public abstract class RecipeResultsByQuery {
     }
 
     protected CompletionStage<Result> getResultFor(CompletionStage<PageDto<RecipeDto>> pageOfRecipesStage) {
-        return pageOfRecipesStage.thenApplyAsync(this::toResult, executionContext.current())
+        return pageOfRecipesStage.thenApplyAsync(this::toResult)
                 .exceptionally(mapException);
     }
 }

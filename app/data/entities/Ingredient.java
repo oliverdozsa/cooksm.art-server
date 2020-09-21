@@ -14,7 +14,7 @@ public class Ingredient {
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(mappedBy = "ingredient")
+    @OneToMany(mappedBy = "ingredient", fetch = FetchType.EAGER)
     private List<IngredientName> names;
 
     public Long getId() {

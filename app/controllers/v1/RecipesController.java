@@ -31,9 +31,6 @@ public class RecipesController extends Controller {
     private FormFactory formFactory;
 
     @Inject
-    private HttpExecutionContext executionContext;
-
-    @Inject
     private Config config;
 
     @Inject
@@ -70,7 +67,7 @@ public class RecipesController extends Controller {
                     } else {
                         return ok(toJson(dto));
                     }
-                }, executionContext.current())
+                })
                 .exceptionally(mapException);
     }
 
@@ -80,11 +77,11 @@ public class RecipesController extends Controller {
         RecipeResultsByQuery resultsByQuery;
 
         if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
-            resultsByQuery = new RecipeResultsByQueryTypeNumber(service, executionContext);
+            resultsByQuery = new RecipeResultsByQueryTypeNumber(service);
         } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
-            resultsByQuery = new RecipeResultsByQueryTypeRatio(service, executionContext);
+            resultsByQuery = new RecipeResultsByQueryTypeRatio(service);
         } else if (searchMode == RecipesQueryParams.SearchMode.NONE) {
-            resultsByQuery = new RecipeResultsByQueryTypeNone(service, executionContext);
+            resultsByQuery = new RecipeResultsByQueryTypeNone(service);
         } else {
             logger.warn("refineRequestBy(): unknown search mode! searchMode = {}", searchMode);
             ValidationError ve = new ValidationError("", "Unkown search mode!");

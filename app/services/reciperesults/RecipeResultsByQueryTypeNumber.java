@@ -13,8 +13,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 public class RecipeResultsByQueryTypeNumber extends RecipeResultsByQuery {
-    public RecipeResultsByQueryTypeNumber(RecipesService service, HttpExecutionContext executionContext) {
-        super(service, executionContext);
+    public RecipeResultsByQueryTypeNumber(RecipesService service) {
+        super(service);
     }
 
     @Override

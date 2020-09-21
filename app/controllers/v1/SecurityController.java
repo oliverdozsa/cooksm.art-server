@@ -41,9 +41,6 @@ public class SecurityController extends Controller {
     private FormFactory formFactory;
 
     @Inject
-    private HttpExecutionContext httpExecutionContext;
-
-    @Inject
     private JwtCenter jwtCenter;
 
     @Inject
@@ -80,7 +77,7 @@ public class SecurityController extends Controller {
                     String token = jwtCenter.create(user.getId());
                     UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName());
                     return ok(Json.toJson(resultDto));
-                }, httpExecutionContext.current())
+                })
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -115,7 +112,7 @@ public class SecurityController extends Controller {
                     String token = jwtCenter.create(e.getId());
                     UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
                     return ok(Json.toJson(result));
-                }, httpExecutionContext.current());
+                });
     }
 
     private UserCreateUpdateDto convertFrom(VerifiedUserInfo info) {

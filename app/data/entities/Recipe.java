@@ -29,7 +29,7 @@ public class Recipe {
     @Column(name = "time")
     private Integer time;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", fetch = FetchType.EAGER)
     private List<RecipeIngredient> ingredients;
 
     @OneToMany(mappedBy = "recipe")

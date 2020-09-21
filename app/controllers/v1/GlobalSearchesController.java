@@ -20,9 +20,6 @@ import java.util.stream.Collectors;
 
 public class GlobalSearchesController extends Controller {
     @Inject
-    private HttpExecutionContext executionContext;
-
-    @Inject
     private GlobalSearchRepository repository;
 
     private static final Logger.ALogger logger = Logger.of(GlobalSearchesController.class);

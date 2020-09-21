@@ -20,9 +20,6 @@ import static play.libs.Json.toJson;
 
 public class SourcePagesController extends Controller {
     @Inject
-    private HttpExecutionContext executionContext;
-
-    @Inject
     private SourcePageRepository repository;
 
     private static final Logger.ALogger logger = Logger.of(SourcePagesController.class);
@@ -30,7 +27,7 @@ public class SourcePagesController extends Controller {
     public CompletionStage<Result> sourcePages() {
         logger.info("sourcePages()");
         return repository.allSourcePages()
-                .thenApplyAsync(SourcePagesController::toResult, executionContext.current());
+                .thenApplyAsync(SourcePagesController::toResult);
     }
 
     private static Result toResult(Page<SourcePage> p) {

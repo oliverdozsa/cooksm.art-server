@@ -13,8 +13,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 public class RecipeResultsByQueryTypeRatio extends RecipeResultsByQuery {
-    public RecipeResultsByQueryTypeRatio(RecipesService service, HttpExecutionContext executionContext) {
-        super(service, executionContext);
+    public RecipeResultsByQueryTypeRatio(RecipesService service) {
+        super(service);
     }
 
     @Override

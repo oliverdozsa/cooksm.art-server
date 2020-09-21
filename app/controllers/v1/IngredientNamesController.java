@@ -30,9 +30,6 @@ public class IngredientNamesController extends Controller {
     @Inject
     private FormFactory formFactory;
 
-    @Inject
-    private HttpExecutionContext executionContext;
-
     private static final Logger.ALogger logger = Logger.of(IngredientNamesController.class);
 
     public CompletionStage<Result> pageNames(Http.Request request) {
@@ -50,7 +47,7 @@ public class IngredientNamesController extends Controller {
             logger.info("pageNames(): params = {}", params);
 
             return repository.page(params.getNameLike(), params.getLanguageId(), params.getLimit(), params.getOffset())
-                    .thenApplyAsync(this::toResult, executionContext.current());
+                    .thenApplyAsync(this::toResult);
         }
     }
 

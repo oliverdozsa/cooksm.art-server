@@ -29,7 +29,7 @@ public class IngredientName {
     @ManyToOne
     private Language language;
 
-    @OneToMany(mappedBy = "ingredientName")
+    @OneToMany(mappedBy = "ingredientName", fetch = FetchType.EAGER)
     private List<IngredientAltName> altNames;
 
     public Long getId() {

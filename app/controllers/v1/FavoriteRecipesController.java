@@ -28,9 +28,6 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class FavoriteRecipesController extends Controller {
     @Inject
-    private HttpExecutionContext httpExecutionContext;
-
-    @Inject
     private Config config;
 
     @Inject
@@ -55,7 +52,7 @@ public class FavoriteRecipesController extends Controller {
 
                     FavoriteRecipeDto dto = DtoMapper.toDto(f);
                     return ok(Json.toJson(dto));
-                }, httpExecutionContext.current())
+                })
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -63,7 +60,7 @@ public class FavoriteRecipesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("allOfUser(): user id = {}", jwt.getUserId());
         return repository.all(jwt.getUserId())
-                .thenApplyAsync(FavoriteRecipesController::toResult, httpExecutionContext.current())
+                .thenApplyAsync(FavoriteRecipesController::toResult)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -83,8 +80,7 @@ public class FavoriteRecipesController extends Controller {
                                 String location = routes.FavoriteRecipesController
                                         .single(e.getId()).absoluteURL(request);
                                 return created().withHeader(LOCATION, location);
-                            },
-                            httpExecutionContext.current())
+                            })
                     .exceptionally(mapExceptionWithUnpack);
         }
     }
@@ -101,7 +97,7 @@ public class FavoriteRecipesController extends Controller {
                         ValidationError ve = new ValidationError("", "Failed to delete!");
                         return badRequest(Json.toJson(ve.messages()));
                     }
-                }, httpExecutionContext.current())
+                })
                 .exceptionally(mapExceptionWithUnpack);
     }
 

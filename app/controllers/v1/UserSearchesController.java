@@ -27,9 +27,6 @@ public class UserSearchesController extends Controller {
     private FormFactory formFactory;
 
     @Inject
-    private HttpExecutionContext httpExecutionContext;
-
-    @Inject
     private UserSearchService userSearchService;
 
     @Inject
@@ -58,7 +55,7 @@ public class UserSearchesController extends Controller {
                     String location = routes.UserSearchesController.single(id).absoluteURL(request);
                     logger.info("create(): location = {}", location);
                     return created().withHeader(LOCATION, location);
-                }, httpExecutionContext.current())
+                })
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -66,7 +63,7 @@ public class UserSearchesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("single(): id = {}, userId = {}", id, jwt.getUserId());
         return userSearchService.single(id, jwt.getUserId())
-                .thenApplyAsync(dto -> ok(Json.toJson(dto)), httpExecutionContext.current())
+                .thenApplyAsync(dto -> ok(Json.toJson(dto)))
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -92,7 +89,7 @@ public class UserSearchesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("all(): user id = {}", jwt.getUserId());
         return userSearchService.all(jwt.getUserId())
-                .thenApplyAsync(l -> ok(Json.toJson(l)), httpExecutionContext.current())
+                .thenApplyAsync(l -> ok(Json.toJson(l)))
                 .exceptionally(mapExceptionWithUnpack);
     }
 
