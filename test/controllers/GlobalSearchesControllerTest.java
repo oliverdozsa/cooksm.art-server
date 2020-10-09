@@ -47,9 +47,12 @@ public class GlobalSearchesControllerTest {
 
         List<String> names = new ArrayList<>();
         List<String> searchIds = new ArrayList<>();
+        List<String> urlFriendlyNames = new ArrayList<>();
         json.forEach(n -> names.add(n.get("name").asText()));
         json.forEach(n -> searchIds.add(n.get("searchId").asText()));
+        json.forEach(n -> urlFriendlyNames.add(n.get("urlFriendlyName").asText()));
         assertTrue(names.containsAll(Arrays.asList("globalQuery1", "globalQuery2", "globalQuery3")));
+        assertTrue(urlFriendlyNames.containsAll(Arrays.asList("global-query-1", "global-query-2", "global-query-3")));
         assertTrue(searchIds.containsAll(Arrays.asList(Base62Utils.encode(239328L), Base62Utils.encode(239329L), Base62Utils.encode(239330L))));
     }
 }

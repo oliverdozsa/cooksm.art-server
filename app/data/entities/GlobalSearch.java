@@ -13,6 +13,9 @@ public class GlobalSearch {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "url_friendly_name")
+    private String urlFriendlyName;
+
     @OneToOne
     @JoinColumn(name = "search_id")
     private RecipeSearch search;
@@ -39,5 +42,13 @@ public class GlobalSearch {
 
     public void setSearch(RecipeSearch search) {
         this.search = search;
+    }
+
+    public String getUrlFriendlyName() {
+        return urlFriendlyName;
+    }
+
+    public void setUrlFriendlyName(String urlFriendlyName) {
+        this.urlFriendlyName = urlFriendlyName;
     }
 }

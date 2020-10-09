@@ -6,4 +6,5 @@ import lombok.Data;
 public class GlobalSearchDto {
     final String name;
     final String searchId;
+    final String urlFriendlyName;
 }
