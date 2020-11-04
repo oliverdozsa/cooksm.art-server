@@ -3,6 +3,7 @@ package controllers.v1;
 import lombokized.dto.IngredientTagDto;
 import lombokized.dto.PageDto;
 import lombokized.queryparams.IngredientTagQueryParams;
+import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
 import data.entities.IngredientTag;
 import data.repositories.IngredientTagRepository;
@@ -46,7 +47,7 @@ public class IngredientTagsController extends Controller {
 
             logger.info("pageTags(): queryParams = {}", queryParams);
 
-            return repository.page(queryParams.getNameLike(), queryParams.getLanguageId(), queryParams.getLimit(), queryParams.getOffset())
+            return repository.page(toPageParams(queryParams))
                     .thenApplyAsync(this::toResult);
         }
     }
@@ -56,5 +57,16 @@ public class IngredientTagsController extends Controller {
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());
         return ok(toJson(new PageDto<>(tags, page.getTotalCount())));
+    }
+
+    private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams) {
+        IngredientTagRepositoryParams.Page.Builder builder = IngredientTagRepositoryParams.Page.builder();
+        builder.nameLike(queryParams.getNameLike());
+        builder.languageId(queryParams.getLanguageId());
+        builder.userId(null); // TODO
+        builder.limit(queryParams.getLimit());
+        builder.offset(queryParams.getOffset());
+
+        return builder.build();
     }
 }

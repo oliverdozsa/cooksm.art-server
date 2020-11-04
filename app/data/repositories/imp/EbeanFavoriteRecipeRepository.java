@@ -3,7 +3,6 @@ package data.repositories.imp;
 import com.typesafe.config.Config;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
-import lombokized.repositories.Page;
 import data.DatabaseExecutionContext;
 import data.entities.FavoriteRecipe;
 import data.entities.Recipe;

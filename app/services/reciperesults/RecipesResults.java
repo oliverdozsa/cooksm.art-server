@@ -1,6 +1,5 @@
 package services.reciperesults;
 
-import play.data.Form;
 import play.mvc.Http;
 import play.mvc.Result;
 import queryparams.RecipesQueryParams;

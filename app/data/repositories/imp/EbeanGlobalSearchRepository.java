@@ -6,7 +6,6 @@ import data.repositories.GlobalSearchRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
-import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;

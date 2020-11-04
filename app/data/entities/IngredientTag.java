@@ -22,6 +22,10 @@ public class IngredientTag {
     @JoinColumn(name = "language_id")
     private Language language;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "ingredient_tag_ingredient",
             joinColumns = {
@@ -62,5 +66,13 @@ public class IngredientTag {
 
     public void setLanguage(Language language) {
         this.language = language;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
