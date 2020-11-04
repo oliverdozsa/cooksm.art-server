@@ -37,7 +37,12 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
             query.setMaxRows(params.getLimit());
 
             if (params.getUserId() != null) {
-                query.where().eq("user.id", params.getUserId());
+                query.where().or()
+                        .isNull("user.id")
+                        .eq("user.id", params.getUserId());
+            } else {
+                query.where()
+                        .isNull("user.id");
             }
 
             return new Page<>(query.findList(), query.findCount());
@@ -46,21 +51,9 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
     @Override
     public CompletionStage<List<IngredientTag>> byIds(List<Long> ids) {
-        return supplyAsync(() -> {
-            List<IngredientTag> tags = new ArrayList<>();
-            ids.forEach(id -> {
-                IngredientTag entity = ebean.createQuery(IngredientTag.class)
-                        .where()
-                        .isNull("user.id")
-                        .eq("id", id)
-                        .findOne();
-                if (entity == null) {
-                    throw new IllegalArgumentException("ID is not valid. ID = " + id);
-                }
-
-                tags.add(entity);
-            });
-            return tags;
-        }, executionContext);
+        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
+                .where()
+                .in("id", ids)
+                .findList(), executionContext);
     }
 }
