@@ -23,7 +23,7 @@ public class RecipeResultsByQueryTypeRatio extends RecipeResultsByQuery {
         producers.unauth = this::getRecipesForQueryTypeRatio;
         producers.auth = this::getRecipesForQueryTypeRatio;
         Function<RecipesQueryParams.Params, CompletionStage<Result>> resultFunction =
-                RecipesResults.determine(form.get(), request, producers);
+                RecipesResults.determine(request, producers);
 
         return pageOrBadRequest(form, resultFunction);
     }

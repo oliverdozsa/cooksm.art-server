@@ -264,7 +264,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     private static void setUseFavoritesOnly(RecipeQuerySql.Configuration config, Common params) {
-        if (params.getUserId() != null) {
+        if (params.getUserId() != null && Boolean.TRUE.equals(params.getUseFavoritesOnly())) {
             config.useFavoritesOnly = true;
         }
     }

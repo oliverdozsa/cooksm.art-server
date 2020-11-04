@@ -69,6 +69,7 @@ public class RecipeRepositoryParams {
         String nameLike;
         List<Long> sourcePageIds;
         Long userId;
+        Boolean useFavoritesOnly;
     }
 
     @Value

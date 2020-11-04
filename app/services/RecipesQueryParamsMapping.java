@@ -29,6 +29,7 @@ class RecipesQueryParamsMapping {
         Common params = toCommon(queryParams);
         Common.Builder builder = params.toBuilder();
         builder.userId(userId);
+        builder.useFavoritesOnly(queryParams.useFavoritesOnly);
         return builder.build();
     }
 

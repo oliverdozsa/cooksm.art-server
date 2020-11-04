@@ -11,9 +11,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class RecipesResults {
-    public static Function<RecipesQueryParams.Params, CompletionStage<Result>> determine(
-            RecipesQueryParams.Params params, Http.Request request, Producers producers) {
-        if (SecurityUtils.hasVerifiedJwt(request) && Boolean.TRUE.equals(params.useFavoritesOnly)) {
+    public static Function<RecipesQueryParams.Params, CompletionStage<Result>> determine(Http.Request request, Producers producers) {
+        if (SecurityUtils.hasVerifiedJwt(request)) {
             VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
             Long userId = jwt.getUserId();
             return p -> producers.auth.apply(p, userId);
