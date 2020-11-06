@@ -35,7 +35,7 @@ public class IngredientTagsControllerTest {
 
         String queryParams = "languageId=1&nameLike=_tag_";
         Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+                .uri(routes.IngredientTagsController.page().url() + "?" + queryParams);
 
         Result result = route(application.getApplication(), request);
 
@@ -61,7 +61,7 @@ public class IngredientTagsControllerTest {
         while (lastPageNotReached) {
             String queryParams = String.format("languageId=1&nameLike=_tag_&limit=%d&offset=%d", limit, offset);
             Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                    .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+                    .uri(routes.IngredientTagsController.page().url() + "?" + queryParams);
 
             Result result = route(application.getApplication(), request);
 
@@ -88,7 +88,7 @@ public class IngredientTagsControllerTest {
 
         String invalidLenghtNameLikeParams = "languageId=1&nameLike=a";
         Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.pageTags().url() + "?" + invalidLenghtNameLikeParams);
+                .uri(routes.IngredientTagsController.page().url() + "?" + invalidLenghtNameLikeParams);
 
         Result result = route(application.getApplication(), request);
         assertEquals("Invalid request's response status is not 400!", BAD_REQUEST, result.status());
@@ -103,7 +103,7 @@ public class IngredientTagsControllerTest {
 
         String queryParams = "languageId=1&nameLike=2_tag_2";
         Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+                .uri(routes.IngredientTagsController.page().url() + "?" + queryParams);
 
         Result result = route(application.getApplication(), request);
 
@@ -130,7 +130,7 @@ public class IngredientTagsControllerTest {
         String queryParams = "languageId=1&nameLike=tag_2";
         String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
         Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+                .uri(routes.IngredientTagsController.page().url() + "?" + queryParams);
         JwtTestUtils.addJwtTokenTo(request, jwt);
 
         Result result = route(application.getApplication(), request);
@@ -156,7 +156,7 @@ public class IngredientTagsControllerTest {
 
         String queryParams = "languageId=1&nameLike=tag_2";
         Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+                .uri(routes.IngredientTagsController.page().url() + "?" + queryParams);
 
         Result result = route(application.getApplication(), request);
 

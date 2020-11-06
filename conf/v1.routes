@@ -4,7 +4,7 @@ GET    /recipes                       controllers.v1.RecipesController.pageRecip
 GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
 + jwtOptionalFilter
-GET    /ingredienttags                controllers.v1.IngredientTagsController.pageTags(request: Request)
+GET    /ingredienttags                controllers.v1.IngredientTagsController.page(request: Request)
 
 # Favorite recipes
 + jwtFilter

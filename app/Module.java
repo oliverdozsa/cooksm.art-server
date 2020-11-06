@@ -33,5 +33,6 @@ public class Module extends AbstractModule {
         bind(LanguageService.class).asEagerSingleton();
         bind(UserSearchService.class).asEagerSingleton();
         bind(RecipeRepositoryQueryCheck.class).asEagerSingleton();
+        bind(IngredientTagsService.class).asEagerSingleton();
     }
 }
