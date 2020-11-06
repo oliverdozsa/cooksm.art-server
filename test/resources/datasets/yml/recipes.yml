@@ -142,24 +142,31 @@ ingredient_name:
 ingredient_tag:
   - id: 1
     name: ingredient_tag_1
+    user_id: null
 
   - id: 2
     name: ingredient_tag_2
+    user_id: null
 
   - id: 3
     name: ingredient_tag_3
+    user_id: null
 
   - id: 4
     name: ingredient_tag_4
+    user_id: null
 
   - id: 5
     name: ingredient_tag_5
+    user_id: null
 
   - id: 6
     name: ingredient_tag_6
+    user_id: null
 
   - id: 7
     name: ingredient_tag_7
+    user_id: null
 
 ingredient_tag_ingredient:
   - ingredient_tag_id: 5

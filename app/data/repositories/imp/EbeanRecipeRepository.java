@@ -1,7 +1,6 @@
 package data.repositories.imp;
 
 import data.DatabaseExecutionContext;
-import data.entities.IngredientTag;
 import data.entities.Recipe;
 import data.repositories.RecipeRepository;
 import io.ebean.*;
@@ -9,7 +8,6 @@ import lombokized.repositories.Page;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
-import java.util.*;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -35,8 +33,11 @@ public class EbeanRecipeRepository implements RecipeRepository {
 
             sqlString = replaceByQueryTypeNumberParameters(sqlString, params);
             Query<Recipe> query = prepare(sqlString, params.getCommon());
-            setIncludedIngredientsConditions(query, params.getIncludedIngredients());
-            setAdditionalIngredientsConditions(query, params.getAdditionalIngredients());
+            setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
+
+            if(params.getAdditionalIngredients().isPresent()) {
+                setAdditionalIngredientsConditions(query, params.getAdditionalIngredients().get(), params.getCommon().getUserId());
+            }
 
             return new Page<>(query.findList(), query.findCount());
         }, executionContext);
@@ -50,7 +51,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
 
             sqlString = replaceQueryTypeRatioParams(sqlString, params);
             Query<Recipe> query = prepare(sqlString, params.getCommon());
-            setIncludedIngredientsConditions(query, params.getIncludedIngredients());
+            setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
 
             return new Page<>(query.findList(), query.findCount());
 
@@ -172,60 +173,29 @@ public class EbeanRecipeRepository implements RecipeRepository {
         query.setMaxRows(limit);
     }
 
-    private void setIncludedIngredientsConditions(Query<Recipe> query, IncludedIngredients params) {
-        // Merge tags
-        if (params.getIncludedIngredientTags() != null) {
-            mergeIngredientIds(params.getIncludedIngredients(), getIngredientIdsForTags(params.getIncludedIngredientTags()));
-        }
-
-        query.setParameter("includedIngredients", params.getIncludedIngredients());
+    private void setIncludedIngredientsConditions(Query<Recipe> query, IncludedIngredients params, Long userId) {
+        EbeanIngredientTagsResolver resolver = new EbeanIngredientTagsResolver(ebean, userId);
+        IngredientsConditionSetter conditionSetter = new IngredientsConditionSetter(
+                resolver, params.getIncludedIngredients(), params.getIncludedIngredientTags());
+        conditionSetter.set(query, "includedIngredients");
     }
 
     private void setExcludedIngredientsCondition(Query<Recipe> query, Common params) {
-        if (params.getExcludedIngredients() != null) {
-            if (params.getExcludedIngredientTags() != null) {
-                // Merge tags
-                mergeIngredientIds(params.getExcludedIngredients(), getIngredientIdsForTags(params.getExcludedIngredientTags()));
-            }
-
-            query.setParameter("excludedIngredients", params.getExcludedIngredients());
-        }
+        EbeanIngredientTagsResolver resolver = new EbeanIngredientTagsResolver(ebean, params.getUserId());
+        IngredientsConditionSetter conditionSetter = new IngredientsConditionSetter(
+                resolver, params.getExcludedIngredients(), params.getExcludedIngredientTags());
+        conditionSetter.set(query, "excludedIngredients");
     }
 
-    private void setAdditionalIngredientsConditions(Query<Recipe> query, Optional<AdditionalIngredients> params) {
-        if (params.isPresent()) {
-            AdditionalIngredients additionals = params.get();
-            if (additionals.getAdditionalIngredientTags() != null) {
-                mergeIngredientIds(additionals.getAdditionalIngredients(), getIngredientIdsForTags(additionals.getAdditionalIngredientTags()));
-            }
-
-            query.setParameter("additionalIngredientIds", additionals.getAdditionalIngredients());
-        }
+    private void setAdditionalIngredientsConditions(Query<Recipe> query, AdditionalIngredients additionals, Long userId) {
+        EbeanIngredientTagsResolver resolver = new EbeanIngredientTagsResolver(ebean, userId);
+        IngredientsConditionSetter conditionSetter = new IngredientsConditionSetter(
+                resolver, additionals.getAdditionalIngredients(), additionals.getAdditionalIngredientTags());
+        conditionSetter.set(query, "additionalIngredientIds");
     }
 
     private void setUseFavoritesOnlyCondition(Query<Recipe> query, Common params){
         query.setParameter("userId", params.getUserId());
-    }
-
-    private List<Long> getIngredientIdsForTags(List<Long> ingredientTagIds) {
-        List<Long> result = new ArrayList<>();
-        if (ingredientTagIds != null && ingredientTagIds.size() > 0) {
-            ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .in("id", ingredientTagIds)
-                    .findList()
-                    .forEach(tag -> tag.getIngredients().forEach(ingr -> result.add(ingr.getId())));
-        }
-
-        return result;
-    }
-
-    // Modifies target.
-    private static void mergeIngredientIds(List<Long> target, List<Long> source) {
-        Set<Long> ids = new HashSet<>(target);
-        ids.addAll(source);
-        target.clear();
-        target.addAll(ids);
     }
 
     private static boolean useExclude(Common params) {

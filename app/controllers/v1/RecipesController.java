@@ -1,22 +1,20 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
-import lombokized.dto.PageDto;
-import lombokized.dto.RecipeDto;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.data.validation.ValidationError;
 import play.libs.Json;
-import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import queryparams.RecipesQueryParams;
-import security.SecurityUtils;
-import security.VerifiedJwt;
 import services.RecipesService;
-import services.reciperesults.*;
+import services.reciperesults.RecipeResultsByQuery;
+import services.reciperesults.RecipeResultsByQueryTypeNone;
+import services.reciperesults.RecipeResultsByQueryTypeNumber;
+import services.reciperesults.RecipeResultsByQueryTypeRatio;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletionStage;

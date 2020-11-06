@@ -8,7 +8,6 @@ import data.entities.*;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.imp.EbeanRecipeSearchRepository;
 import io.ebean.Ebean;
-import io.seruco.encoding.base62.Base62;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
@@ -20,7 +19,6 @@ import utils.Base62Utils;
 import utils.JwtTestUtils;
 
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,0 +1,50 @@
+users:
+  - id: 1
+    email: user1@example.com
+    full_name: John Doe
+
+  - id: 2
+    email: user2@example.com
+    full_name: Jane Doe
+
+ingredient_tag:
+  - id: 8
+    name: user_1_ingredient_tag_1
+    user_id: 1
+
+  - id: 9
+    name: user_1_ingredient_tag_2
+    user_id: 1
+
+  - id: 10
+    name: user_2_ingredient_tag_1
+    user_id: 2
+
+  - id: 11
+    name: user_2_ingredient_tag_2
+    user_id: 2
+
+ingredient_tag_ingredient:
+  - ingredient_tag_id: 8
+    ingredient_id: 1
+
+  - ingredient_tag_id: 8
+    ingredient_id: 2
+
+  - ingredient_tag_id: 9
+    ingredient_id: 3
+
+  - ingredient_tag_id: 9
+    ingredient_id: 4
+
+  - ingredient_tag_id: 10
+    ingredient_id: 5
+
+  - ingredient_tag_id: 10
+    ingredient_id: 6
+
+  - ingredient_tag_id: 11
+    ingredient_id: 7
+
+  - ingredient_tag_id: 11
+    ingredient_id: 8
