@@ -5,7 +5,7 @@ import lombok.Value;
 
 public class IngredientTagRepositoryParams {
     @Value
-    @Builder(builderClassName = "Builder")
+    @Builder(builderClassName = "Builder", toBuilder = true)
     public static class Page {
         public String nameLike;
         public Long languageId;

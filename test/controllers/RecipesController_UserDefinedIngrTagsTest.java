@@ -38,7 +38,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Included() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Included");
@@ -64,7 +64,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Included_Unauth() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Included_Unauth");
@@ -88,7 +88,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Included_OtherUsersTags() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Included_OtherUsersTags");
@@ -114,7 +114,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Excluded() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Excluded");
@@ -140,7 +140,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Excluded_Unauth() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Excluded_Unauth");
@@ -164,7 +164,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Excluded_OtherUsersTag() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Excluded_OtherUsersTag");
@@ -190,7 +190,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Additionals() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Additionals");
@@ -216,7 +216,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Additionals_Unauth() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Additionals_Unauth");
@@ -240,7 +240,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
     }
 
     @Test
-    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
+    @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipes-user-defined-tags.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRecipesWithUserDefinedIngrTags_Additionals_OtherUsersTag() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testRecipesWithUserDefinedIngrTags_Additionals_OtherUsersTag");

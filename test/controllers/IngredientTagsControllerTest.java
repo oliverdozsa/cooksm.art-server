@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
 import org.junit.Rule;
@@ -10,6 +11,11 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
+import utils.JwtTestUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
 import static play.test.Helpers.*;
@@ -38,7 +44,7 @@ public class IngredientTagsControllerTest {
         String jsonStr = contentAsString(result);
         JsonNode json = Json.parse(jsonStr);
 
-        assertEquals("Total count is incorrect!",7, json.get("totalCount").asInt());
+        assertEquals("Total count is incorrect!", 7, json.get("totalCount").asInt());
     }
 
     @Test
@@ -64,7 +70,7 @@ public class IngredientTagsControllerTest {
             String jsonStr = contentAsString(result);
             JsonNode json = Json.parse(jsonStr);
 
-            assertEquals("Total count is incorrect!",7, json.get("totalCount").asInt());
+            assertEquals("Total count is incorrect!", 7, json.get("totalCount").asInt());
             assertTrue("Items' size is not <= limit!", json.get("items").size() <= limit);
 
             int totalCount = json.get("totalCount").asInt();
@@ -90,7 +96,7 @@ public class IngredientTagsControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
-    public void testIngredientsOfTags(){
+    public void testIngredientsOfTags() {
         logger.info("------------------------------------------------------------------------------------------------");
         logger.info("-- RUNNING TEST: testIngredientsOfTags");
         logger.info("------------------------------------------------------------------------------------------------");
@@ -112,5 +118,65 @@ public class IngredientTagsControllerTest {
 
         assertNotNull("Ingredients field is not present!", jsonTag.get("ingredients"));
         assertEquals("Number of ingredients of tags is wrong!", 2, jsonTag.get("ingredients").size());
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testListTags_UserDefined() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testListTags_UserDefined");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String queryParams = "languageId=1&nameLike=tag_2";
+        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
+        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
+                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        Result result = route(application.getApplication(), request);
+
+        assertEquals("Status is not success", Http.Status.OK, result.status());
+
+        String jsonStr = contentAsString(result);
+        JsonNode json = Json.parse(jsonStr);
+
+        logger.warn("result = " + jsonStr);
+        assertEquals("Total count is incorrect!", 3, json.get("totalCount").asInt());
+
+        List<Long> tagIds = extractTagIds(json.get("items"));
+        assertTrue(tagIds.containsAll(Arrays.asList(6L, 3L, 11L)));
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testListTags_UserDefined_Unauth() {
+        logger.info("------------------------------------------------------------------------------------------------");
+        logger.info("-- RUNNING TEST: testListTags_UserDefined_Unauth");
+        logger.info("------------------------------------------------------------------------------------------------");
+
+        String queryParams = "languageId=1&nameLike=tag_2";
+        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
+                .uri(routes.IngredientTagsController.pageTags().url() + "?" + queryParams);
+
+        Result result = route(application.getApplication(), request);
+
+        assertEquals("Status is not success", Http.Status.OK, result.status());
+
+        String jsonStr = contentAsString(result);
+        JsonNode json = Json.parse(jsonStr);
+
+        assertEquals("Total count is incorrect!", 2, json.get("totalCount").asInt());
+
+        List<Long> tagIds = extractTagIds(json.get("items"));
+        assertTrue(tagIds.containsAll(Arrays.asList(6L, 3L)));
+    }
+
+    private List<Long> extractTagIds(JsonNode result) {
+        List<Long> ids = new ArrayList<>();
+
+        ArrayNode arrayNode = (ArrayNode) result;
+        arrayNode.forEach(n -> ids.add(n.get("id").asLong()));
+
+        return ids;
     }
 }

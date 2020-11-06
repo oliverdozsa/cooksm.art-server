@@ -14,6 +14,8 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import security.SecurityUtils;
+import security.VerifiedJwt;
 import services.DtoMapper;
 
 import javax.inject.Inject;
@@ -47,8 +49,21 @@ public class IngredientTagsController extends Controller {
 
             logger.info("pageTags(): queryParams = {}", queryParams);
 
-            return repository.page(toPageParams(queryParams))
+            IngredientTagRepositoryParams.Page repositoryParams = determineRepositoryPageParams(request, queryParams);
+            return repository.page(repositoryParams)
                     .thenApplyAsync(this::toResult);
+        }
+    }
+
+    private IngredientTagRepositoryParams.Page determineRepositoryPageParams(
+            Http.Request request, IngredientTagQueryParams queryParams){
+        if(SecurityUtils.hasVerifiedJwt(request)) {
+            logger.info("determineRepositoryPageParams(): request is authenticated.");
+            VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+            return toPageParams(queryParams, jwt.getUserId());
+        } else {
+            logger.info("determineRepositoryPageParams(): request is unauthenticated.");
+            return toPageParams(queryParams);
         }
     }
 
@@ -63,10 +78,15 @@ public class IngredientTagsController extends Controller {
         IngredientTagRepositoryParams.Page.Builder builder = IngredientTagRepositoryParams.Page.builder();
         builder.nameLike(queryParams.getNameLike());
         builder.languageId(queryParams.getLanguageId());
-        builder.userId(null); // TODO
         builder.limit(queryParams.getLimit());
         builder.offset(queryParams.getOffset());
 
+        return builder.build();
+    }
+
+    private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams, Long userId) {
+        IngredientTagRepositoryParams.Page.Builder builder = toPageParams(queryParams).toBuilder();
+        builder.userId(userId);
         return builder.build();
     }
 }
