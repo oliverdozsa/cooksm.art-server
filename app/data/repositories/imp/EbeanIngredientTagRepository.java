@@ -1,7 +1,10 @@
 package data.repositories.imp;
 
 import data.DatabaseExecutionContext;
+import data.entities.Ingredient;
 import data.entities.IngredientTag;
+import data.entities.Language;
+import data.entities.User;
 import data.repositories.IngredientTagRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
@@ -55,5 +58,55 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 .where()
                 .in("id", ids)
                 .findList(), executionContext);
+    }
+
+    @Override
+    public CompletionStage<IngredientTag> byNameOfUser(Long userId, String name) {
+        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("name", name)
+                .eq("user.id", userId)
+                .findOne());
+    }
+
+    @Override
+    public CompletionStage<Integer> count(Long userId) {
+        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("user.id", userId)
+                .findCount());
+    }
+
+    @Override
+    public CompletionStage<IngredientTag> create(Long userId, String name, List<Long> ingredientIds, Long languageId) {
+        return supplyAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
+
+            User user = Ebean.find(User.class, userId);
+            Language language = Ebean.find(Language.class, languageId);
+            List<Ingredient> ingredients = ebean.createQuery(Ingredient.class)
+                    .where()
+                    .in("id", ingredientIds)
+                    .findList();
+
+            IngredientTag entity = new IngredientTag();
+            entity.setUser(user);
+            entity.setIngredients(ingredients);
+            entity.setLanguage(language);
+            entity.setName(name);
+
+            ebean.save(entity);
+            return entity;
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<IngredientTag> byId(Long id, Long userId) {
+        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("id", id)
+                .eq("user.id", userId)
+                .findOne());
     }
 }

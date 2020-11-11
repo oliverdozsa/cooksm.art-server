@@ -10,4 +10,8 @@ import java.util.concurrent.CompletionStage;
 public interface IngredientTagRepository {
     CompletionStage<Page<IngredientTag>> page(IngredientTagRepositoryParams.Page params);
     CompletionStage<List<IngredientTag>> byIds(List<Long> ids);
+    CompletionStage<IngredientTag> byNameOfUser(Long userId, String name);
+    CompletionStage<Integer> count(Long userId);
+    CompletionStage<IngredientTag> create(Long userId, String name, List<Long> ingredientIds, Long languageId);
+    CompletionStage<IngredientTag> byId(Long id, Long userId);
 }

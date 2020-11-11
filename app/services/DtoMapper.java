@@ -84,4 +84,8 @@ public class DtoMapper {
         String encodedId = Base62Conversions.encode(entity.getSearch().getId());
         return new GlobalSearchDto(entity.getName(), encodedId, entity.getUrlFriendlyName());
     }
+
+    public static IngredientTagResolvedDto toDto(IngredientTag tag, List<IngredientNameDto> names) {
+        return new IngredientTagResolvedDto(tag.getId(), tag.getName(), names);
+    }
 }

@@ -19,4 +19,8 @@ public class LanguageService {
 
         return id;
     }
+
+    public Long getDefault() {
+        return defaultLanguageId;
+    }
 }

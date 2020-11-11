@@ -3,8 +3,14 @@ GET    /ingredientnames               controllers.v1.IngredientNamesController.p
 GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
 GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
+
+# Ingredient tags
 + jwtOptionalFilter
 GET    /ingredienttags                controllers.v1.IngredientTagsController.page(request: Request)
++ jwtFilter
+POST   /ingredienttags/create         controllers.v1.IngredientTagsController.create(request: Request)
++ jwtFilter
+GET    /ingredienttags/:id            controllers.v1.IngredientTagsController.single(id: Long, language: Long ?= 0, request: Request)
 
 # Favorite recipes
 + jwtFilter

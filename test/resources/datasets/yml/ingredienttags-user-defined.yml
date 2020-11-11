@@ -7,6 +7,10 @@ users:
     email: user2@example.com
     full_name: Jane Doe
 
+  - id: 3
+    email: user3@example.com
+    full_name: Jack Doe
+
 ingredient_tag:
   - id: 10
     name: user_1_ingredient_tag_1
@@ -68,3 +72,24 @@ ingredient_tag_ingredient:
 
   - ingredient_tag_id: 15
     ingredient_id: 3
+
+ingredient_name:
+  - id: 1
+    language_id: 1
+    ingredient_id: 1
+    name: hu_1
+
+  - id: 2
+    language_id: 1
+    ingredient_id: 2
+    name: hu_2
+
+  - id: 3
+    language_id: 2
+    ingredient_id: 1
+    name: en_1
+
+  - id: 4
+    language_id: 2
+    ingredient_id: 2
+    name: en_2
