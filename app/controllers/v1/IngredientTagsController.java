@@ -17,7 +17,6 @@ import security.VerifiedJwt;
 import services.IngredientTagsService;
 
 import javax.inject.Inject;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
@@ -93,6 +92,22 @@ public class IngredientTagsController extends Controller {
 
         return service.single(id, languageId, jwt.getUserId())
                 .thenApplyAsync(this::toResult)
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
+    public CompletionStage<Result> update(Long id, Http.Request request) {
+        Form<IngredientTagCreateUpdateDto> form = formFactory.form(IngredientTagCreateUpdateDto.class)
+                .bindFromRequest(request);
+
+        if(form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+        IngredientTagCreateUpdateDto dto = form.get();
+
+        return service.update(id, dto, jwt.getUserId())
+                .thenApplyAsync(v -> (Result) noContent())
                 .exceptionally(mapExceptionWithUnpack);
     }
 

@@ -64,28 +64,17 @@ public class IngredientTagsService {
     public CompletionStage<IngredientTagResolvedDto> single(Long id, Long languageId, Long userId) {
         CompletionStage<IngredientTag> tagCompletionStage = repository.byId(id, userId);
         CompletionStage<List<IngredientName>> ingredientNamesDtoCompletionStage =
-                tagCompletionStage.thenComposeAsync(tag -> {
-                    if(tag != null) {
-                        List<Long> ingredientIds = toIds(tag.getIngredients());
-                        return ingredientNameRepository
-                                .byIngredientIds(ingredientIds, languageService.getLanguageIdOrDefault(languageId));
-                    }
-
-                    return null;
-                });
+                tagCompletionStage.thenComposeAsync(tag -> namesOfTag(tag, languageId));
 
         return tagCompletionStage
-                .thenCombineAsync(ingredientNamesDtoCompletionStage, (tag, names) -> {
-                    if(tag == null) {
-                        throw new NotFoundException("Not found tag with id =" + id + ", userId = " + userId);
-                    }
+                .thenCombineAsync(ingredientNamesDtoCompletionStage, this::createResolvedDto);
+    }
 
-                    List<IngredientNameDto> namesDto = names.stream()
-                            .map(DtoMapper::toDto)
-                            .collect(Collectors.toList());
+    public CompletionStage<Void> update(Long id, IngredientTagCreateUpdateDto dto, Long userId) {
+        List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
 
-                    return DtoMapper.toDto(tag, namesDto);
-                });
+        return checkAllIngredientIdsExist(dto.ingredientIds)
+                .thenAcceptAsync(v -> repository.update(id, userId, dto.name, uniqueIngredientIds, languageService.getDefault()));
     }
 
     private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams) {
@@ -127,13 +116,36 @@ public class IngredientTagsService {
                 });
     }
 
-    private CompletionStage<List<IngredientName>> checkAllIngredientIdsExist(List<Long> ingredientIds) {
-        return ingredientNameRepository.byIngredientIds(ingredientIds, languageService.getDefault());
+    private CompletionStage<Void> checkAllIngredientIdsExist(List<Long> ingredientIds) {
+        return ingredientNameRepository.byIngredientIds(ingredientIds, languageService.getDefault())
+                .thenRunAsync(() -> {});
     }
 
     private List<Long> toIds(List<Ingredient> ingredients) {
         return ingredients.stream()
                 .map(Ingredient::getId)
                 .collect(Collectors.toList());
+    }
+
+    private CompletionStage<List<IngredientName>> namesOfTag(IngredientTag tag, Long languageId) {
+        if(tag != null) {
+            List<Long> ingredientIds = toIds(tag.getIngredients());
+            return ingredientNameRepository
+                    .byIngredientIds(ingredientIds, languageService.getLanguageIdOrDefault(languageId));
+        }
+
+        return null;
+    }
+
+    private IngredientTagResolvedDto createResolvedDto(IngredientTag tag, List<IngredientName> names) {
+        if(tag == null) {
+            throw new NotFoundException("Not found tag!");
+        }
+
+        List<IngredientNameDto> namesDto = names.stream()
+                .map(DtoMapper::toDto)
+                .collect(Collectors.toList());
+
+        return DtoMapper.toDto(tag, namesDto);
     }
 }

@@ -93,3 +93,13 @@ ingredient_name:
     language_id: 2
     ingredient_id: 2
     name: en_2
+
+  - id: 5
+    language_id: 1
+    ingredient_id: 3
+    name: hu_3
+
+  - id: 6
+    language_id: 1
+    ingredient_id: 4
+    name: hu_4

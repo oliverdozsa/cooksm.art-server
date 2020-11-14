@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanIngredientTagRepository implements IngredientTagRepository {
@@ -85,10 +86,7 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
             User user = Ebean.find(User.class, userId);
             Language language = Ebean.find(Language.class, languageId);
-            List<Ingredient> ingredients = ebean.createQuery(Ingredient.class)
-                    .where()
-                    .in("id", ingredientIds)
-                    .findList();
+            List<Ingredient> ingredients = ingredientByIds(ingredientIds);
 
             IngredientTag entity = new IngredientTag();
             entity.setUser(user);
@@ -108,5 +106,36 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 .eq("id", id)
                 .eq("user.id", userId)
                 .findOne());
+    }
+
+    @Override
+    public CompletionStage<Void> update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId) {
+        return runAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+            EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
+
+            IngredientTag entity = Ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .eq("id", id)
+                    .eq("user.id", userId)
+                    .findOne();
+
+            List<Ingredient> ingredients = ingredientByIds(ingredientIds);
+            Language language = ebean.find(Language.class, languageId);
+
+            entity.setName(name);
+            entity.setIngredients(ingredients);
+            entity.setLanguage(language);
+
+            ebean.update(entity);
+            ebean.flush();
+        });
+    }
+
+    private List<Ingredient> ingredientByIds(List<Long> ingredientIds) {
+        return ebean.createQuery(Ingredient.class)
+                .where()
+                .in("id", ingredientIds)
+                .findList();
     }
 }
