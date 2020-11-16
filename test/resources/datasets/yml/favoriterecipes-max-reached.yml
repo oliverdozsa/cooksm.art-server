@@ -1,0 +1,11 @@
+users:
+  - id: 1
+
+language:
+  - id: 1
+    iso_name: hu
+
+source_page:
+  - id: 1
+    name: src_pg_1_hu
+    language_id: 1

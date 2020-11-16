@@ -1,256 +1,190 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import clients.FavoriteRecipesTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
-import data.entities.*;
-import lombokized.dto.FavoriteRecipeCreateDto;
+import data.entities.FavoriteRecipe;
+import data.entities.Recipe;
+import data.entities.SourcePage;
+import data.entities.User;
 import io.ebean.Ebean;
+import lombokized.dto.FavoriteRecipeCreateDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import play.Logger;
-import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
 import rules.PlayApplicationWithGuiceDbRider;
-import utils.JwtTestUtils;
+import rules.TestMethodNameLogger;
 
-import java.io.IOException;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static matchers.ResultHasFavoriteRecipesWithIds.hasFavoriteRecipesWithIds;
+import static matchers.ResultHasJsonSize.hasJsonSize;
+import static matchers.ResultHasLocationHeader.hasLocationHeader;
+import static matchers.ResultHasSingleFavoriteRecipeWithId.hasSingleFavoriteRecipeWithId;
+import static matchers.ResultStatusIs.statusIs;
+import static org.junit.Assert.assertThat;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
 
 public class FavoriteRecipesControllerTest {
-    @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+
+    @Rule
+    public RuleChain chain = RuleChain.outerRule(application)
+            .around(new TestMethodNameLogger());
+
+    private FavoriteRecipesTestClient client;
 
     private static final Logger.ALogger logger = Logger.of(FavoriteRecipesControllerTest.class);
 
     @Before
     public void setup() {
+        client = new FavoriteRecipesTestClient(application.getApplication());
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetEmpty() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetEmpty");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.allOf(1L);
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder().uri(routes.FavoriteRecipesController.all().url());
-
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequest, token);
-
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", OK, result.status());
-        JsonNode resultJson = Json.parse(contentAsString(result));
-        assertEquals("Total count is wrong!", 0, resultJson.size());
+        // Then
+        assertThat(result, statusIs(OK));
+        assertThat(result, hasJsonSize(0));
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_Get() throws IOException {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_Get");
-        logger.info("------------------------------------------------------------------------------------------------");
-
+    public void testCreate() {
+        // When
         FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
         favoriteRecipe.setRecipeId(1L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(Json.toJson(favoriteRecipe))
-                .uri(routes.FavoriteRecipesController.create().url());
+        Result result = client.create(favoriteRecipe, 1L);
 
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
+        // Then
+        assertThat(result, statusIs(CREATED));
+        assertThat(result, hasLocationHeader());
 
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Result of request is wrong!", CREATED, result.status());
-        assertNotNull("Missing header: Location!", result.headers().get("Location"));
+        String locationUrl = result.headers().get("Location");
+        result = client.byLocation(locationUrl, 1L);
+        assertThat(result, hasSingleFavoriteRecipeWithId(1L));
 
-        // Get by id
-        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
-                .uri(result.headers().get("Location"));
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, token);
-        result = route(application.getApplication(), httpRequestGet);
-        JsonNode favoriteRecipesJson = Json.parse(contentAsString(result));
-
-        assertEquals("Unexpected recipe id!", 1L, favoriteRecipesJson.get("recipeId").asLong());
-
-        // Get all
-        httpRequestGet = new Http.RequestBuilder()
-                .uri(routes.FavoriteRecipesController.all().url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, token);
-
-        result = route(application.getApplication(), httpRequestGet);
-        JsonNode resultJson = Json.parse(contentAsString(result));
-
-
-        assertEquals("Total count is wrong!", 1, resultJson.size());
-        assertEquals("Unexpected recipe id!", 1L, resultJson.get(0).get("recipeId").asLong());
+        result = client.allOf(1L);
+        assertThat(result, hasJsonSize(1));
+        assertThat(result, hasFavoriteRecipesWithIds(1L));
     }
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testDelete() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testDelete");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        FavoriteRecipe favoriteRecipe = createFavoriteRecipeInDb(1L, 1L);
 
-        // Create a favorite recipes
-        FavoriteRecipe favoriteRecipe = new FavoriteRecipe();
-        favoriteRecipe.setRecipe(Ebean.find(Recipe.class, 1L));
-        favoriteRecipe.setUser(Ebean.find(User.class, 1L));
-        Ebean.save(favoriteRecipe);
+        // When
+        Result result = client.delete(favoriteRecipe.getId(), 1L);
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(DELETE)
-                .uri(routes.FavoriteRecipesController.delete(favoriteRecipe.getId()).url());
-
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequest, token);
-
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", NO_CONTENT, result.status());
+        // Then
+        assertThat(result, statusIs(NO_CONTENT));
     }
 
     @Test
     public void testCreate_Invalid_NoJson() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_Invalid_NoJson");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        User user = createUserInDb("some@one");
 
-        User user = new User();
-        user.setEmail("some@one.com");
-        Ebean.save(user);
+        // When
+        Result result = client.create("{asd", user.getId());
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyText("{asd")
-                .uri(routes.FavoriteRecipesController.create().url());
-
-        String token = JwtTestUtils.createToken(10000L, user.getId(), application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
+        // Then
+        assertThat(result, statusIs(BAD_REQUEST));
     }
 
     @Test
     public void testCreate_Invalid_RecipeNotExisting() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_Invalid_RecipeNotExisting");
-        logger.info("------------------------------------------------------------------------------------------------");
-
+        // Given
         FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
         favoriteRecipe.setRecipeId(4284L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(Json.toJson(favoriteRecipe))
-                .uri(routes.FavoriteRecipesController.create().url());
+        // When
+        Result result = client.create(favoriteRecipe, 1L);
 
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
+        // Then
+        assertThat(result, statusIs(NOT_FOUND));
     }
 
     @Test
+    @DataSet(value = "datasets/yml/favoriterecipes-max-reached.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_Invalid_MaxReached() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_Invalid_MaxReached");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        Language language = new Language();
-        language.setIsoName("hu");
-        Ebean.save(language);
-
-        SourcePage sourcePage = new SourcePage();
-        sourcePage.setName("someSourcePage");
-        sourcePage.setLanguage(language);
-        Ebean.save(sourcePage);
-
-        User user = new User();
-        user.setEmail("some@user.com");
-        Ebean.save(user);
-
+        // Given
         int max = application.getApplication().config().getInt("receptnekem.favoriterecipes.maxperuser");
         for (int i = 0; i < max; i++) {
-            Recipe recipe = new Recipe();
-            recipe.setName("recipe_t_" + i);
-            recipe.setSourcePage(sourcePage);
-            Ebean.save(recipe);
-
-            FavoriteRecipe favoriteRecipe = new FavoriteRecipe();
-            favoriteRecipe.setUser(user);
-            favoriteRecipe.setRecipe(Ebean.find(Recipe.class, recipe.getId()));
-            Ebean.save(favoriteRecipe);
+            Recipe recipe = createRecipeInDb("test-recipe-" + i, 1L);
+            createFavoriteRecipeInDb(recipe.getId(), 1L);
         }
 
+        // When
         FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
         favoriteRecipe.setRecipeId(1L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(Json.toJson(favoriteRecipe))
-                .uri(routes.FavoriteRecipesController.create().url());
+        Result result = client.create(favoriteRecipe, 1L);
 
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
+        // Then
+        assertThat(result, statusIs(BAD_REQUEST));
     }
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_Already_Existing() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_Already_Existing");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        createFavoriteRecipeInDb(1L, 1L);
 
-        FavoriteRecipe favoriteRecipe = new FavoriteRecipe();
-        favoriteRecipe.setUser(Ebean.find(User.class, 1L));
-        favoriteRecipe.setRecipe(Ebean.find(Recipe.class, 1L));
-        Ebean.save(favoriteRecipe);
+        // When
+        FavoriteRecipeCreateDto favoriteRecipe = new FavoriteRecipeCreateDto();
+        favoriteRecipe.setRecipeId(1L);
 
-        FavoriteRecipeCreateDto favoriteRecipeDTO = new FavoriteRecipeCreateDto();
-        favoriteRecipeDTO.setRecipeId(1L);
+        Result result = client.create(favoriteRecipe, 1L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(Json.toJson(favoriteRecipeDTO))
-                .uri(routes.FavoriteRecipesController.create().url());
-
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
+        // Then
+        assertThat(result, statusIs(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/favoriterecipes.yml", disableConstraints = true, cleanBefore = true)
     public void testSingle_UserDoesntOwn() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle_UserDoesntOwn");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.single(2L, 1L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.FavoriteRecipesController.single(2).url());
+        // Then
+        assertThat(result, statusIs(NOT_FOUND));
+    }
 
-        String token = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, token);
+    private User createUserInDb(String email) {
+        User user = new User();
+        user.setEmail(email);
+        Ebean.save(user);
 
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Result of request is wrong!", NOT_FOUND, result.status());
+        return user;
+    }
+
+    private FavoriteRecipe createFavoriteRecipeInDb(Long recipeId, Long userId) {
+        FavoriteRecipe favoriteRecipe = new FavoriteRecipe();
+        favoriteRecipe.setRecipe(Ebean.find(Recipe.class, recipeId));
+        favoriteRecipe.setUser(Ebean.find(User.class, userId));
+        Ebean.save(favoriteRecipe);
+
+        return favoriteRecipe;
+    }
+
+    private Recipe createRecipeInDb(String name, Long sourcePageId) {
+        Recipe recipe = new Recipe();
+        recipe.setName(name);
+        recipe.setSourcePage(Ebean.find(SourcePage.class, sourcePageId));
+        Ebean.save(recipe);
+
+        return recipe;
     }
 }

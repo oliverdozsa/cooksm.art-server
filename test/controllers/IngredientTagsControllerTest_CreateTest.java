@@ -27,7 +27,7 @@ public class IngredientTagsControllerTest_CreateTest {
     @Rule
     public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
 
-    private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest.class);
+    private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest_CreateTest.class);
 
     @Test
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
