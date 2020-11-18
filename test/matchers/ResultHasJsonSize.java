@@ -11,7 +11,7 @@ import static play.test.Helpers.contentAsString;
 public class ResultHasJsonSize extends TypeSafeMatcher<Result> {
     private int expectedSize;
 
-    public ResultHasJsonSize(int expectedSize) {
+    private ResultHasJsonSize(int expectedSize) {
         this.expectedSize = expectedSize;
     }
 

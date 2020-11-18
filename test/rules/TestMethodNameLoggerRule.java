@@ -5,8 +5,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import play.Logger;
 
-public class TestMethodNameLogger implements TestRule {
-    private static final Logger.ALogger logger = Logger.of(TestMethodNameLogger.class);
+public class TestMethodNameLoggerRule implements TestRule {
+    private static final Logger.ALogger logger = Logger.of(TestMethodNameLoggerRule.class);
 
     @Override
     public Statement apply(Statement base, Description description) {

@@ -12,10 +12,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import play.Logger;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRider;
-import rules.TestMethodNameLogger;
+import rules.RuleChainForTests;
 
 import static matchers.ResultHasFavoriteRecipesWithIds.hasFavoriteRecipesWithIds;
 import static matchers.ResultHasJsonSize.hasJsonSize;
@@ -27,19 +25,16 @@ import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
 
 public class FavoriteRecipesControllerTest {
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
 
     @Rule
-    public RuleChain chain = RuleChain.outerRule(application)
-            .around(new TestMethodNameLogger());
+    public RuleChain chain = ruleChainForTests.getRuleChain();
 
     private FavoriteRecipesTestClient client;
 
-    private static final Logger.ALogger logger = Logger.of(FavoriteRecipesControllerTest.class);
-
     @Before
     public void setup() {
-        client = new FavoriteRecipesTestClient(application.getApplication());
+        client = new FavoriteRecipesTestClient(ruleChainForTests.getApplication());
     }
 
     @Test
@@ -117,9 +112,9 @@ public class FavoriteRecipesControllerTest {
 
     @Test
     @DataSet(value = "datasets/yml/favoriterecipes-max-reached.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_Invalid_MaxReached() {
+    public void testCreate_MaxReached() {
         // Given
-        int max = application.getApplication().config().getInt("receptnekem.favoriterecipes.maxperuser");
+        int max = ruleChainForTests.getApplication().config().getInt("receptnekem.favoriterecipes.maxperuser");
         for (int i = 0; i < max; i++) {
             Recipe recipe = createRecipeInDb("test-recipe-" + i, 1L);
             createFavoriteRecipeInDb(recipe.getId(), 1L);

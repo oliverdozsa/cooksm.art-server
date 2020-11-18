@@ -10,7 +10,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRider;
+import rules.PlayApplicationWithGuiceDbRiderRule;
 import utils.JwtTestUtils;
 
 import java.util.Arrays;
@@ -25,7 +25,7 @@ import static play.test.Helpers.*;
 
 public class IngredientTagsControllerTest_CreateTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
 
     private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest_CreateTest.class);
 

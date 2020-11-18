@@ -21,7 +21,7 @@ import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRider;
+import rules.PlayApplicationWithGuiceDbRiderRule;
 import security.SocialTokenVerifier;
 import utils.JwtTestUtils;
 import utils.MockSocialTokenVerifier;
@@ -43,12 +43,12 @@ import static play.test.Helpers.*;
 
 public class SecurityControllerTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application;
+    public PlayApplicationWithGuiceDbRiderRule application;
 
     private static final Logger.ALogger logger = Logger.of(SecurityControllerTest.class);
 
     public SecurityControllerTest() {
-        application = new PlayApplicationWithGuiceDbRider(
+        application = new PlayApplicationWithGuiceDbRiderRule(
                 new GuiceApplicationBuilder()
                         .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
                         .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))

@@ -10,17 +10,17 @@ import play.Application;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.test.Helpers;
 
-public class PlayApplicationWithGuiceDbRider implements TestRule {
+public class PlayApplicationWithGuiceDbRiderRule implements TestRule {
     private EntityManagerProvider emProvider;
     private DBUnitRule dbUnitRule;
     private Application application;
     private GuiceApplicationBuilder appBuilder;
 
-    public PlayApplicationWithGuiceDbRider() {
+    public PlayApplicationWithGuiceDbRiderRule() {
         appBuilder = new GuiceApplicationBuilder();
     }
 
-    public PlayApplicationWithGuiceDbRider(GuiceApplicationBuilder appBuilder) {
+    public PlayApplicationWithGuiceDbRiderRule(GuiceApplicationBuilder appBuilder) {
         this.appBuilder = appBuilder;
     }
 

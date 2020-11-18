@@ -1,58 +1,54 @@
 package controllers;
 
+import clients.GlobalSearchesTestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import play.Logger;
+import org.junit.rules.RuleChain;
 import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRider;
+import rules.RuleChainForTests;
 import utils.Base62Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static play.test.Helpers.*;
+import static matchers.ResultHasGlobalSearchesWithNames.hasGlobalSearchesWithNames;
+import static matchers.ResultHasGlobalSearchesWithSearchIds.hasGlobalSearchesWithSearchIds;
+import static matchers.ResultHasGlobalSearchesWithUrlFriendlyNames.hasGlobalSearchesWithUrlFriendlyNames;
+import static matchers.ResultHasJsonSize.hasJsonSize;
+import static matchers.ResultStatusIs.statusIs;
+import static org.junit.Assert.*;
+import static play.test.Helpers.OK;
 
 public class GlobalSearchesControllerTest {
-    @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
 
-    private static final Logger.ALogger logger = Logger.of(GlobalSearchesControllerTest.class);
+    @Rule
+    public RuleChain chain = ruleChainForTests.getRuleChain();
+
+    private GlobalSearchesTestClient client;
+
+    @Before
+    public void setup() {
+        client = new GlobalSearchesTestClient(ruleChainForTests.getApplication());
+    }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/globalsearches.yml", disableConstraints = true, cleanBefore = true)
     public void testAll() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testListTags");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.all();
 
-        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
-                .uri(routes.GlobalSearchesController.all().url());
-
-        Result response = route(application.getApplication(), request);
-
-        assertEquals(OK, response.status());
-
-        String jsonStr = contentAsString(response);
-        JsonNode json = Json.parse(jsonStr);
-
-        assertEquals(3, json.size());
-
-        List<String> names = new ArrayList<>();
-        List<String> searchIds = new ArrayList<>();
-        List<String> urlFriendlyNames = new ArrayList<>();
-        json.forEach(n -> names.add(n.get("name").asText()));
-        json.forEach(n -> searchIds.add(n.get("searchId").asText()));
-        json.forEach(n -> urlFriendlyNames.add(n.get("urlFriendlyName").asText()));
-        assertTrue(names.containsAll(Arrays.asList("globalQuery1", "globalQuery2", "globalQuery3")));
-        assertTrue(urlFriendlyNames.containsAll(Arrays.asList("global-query-1", "global-query-2", "global-query-3")));
-        assertTrue(searchIds.containsAll(Arrays.asList(Base62Utils.encode(239328L), Base62Utils.encode(239329L), Base62Utils.encode(239330L))));
+        // Then
+        assertThat(result, statusIs(OK));
+        assertThat(result, hasJsonSize(3));
+        assertThat(result, hasGlobalSearchesWithNames("globalQuery1", "globalQuery2", "globalQuery3"));
+        assertThat(result, hasGlobalSearchesWithUrlFriendlyNames("global-query-1", "global-query-2", "global-query-3"));
+        assertThat(result, hasGlobalSearchesWithSearchIds(239328L, 239329L, 239330L));
     }
 }

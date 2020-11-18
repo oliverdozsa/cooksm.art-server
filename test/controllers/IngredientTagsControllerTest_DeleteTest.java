@@ -4,11 +4,11 @@ import com.github.database.rider.core.api.dataset.DataSet;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
-import rules.PlayApplicationWithGuiceDbRider;
+import rules.PlayApplicationWithGuiceDbRiderRule;
 
 public class IngredientTagsControllerTest_DeleteTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
 
     private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest_DeleteTest.class);
 

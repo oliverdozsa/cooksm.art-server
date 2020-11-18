@@ -11,7 +11,7 @@ import static play.test.Helpers.contentAsString;
 public class ResultHasSingleFavoriteRecipeWithId extends TypeSafeMatcher<Result> {
     private Long expectedRecipeId;
 
-    public ResultHasSingleFavoriteRecipeWithId(Long expectedRecipeId) {
+    private ResultHasSingleFavoriteRecipeWithId(Long expectedRecipeId) {
         this.expectedRecipeId = expectedRecipeId;
     }
 

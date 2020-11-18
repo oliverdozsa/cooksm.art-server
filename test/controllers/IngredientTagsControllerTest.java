@@ -1,24 +1,18 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import controllers.v1.routes;
-import data.entities.IngredientTag;
-import dto.IngredientTagCreateUpdateDto;
-import io.ebean.Ebean;
 import org.junit.Rule;
 import org.junit.Test;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRider;
+import rules.PlayApplicationWithGuiceDbRiderRule;
 import utils.JwtTestUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static controllers.IngredientTagsControllerTestUtils.*;
@@ -27,7 +21,7 @@ import static play.test.Helpers.*;
 
 public class IngredientTagsControllerTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
 
     private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest.class);
 

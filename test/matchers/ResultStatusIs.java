@@ -7,7 +7,7 @@ import play.mvc.Result;
 public class ResultStatusIs extends TypeSafeMatcher<Result> {
     private int expectedStatus;
 
-    public ResultStatusIs(int expectedStatus) {
+    private ResultStatusIs(int expectedStatus) {
         this.expectedStatus = expectedStatus;
     }
 

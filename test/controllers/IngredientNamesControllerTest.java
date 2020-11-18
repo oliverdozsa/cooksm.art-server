@@ -9,7 +9,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRider;
+import rules.PlayApplicationWithGuiceDbRiderRule;
 
 import static junit.framework.TestCase.assertEquals;
 import static play.mvc.Http.HttpVerbs.GET;
@@ -17,7 +17,7 @@ import static play.test.Helpers.*;
 
 public class IngredientNamesControllerTest {
     @Rule
-    public PlayApplicationWithGuiceDbRider application = new PlayApplicationWithGuiceDbRider();
+    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
 
     private static final Logger.ALogger logger = Logger.of(IngredientNamesControllerTest.class);
 
