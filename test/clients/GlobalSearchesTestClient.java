@@ -1,6 +1,5 @@
 package clients;
 
-import com.typesafe.config.Config;
 import controllers.v1.routes;
 import play.Application;
 import play.mvc.Http;
@@ -10,12 +9,10 @@ import static play.test.Helpers.GET;
 import static play.test.Helpers.route;
 
 public class GlobalSearchesTestClient {
-    private Application application;
-    private Config config;
+    private final Application application;
 
     public GlobalSearchesTestClient(Application application) {
         this.application = application;
-        this.config = application.config();
     }
 
     public Result all() {

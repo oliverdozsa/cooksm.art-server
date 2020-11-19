@@ -12,8 +12,8 @@ import utils.JwtTestUtils;
 import static play.test.Helpers.*;
 
 public class FavoriteRecipesTestClient {
-    private Application application;
-    private Config config;
+    private final Application application;
+    private final Config config;
 
     public FavoriteRecipesTestClient(Application application) {
         this.application = application;

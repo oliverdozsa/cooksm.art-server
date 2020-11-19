@@ -23,6 +23,7 @@ libraryDependencies += "io.seruco.encoding" % "base62" % "0.1.3"
 libraryDependencies ++= Seq(javaJpa % "test", "org.hibernate" % "hibernate-core" % "5.4.2.Final" % "test")
 libraryDependencies += "com.github.database-rider" % "rider-core" % "1.7.2" % "test"
 libraryDependencies += "org.mockito" % "mockito-core" % "3.1.0" % "test"
+libraryDependencies += "com.jayway.jsonpath" % "json-path" % "2.4.0" % "test"
 
 javaOptions in Test ++= Seq("-Dconfig.file=conf/application.test.conf")
 

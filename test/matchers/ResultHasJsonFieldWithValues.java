@@ -2,14 +2,19 @@ package matchers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import play.libs.Json;
 import play.mvc.Result;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static play.test.Helpers.contentAsString;
 
@@ -33,8 +38,7 @@ abstract class ResultHasJsonFieldWithValues<T> extends TypeSafeMatcher<Result> {
     @Override
     protected boolean matchesSafely(Result item) {
         String jsonStr = contentAsString(item);
-        JsonNode json = Json.parse(jsonStr);
-        ArrayNode jsonActualValues = selectField(json);
+        ArrayNode jsonActualValues = selectField(jsonStr);
 
         List<T> actualValues = new ArrayList<>();
         jsonActualValues.forEach(n -> actualValues.add(retrieveValue(n)));
@@ -49,18 +53,33 @@ abstract class ResultHasJsonFieldWithValues<T> extends TypeSafeMatcher<Result> {
 
     abstract T retrieveValue(JsonNode e);
 
-    private ArrayNode selectField(JsonNode json) {
+    private ArrayNode selectField(String jsonStr) {
         if(fieldSelector == null) {
-            return (ArrayNode) json;
+            return (ArrayNode) Json.parse(jsonStr);
         } else {
-            String[] fields = fieldSelector.split("\\.");
-            JsonNode current = json;
+            return JsonPath.read(jsonStr, fieldSelector);
+        }
+    }
 
-            for(String field: fields) {
-                current = current.get(field);
+    static {
+        Configuration.setDefaults(new Configuration.Defaults() {
+            private final JsonProvider jsonProvider = new JacksonJsonNodeJsonProvider();
+            private final MappingProvider mappingProvider = new JacksonMappingProvider();
+
+            @Override
+            public JsonProvider jsonProvider() {
+                return jsonProvider;
             }
 
-            return (ArrayNode) current;
-        }
+            @Override
+            public MappingProvider mappingProvider() {
+                return mappingProvider;
+            }
+
+            @Override
+            public Set<Option> options() {
+                return EnumSet.noneOf(Option.class);
+            }
+        });
     }
 }
