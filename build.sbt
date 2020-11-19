@@ -24,6 +24,7 @@ libraryDependencies ++= Seq(javaJpa % "test", "org.hibernate" % "hibernate-core"
 libraryDependencies += "com.github.database-rider" % "rider-core" % "1.7.2" % "test"
 libraryDependencies += "org.mockito" % "mockito-core" % "3.1.0" % "test"
 libraryDependencies += "com.jayway.jsonpath" % "json-path" % "2.4.0" % "test"
+libraryDependencies += "org.hamcrest" % "hamcrest-library" % "1.3" % "test"
 
 javaOptions in Test ++= Seq("-Dconfig.file=conf/application.test.conf")
 
