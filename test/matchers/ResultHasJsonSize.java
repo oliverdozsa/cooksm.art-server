@@ -9,21 +9,28 @@ import play.mvc.Result;
 import static play.test.Helpers.contentAsString;
 
 public class ResultHasJsonSize extends TypeSafeMatcher<Result> {
-    private int expectedSize;
+    private final int expected;
+    private int actual;
 
-    private ResultHasJsonSize(int expectedSize) {
-        this.expectedSize = expectedSize;
+    private ResultHasJsonSize(int expected) {
+        this.expected = expected;
     }
 
     @Override
     protected boolean matchesSafely(Result item) {
         JsonNode json = Json.parse(contentAsString(item));
-        return json.size() == expectedSize;
+        actual = json.size();
+        return actual == expected;
     }
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("size to be " + expectedSize);
+        description.appendText("size to be").appendValue(expected);
+    }
+
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("was").appendValue(actual);
     }
 
     public static ResultHasJsonSize hasJsonSize(int expectedSize) {

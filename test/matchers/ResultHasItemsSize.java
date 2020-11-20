@@ -10,6 +10,7 @@ import static play.test.Helpers.contentAsString;
 
 public class ResultHasItemsSize extends TypeSafeMatcher<Result> {
     int expected;
+    int actual;
 
     private ResultHasItemsSize(int expected) {
         this.expected = expected;
@@ -21,12 +22,19 @@ public class ResultHasItemsSize extends TypeSafeMatcher<Result> {
         JsonNode json = Json.parse(jsonStr);
         JsonNode items = json.get("items");
 
-        return items.size() == expected;
+        actual = items.size();
+
+        return actual == expected;
     }
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("items size to be " + expected);
+        description.appendText("items size to be").appendValue(expected);
+    }
+
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("was").appendValue(actual);
     }
 
     public static ResultHasItemsSize hasItemsSize(int expected) {

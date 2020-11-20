@@ -15,6 +15,11 @@ public class ResultHasLocationHeader extends TypeSafeMatcher<Result> {
         description.appendText("\"Location\" header to exist");
     }
 
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("\"Location\" header is not present");
+    }
+
     public static ResultHasLocationHeader hasLocationHeader() {
         return new ResultHasLocationHeader();
     }

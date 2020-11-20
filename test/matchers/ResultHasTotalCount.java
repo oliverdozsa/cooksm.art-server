@@ -9,7 +9,8 @@ import play.mvc.Result;
 import static play.test.Helpers.contentAsString;
 
 public class ResultHasTotalCount extends TypeSafeMatcher<Result> {
-    int expected;
+    private final int expected;
+    private int actual;
 
     private ResultHasTotalCount(int expected) {
         this.expected = expected;
@@ -19,7 +20,7 @@ public class ResultHasTotalCount extends TypeSafeMatcher<Result> {
     protected boolean matchesSafely(Result item) {
         String jsonStr = contentAsString(item);
         JsonNode json = Json.parse(jsonStr);
-        int actual = json.get("totalCount").asInt();
+        actual = json.get("totalCount").asInt();
 
         return actual == expected;
     }
@@ -27,6 +28,11 @@ public class ResultHasTotalCount extends TypeSafeMatcher<Result> {
     @Override
     public void describeTo(Description description) {
         description.appendText("items size to be " + expected);
+    }
+
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("was").appendValue(actual);
     }
 
     public static ResultHasTotalCount hasTotalCount(int expected) {

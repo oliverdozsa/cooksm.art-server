@@ -20,6 +20,4 @@ public class ExtractFromResult {
 
         return json.get("totalCount").asInt();
     }
-
-
 }

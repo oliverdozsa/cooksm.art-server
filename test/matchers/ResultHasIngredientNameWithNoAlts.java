@@ -10,6 +10,7 @@ import static play.test.Helpers.contentAsString;
 
 public class ResultHasIngredientNameWithNoAlts extends TypeSafeMatcher<Result> {
     private final int index;
+    private int actualSize;
 
     private ResultHasIngredientNameWithNoAlts(int index) {
         this.index = index;
@@ -25,12 +26,19 @@ public class ResultHasIngredientNameWithNoAlts extends TypeSafeMatcher<Result> {
                 .get(index)
                 .get("altNames");
 
-        return altNames.size() == 0;
+        actualSize = altNames.size();
+
+        return actualSize == 0;
     }
 
     @Override
     public void describeTo(Description description) {
         description.appendText("alt names to be empty");
+    }
+
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("was").appendValue(actualSize);
     }
 
     public static ResultHasIngredientNameWithNoAlts hasIngredientNameWithNoAlts(int index) {

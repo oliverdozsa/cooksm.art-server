@@ -9,7 +9,7 @@ import org.junit.rules.RuleChain;
 import play.mvc.Result;
 import rules.RuleChainForTests;
 
-import static matchers.ResultHasIngredientTagWithIds.hasIngredientTagWithIds;
+import static matchers.ResultHasIngredientTagsWithIds.hasIngredientTagsWithIds;
 import static matchers.ResultHasIngredientTagWithIngredientIds.hasIngredientTagWithIngredientIds;
 import static matchers.ResultHasSingleIngredientTagWithIngredientNames.hasSingleIngredientTagWithIngredientNames;
 import static matchers.ResultHasTotalCount.hasTotalCount;
@@ -107,7 +107,7 @@ public class IngredientTagsControllerTest {
         // Then
         assertThat(result, statusIs(OK));
         assertThat(totalCountOf(result), equalTo(3));
-        assertThat(result, hasIngredientTagWithIds(6L, 3L, 11L));
+        assertThat(result, hasIngredientTagsWithIds(6L, 3L, 11L));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class IngredientTagsControllerTest {
         // Then
         assertThat(result, statusIs(OK));
         assertThat(totalCountOf(result), equalTo(2));
-        assertThat(result, hasIngredientTagWithIds(6L, 3L));
+        assertThat(result, hasIngredientTagsWithIds(6L, 3L));
     }
 
     @Test

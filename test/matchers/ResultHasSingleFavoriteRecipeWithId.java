@@ -9,24 +9,30 @@ import play.mvc.Result;
 import static play.test.Helpers.contentAsString;
 
 public class ResultHasSingleFavoriteRecipeWithId extends TypeSafeMatcher<Result> {
-    private Long expectedRecipeId;
+    private final Long expected;
+    private Long actual;
 
-    private ResultHasSingleFavoriteRecipeWithId(Long expectedRecipeId) {
-        this.expectedRecipeId = expectedRecipeId;
+    private ResultHasSingleFavoriteRecipeWithId(Long expected) {
+        this.expected = expected;
     }
 
     @Override
     protected boolean matchesSafely(Result item) {
         String jsonStr = contentAsString(item);
         JsonNode json = Json.parse(jsonStr);
-        Long actualRecipeId = json.get("recipeId").asLong();
+        actual = json.get("recipeId").asLong();
 
-        return expectedRecipeId.equals(actualRecipeId);
+        return expected.equals(actual);
     }
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("recipe id to be " + expectedRecipeId);
+        description.appendText("recipe id to be " + expected);
+    }
+
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("was").appendValue(actual);
     }
 
     public static ResultHasSingleFavoriteRecipeWithId hasSingleFavoriteRecipeWithId(Long expectedId) {

@@ -21,6 +21,7 @@ import static play.test.Helpers.contentAsString;
 abstract class ResultHasJsonFieldWithValues<T> extends TypeSafeMatcher<Result> {
     private final String fieldSelector;
     private final List<T> expectedValues;
+    private List<T> actualValues;
     private final String failureText;
 
     @SafeVarargs
@@ -40,7 +41,7 @@ abstract class ResultHasJsonFieldWithValues<T> extends TypeSafeMatcher<Result> {
         String jsonStr = contentAsString(item);
         ArrayNode jsonActualValues = selectField(jsonStr);
 
-        List<T> actualValues = new ArrayList<>();
+        actualValues = new ArrayList<>();
         jsonActualValues.forEach(n -> actualValues.add(retrieveValue(n)));
 
         return actualValues.size() == expectedValues.size() && expectedValues.containsAll(actualValues);
@@ -48,7 +49,12 @@ abstract class ResultHasJsonFieldWithValues<T> extends TypeSafeMatcher<Result> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText(failureText + " " + expectedValues);
+        description.appendText(failureText).appendValue(expectedValues);
+    }
+
+    @Override
+    protected void describeMismatchSafely(Result item, Description mismatchDescription) {
+        mismatchDescription.appendText("was").appendValue(actualValues);
     }
 
     abstract T retrieveValue(JsonNode e);
