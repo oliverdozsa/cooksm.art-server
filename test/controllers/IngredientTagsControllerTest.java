@@ -9,18 +9,12 @@ import org.junit.rules.RuleChain;
 import play.mvc.Result;
 import rules.RuleChainForTests;
 
-import static matchers.ResultHasIngredientTagsWithIds.hasIngredientTagsWithIds;
-import static matchers.ResultHasIngredientTagWithIngredientIds.hasIngredientTagWithIngredientIds;
-import static matchers.ResultHasSingleIngredientTagWithIngredientNames.hasSingleIngredientTagWithIngredientNames;
-import static matchers.ResultHasTotalCount.hasTotalCount;
-import static matchers.ResultStatusIs.statusIs;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static extractors.DataFromResult.*;
+import static extractors.IngredientTagsFromResult.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static play.test.Helpers.BAD_REQUEST;
 import static play.test.Helpers.OK;
-import static utils.ExtractFromResult.itemsSizeOf;
-import static utils.ExtractFromResult.totalCountOf;
 
 public class IngredientTagsControllerTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
@@ -43,15 +37,14 @@ public class IngredientTagsControllerTest {
         Result result = client.page("languageId=1&nameLike=_tag_");
 
         // Then
-        assertThat(result, statusIs(OK));
-        assertThat(result, hasTotalCount(7));
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(totalCountOf(result), equalTo(7));
     }
 
     @Test
     // Given
     @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
     public void testPaging() {
-
         int limit = 2;
         int offset = 0;
         boolean lastPageNotReached = true;
@@ -62,8 +55,8 @@ public class IngredientTagsControllerTest {
             Result result = client.page(queryParams);
 
             // Then
-            assertThat(result, statusIs(OK));
-            assertThat(result, hasTotalCount(7));
+            assertThat(statusOf(result), equalTo(OK));
+            assertThat(totalCountOf(result), equalTo(7));
             assertThat(itemsSizeOf(result), lessThanOrEqualTo(limit));
 
             int totalCount = totalCountOf(result);
@@ -81,7 +74,7 @@ public class IngredientTagsControllerTest {
         Result result = client.page(invalidLenghtNameLikeParams);
 
         // Then
-        assertThat(result, statusIs(BAD_REQUEST));
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -92,9 +85,9 @@ public class IngredientTagsControllerTest {
         Result result = client.page("languageId=1&nameLike=2_tag_2");
 
         // Then
-        assertThat(result, statusIs(OK));
+        assertThat(statusOf(result), equalTo(OK));
         assertThat(totalCountOf(result), equalTo(1));
-        assertThat(result, hasIngredientTagWithIngredientIds(0, 2L, 1L));
+        assertThat(ingredientIdsOfIngredientTagOf(result, 0), containsInAnyOrder(2L, 1L));
     }
 
     @Test
@@ -105,9 +98,10 @@ public class IngredientTagsControllerTest {
         Result result = client.authorizedPage(1L, "languageId=1&nameLike=tag_2");
 
         // Then
-        assertThat(result, statusIs(OK));
+        assertThat(statusOf(result), equalTo(OK));
         assertThat(totalCountOf(result), equalTo(3));
-        assertThat(result, hasIngredientTagsWithIds(6L, 3L, 11L));
+        assertThat(ingredientTagIdsOf(result), hasSize(3));
+        assertThat(ingredientTagIdsOf(result), containsInAnyOrder(6L, 3L, 11L));
     }
 
     @Test
@@ -118,9 +112,10 @@ public class IngredientTagsControllerTest {
         Result result = client.page("languageId=1&nameLike=tag_2");
 
         // Then
-        assertThat(result, statusIs(OK));
+        assertThat(statusOf(result), equalTo(OK));
         assertThat(totalCountOf(result), equalTo(2));
-        assertThat(result, hasIngredientTagsWithIds(6L, 3L));
+        assertThat(ingredientTagIdsOf(result), hasSize(2));
+        assertThat(ingredientTagIdsOf(result), containsInAnyOrder(6L, 3L));
     }
 
     @Test
@@ -131,7 +126,7 @@ public class IngredientTagsControllerTest {
         Result result = client.single(1L, 10L, 2L);
 
         // Then
-        assertThat(result, statusIs(OK));
-        assertThat(result, hasSingleIngredientTagWithIngredientNames("en_1", "en_2"));
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(ingredientNamesOfSingleIngredientTagOfResult(result), containsInAnyOrder("en_1", "en_2"));
     }
 }

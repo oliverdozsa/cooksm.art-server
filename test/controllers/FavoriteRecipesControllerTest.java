@@ -15,11 +15,13 @@ import org.junit.rules.RuleChain;
 import play.mvc.Result;
 import rules.RuleChainForTests;
 
-import static matchers.ResultHasFavoriteRecipesWithIds.hasFavoriteRecipesWithIds;
-import static matchers.ResultHasJsonSize.hasJsonSize;
+import static extractors.FavoriteRecipesFromResult.recipeIdOfSingleFavoriteRecipeOf;
+import static extractors.FavoriteRecipesFromResult.recipeIdsOfFavoriteRecipesOf;
+import static extractors.DataFromResult.sizeAsJsonOf;
+import static extractors.DataFromResult.statusOf;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
-import static matchers.ResultHasSingleFavoriteRecipeWithId.hasSingleFavoriteRecipeWithId;
-import static matchers.ResultStatusIs.statusIs;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
@@ -45,8 +47,8 @@ public class FavoriteRecipesControllerTest {
         Result result = client.allOf(1L);
 
         // Then
-        assertThat(result, statusIs(OK));
-        assertThat(result, hasJsonSize(0));
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(sizeAsJsonOf(result), equalTo(0));
     }
 
     @Test
@@ -60,16 +62,16 @@ public class FavoriteRecipesControllerTest {
         Result result = client.create(favoriteRecipe, 1L);
 
         // Then
-        assertThat(result, statusIs(CREATED));
+        assertThat(statusOf(result), equalTo(CREATED));
         assertThat(result, hasLocationHeader());
 
         String locationUrl = result.headers().get("Location");
         result = client.byLocation(locationUrl, 1L);
-        assertThat(result, hasSingleFavoriteRecipeWithId(1L));
+        assertThat(recipeIdOfSingleFavoriteRecipeOf(result), equalTo(1L));
 
         result = client.allOf(1L);
-        assertThat(result, hasJsonSize(1));
-        assertThat(result, hasFavoriteRecipesWithIds(1L));
+        assertThat(sizeAsJsonOf(result), equalTo(1));
+        assertThat(recipeIdsOfFavoriteRecipesOf(result), containsInAnyOrder(1L));
     }
 
     @Test
@@ -82,7 +84,7 @@ public class FavoriteRecipesControllerTest {
         Result result = client.delete(favoriteRecipe.getId(), 1L);
 
         // Then
-        assertThat(result, statusIs(NO_CONTENT));
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
     }
 
     @Test
@@ -94,7 +96,7 @@ public class FavoriteRecipesControllerTest {
         Result result = client.create("{asd", user.getId());
 
         // Then
-        assertThat(result, statusIs(BAD_REQUEST));
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -107,7 +109,7 @@ public class FavoriteRecipesControllerTest {
         Result result = client.create(favoriteRecipe, 1L);
 
         // Then
-        assertThat(result, statusIs(NOT_FOUND));
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -127,7 +129,7 @@ public class FavoriteRecipesControllerTest {
         Result result = client.create(favoriteRecipe, 1L);
 
         // Then
-        assertThat(result, statusIs(BAD_REQUEST));
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -143,7 +145,7 @@ public class FavoriteRecipesControllerTest {
         Result result = client.create(favoriteRecipe, 1L);
 
         // Then
-        assertThat(result, statusIs(BAD_REQUEST));
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -154,7 +156,7 @@ public class FavoriteRecipesControllerTest {
         Result result = client.single(2L, 1L);
 
         // Then
-        assertThat(result, statusIs(NOT_FOUND));
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     private User createUserInDb(String email) {
