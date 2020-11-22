@@ -1,181 +1,131 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import clients.IngredientTagsTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
 import dto.IngredientTagCreateUpdateDto;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import play.Logger;
-import play.libs.Json;
-import play.mvc.Http;
+import org.junit.rules.RuleChain;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRiderRule;
-import utils.JwtTestUtils;
+import rules.RuleChainForTests;
 
 import java.util.Arrays;
-import java.util.List;
 
-import static controllers.IngredientTagsControllerTestUtils.toIngredientIdList;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static extractors.DataFromResult.statusOf;
+import static extractors.IngredientTagsFromResult.ingredientIdsOfSingleIngredientTagOf;
+import static extractors.IngredientTagsFromResult.singleIngredientTagNameOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 import static play.test.Helpers.*;
 
 public class IngredientTagsControllerTest_UpdateTest {
-    @Rule
-    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
+    private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
 
-    private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest_UpdateTest.class);
+    @Rule
+    public RuleChain chain = ruleChainForTests.getRuleChain();
+
+    private IngredientTagsTestClient client;
+
+    @Before
+    public void setup() {
+        client = new IngredientTagsTestClient(ruleChainForTests.getApplication());
+    }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Update() throws InterruptedException {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserDefined_Update");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-
+        // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
         dto.ingredientIds = Arrays.asList(3L, 4L);
 
-        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
-                .bodyJson(Json.toJson(dto))
-                .uri(routes.IngredientTagsController.update(10L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
+        Result result = client.update(10L, dto, 1L);
 
-        Result result = route(application.getApplication(), request);
-
-        assertEquals("Status is not NO CONTENT", Http.Status.NO_CONTENT, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
 
         // Because of parallel execution of SQL command, we need o wait until PUT finishes.
         // I haven't found any better way here :(. This can make the test flaky.
         Thread.sleep(2000);
 
-        request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.single(10L, 0L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
-        result = route(application.getApplication(), request);
+        result = client.single(1L, 10L, 0L);
 
-        assertEquals("Status is not OK", Http.Status.OK, result.status());
-
-        String jsonStr = contentAsString(result);
-        JsonNode json = Json.parse(jsonStr);
-
-        String name = json.get("name").asText();
-        List<Long> ingredientIds = toIngredientIdList(json.get("ingredients"));
-
-        assertEquals("user_1_ingredient_tag_1_updated", name);
-        assertTrue(ingredientIds.containsAll(Arrays.asList(3L, 4L)));
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(singleIngredientTagNameOf(result), equalTo("user_1_ingredient_tag_1_updated"));
+        assertThat(ingredientIdsOfSingleIngredientTagOf(result), hasSize(2));
+        assertThat(ingredientIdsOfSingleIngredientTagOf(result), containsInAnyOrder(3L, 4L));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Update_NotExistingIngredientId() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserDefined_Update_NotExistingIngredientId");
-        logger.info("------------------------------------------------------------------------------------------------");
-
+        // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
         dto.ingredientIds = Arrays.asList(3L, 42L);
 
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
-        Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
-                .bodyJson(Json.toJson(dto))
-                .uri(routes.IngredientTagsController.update(10L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
+        Result result = client.update(10L, dto, 1L);
 
-        Result result = route(application.getApplication(), request);
-
-        assertEquals("Status is not BAD REQUEST", Http.Status.BAD_REQUEST, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Update_NoIngredientIds() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserDefined_Update_NoIngredientIds");
-        logger.info("------------------------------------------------------------------------------------------------");
-
+        // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
 
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
-        Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
-                .bodyJson(Json.toJson(dto))
-                .uri(routes.IngredientTagsController.update(10L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
+        Result result = client.update(10L, dto, 1L);
 
-        Result result = route(application.getApplication(), request);
-
-        assertEquals("Status is not BAD REQUEST", Http.Status.BAD_REQUEST, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_UpdateWithDuplicateIngredientIds() throws InterruptedException {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserDefined_UpdateWithDuplicateIngredientIds");
-        logger.info("------------------------------------------------------------------------------------------------");
-
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
         dto.ingredientIds = Arrays.asList(3L, 3L, 4L, 4L);
 
-        String jwt = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
-        Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
-                .bodyJson(Json.toJson(dto))
-                .uri(routes.IngredientTagsController.update(10L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
+        Result result = client.update(10L, dto, 1L);
 
-        Result result = route(application.getApplication(), request);
-
-        assertEquals("Status is not NO CONTENT", Http.Status.NO_CONTENT, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
 
         // Because of parallel execution of SQL command, we need o wait until PUT finishes.
         // I haven't found any better way here :(. This can make the test flaky.
         Thread.sleep(2000);
 
-        request = new Http.RequestBuilder().method(GET)
-                .uri(routes.IngredientTagsController.single(10L, 0L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
-        result = route(application.getApplication(), request);
+        result = client.single(1L, 10L, 0L);
 
-        assertEquals("Status is not OK", Http.Status.OK, result.status());
-
-        String jsonStr = contentAsString(result);
-        JsonNode json = Json.parse(jsonStr);
-
-        String name = json.get("name").asText();
-        logger.warn("name = " + name);
-        List<Long> ingredientIds = toIngredientIdList(json.get("ingredients"));
-
-        assertEquals("user_1_ingredient_tag_1_updated", name);
-        assertTrue(ingredientIds.containsAll(Arrays.asList(3L, 4L)));
-        assertEquals("Ids size is not correct!", 2, ingredientIds.size());
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(singleIngredientTagNameOf(result), equalTo("user_1_ingredient_tag_1_updated"));
+        assertThat(ingredientIdsOfSingleIngredientTagOf(result), hasSize(2));
+        assertThat(ingredientIdsOfSingleIngredientTagOf(result), containsInAnyOrder(3L, 4L));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Update_InvalidName() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUserDefined_Update_InvalidName");
-        logger.info("------------------------------------------------------------------------------------------------");
-
+        // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "u";
         dto.ingredientIds = Arrays.asList(3L, 4L);
 
-        String jwt = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
-        Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
-                .bodyJson(Json.toJson(dto))
-                .uri(routes.IngredientTagsController.update(10L).url());
-        JwtTestUtils.addJwtTokenTo(request, jwt);
+        Result result = client.update(10L, dto, 1L);
 
-        Result result = route(application.getApplication(), request);
-
-        assertEquals("Status is not BAD_REQUEST", Http.Status.BAD_REQUEST, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 }

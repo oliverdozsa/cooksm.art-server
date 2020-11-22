@@ -1,16 +1,25 @@
 package controllers;
 
+import clients.IngredientTagsTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import play.Logger;
-import rules.PlayApplicationWithGuiceDbRiderRule;
+import org.junit.rules.RuleChain;
+import rules.RuleChainForTests;
 
 public class IngredientTagsControllerTest_DeleteTest {
-    @Rule
-    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
+    private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
 
-    private static final Logger.ALogger logger = Logger.of(IngredientTagsControllerTest_DeleteTest.class);
+    @Rule
+    public RuleChain chain = ruleChainForTests.getRuleChain();
+
+    private IngredientTagsTestClient client;
+
+    @Before
+    public void setup() {
+        client = new IngredientTagsTestClient(ruleChainForTests.getApplication());
+    }
 
     @Test
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)

@@ -49,6 +49,16 @@ public class IngredientTagsTestClient {
         return route(application, request);
     }
 
+    public Result update(Long id, IngredientTagCreateUpdateDto dto, Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
+                .bodyJson(Json.toJson(dto))
+                .uri(routes.IngredientTagsController.update(id).url());
+        String jwt = JwtTestUtils.createToken(1L, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
     public Result byLocation(String url, Long userId) {
         Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
                 .uri(url);

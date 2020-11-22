@@ -1,32 +1,21 @@
 package controllers;
 
 import clients.IngredientTagsTestClient;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
 import dto.IngredientTagCreateUpdateDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import play.Logger;
-import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRiderRule;
 import rules.RuleChainForTests;
-import utils.JwtTestUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
-import static controllers.IngredientTagsControllerTestUtils.toIngredientIdList;
 import static extractors.DataFromResult.statusOf;
 import static extractors.IngredientTagsFromResult.ingredientIdsOfSingleIngredientTagOf;
 import static extractors.IngredientTagsFromResult.singleIngredientTagNameOf;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
