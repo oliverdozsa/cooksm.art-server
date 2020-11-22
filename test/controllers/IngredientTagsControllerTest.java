@@ -127,6 +127,6 @@ public class IngredientTagsControllerTest {
 
         // Then
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(ingredientNamesOfSingleIngredientTagOfResult(result), containsInAnyOrder("en_1", "en_2"));
+        assertThat(ingredientNamesOfSingleIngredientTagOf(result), containsInAnyOrder("en_1", "en_2"));
     }
 }
