@@ -5,7 +5,7 @@ import play.mvc.Result;
 import java.util.List;
 
 public class RecipesFromResult {
-    public static List<Long> recipeIdsOfResult(Result result) {
+    public static List<Long> recipeIdsOf(Result result) {
         ListOfValuesFromResult<Long> values = new ListOfValuesFromResult<Long>()
                 .select("$.items")
                 .converting(n -> n.get("id").asLong());
