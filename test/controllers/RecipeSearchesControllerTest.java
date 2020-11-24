@@ -234,7 +234,7 @@ public class RecipeSearchesControllerTest {
         logger.info("-- RUNNING TEST: testCreate_InvalidNotMutuallyExclusive");
         logger.info("------------------------------------------------------------------------------------------------");
 
-        boolean shouldSkip = !application.getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+        boolean shouldSkip = application.getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
         if (shouldSkip) {
             return;
         }

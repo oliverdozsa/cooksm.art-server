@@ -19,6 +19,11 @@ public class RecipesTestClient {
         this.config = application.config();
     }
 
+    public Result page() {
+        Http.RequestBuilder request = createPageRequest(null);
+        return route(application, request);
+    }
+
     public Result page(String queryParams) {
         Http.RequestBuilder request = createPageRequest(queryParams);
         return route(application, request);
@@ -32,8 +37,21 @@ public class RecipesTestClient {
         return route(application, request);
     }
 
+    public Result single(Long id, Long languageId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipesController.singleRecipe(id, languageId).url());
+
+        return route(application, request);
+    }
+
     private Http.RequestBuilder createPageRequest(String queryParams) {
+        String queryParamsToAppend = queryParams == null ? "" : queryParams;
+        if(!queryParamsToAppend.equals("")){
+            queryParamsToAppend = "?" + queryParamsToAppend;
+        }
+
         return new Http.RequestBuilder().method(GET)
-                .uri(routes.RecipesController.pageRecipes().url() + "?" + queryParams);
+                .uri(routes.RecipesController.pageRecipes().url() + queryParamsToAppend);
     }
 }
