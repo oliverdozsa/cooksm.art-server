@@ -1,5 +1,6 @@
 package controllers;
 
+import clients.RecipeSearchesTestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
@@ -8,24 +9,35 @@ import data.entities.*;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.imp.EbeanRecipeSearchRepository;
 import io.ebean.Ebean;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import play.Logger;
+import org.junit.rules.RuleChain;
+import play.Application;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRiderRule;
-import utils.Base62Utils;
+import rules.RuleChainForTests;
 import utils.JwtTestUtils;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static extractors.DataFromResult.statusOf;
+import static extractors.RecipeSearchesFromResult.*;
 import static junit.framework.TestCase.*;
+import static matchers.ResultHasLocationHeader.hasLocationHeader;
+import static matchers.ResultHasNullForField.hasNullForField;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static play.mvc.Http.HeaderNames.LOCATION;
 import static play.mvc.Http.HttpVerbs.GET;
 import static play.mvc.Http.HttpVerbs.POST;
@@ -34,43 +46,37 @@ import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.route;
 
 public class RecipeSearchesControllerTest {
+    private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
+
     @Rule
-    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
+    public RuleChain chain = ruleChainForTests.getRuleChain();
 
-    private static final Logger.ALogger logger = Logger.of(RecipeSearchesControllerTest.class);
+    private RecipeSearchesTestClient client;
+    private List<Long> createdIds = new ArrayList<>();
 
-    @Test
-    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testSingle() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        long id = 239329L;
-        String encodedIdString = Base62Utils.encode(id);
-
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.RecipeSearchesController.single(encodedIdString).url());
-
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Response status is not OK!", OK, result.status());
-
-        String responseStr = contentAsString(result);
-        JsonNode responseJson = Json.parse(responseStr);
-        JsonNode query = responseJson.get("query");
-        assertEquals("Wrong query in result!", "composed-of-ratio", query.get("searchMode").asText());
+    @Before
+    public void setup() {
+        client = new RecipeSearchesTestClient(ruleChainForTests.getApplication());
     }
 
     @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void testSingle() {
+        // When
+        Result result = client.single(239329L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(searchModeOfSingleRecipeSearchOf(result), equalTo("composed-of-ratio"));
+    }
+
+    @Test
+    // Given
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        JsonNode searchJson = Json.parse("" +
+        // When
+        Result result = client.create(
                 "{" +
                 "  \"searchMode\": \"composed-of-number\"," +
                 "  \"goodIngs\": 3," +
@@ -86,71 +92,50 @@ public class RecipeSearchesControllerTest {
                 "  \"addIngs\": [5]," +
                 "  \"addIngTags\": [6]," +
                 "  \"sourcePages\": [1, 2]" +
-                "}"
-        );
+                "}");
 
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
+        // Then
+        assertThat(statusOf(result), equalTo(CREATED));
+        assertThat(result, hasLocationHeader());
 
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals("Response status is not CREATED!", CREATED, response.status());
-        assertTrue("Missing Location header!", response.header(LOCATION).isPresent());
+        String url = result.header(LOCATION).get();
 
-        String location = response.header(LOCATION).get();
+        result = client.byLocation(url);
 
-        // Check if returned id can be queried.
-        Http.RequestBuilder httpGetRequest = new Http.RequestBuilder()
-                .method(GET)
-                .uri(location);
-        response = route(application.getApplication(), httpGetRequest);
-        assertEquals("Response status is not OK!", OK, response.status());
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(searchModeOfSingleRecipeSearchOf(result), equalTo("composed-of-number"));
+        assertThat(goodIngredientsOfSingleRecipeSearchOf(result), equalTo(3));
+        assertThat(includedIngredientsOfSingleRecipeSearchOf(result), hasSize(3));
+        assertThat(includedIngredientTagsOfSingleRecipeSearchOf(result), hasSize(1));
+        assertThat(excludedIngredientsOfSingleRecipeSearchOf(result), hasSize(2));
+        assertThat(excludedIngredientTagsOfSingleRecipeSearchOf(result), hasSize(1));
+        assertThat(additionalIngredientsOfSingleRecipeSearchOf(result), hasSize(1));
+        assertThat(additionalIngredientTagsOfSingleRecipeSearchOf(result), hasSize(1));
+        assertThat(sourcePagesOfSingleRecipeSearchOf(result), hasSize(2));
 
-        String responseStr = contentAsString(response);
-        JsonNode responseJson = Json.parse(responseStr);
-        JsonNode query = responseJson.get("query");
-        assertEquals("Wrong query in result!", "composed-of-number", query.get("searchMode").asText());
-        assertEquals("Good ingredients is wrong", 3, query.get("goodIngs").asInt());
-        assertEquals("Number of included ingredients is wrong", 3, query.get("inIngs").size());
-        assertEquals("Number of included ingredient tags is wrong", 1, query.get("inIngTags").size());
-        assertEquals("Number of excluded ingredients is wrong", 2, query.get("exIngs").size());
-        assertEquals("Number of excluded ingredient tags is wrong", 1, query.get("exIngTags").size());
-        assertEquals("Number of additional ingredients is wrong", 1, query.get("addIngs").size());
-        assertEquals("Number of additional ingredient tags is wrong", 1, query.get("addIngTags").size());
-        assertEquals("Number of source pages is wrong", 2, query.get("sourcePages").size());
-
-        List<String> includedIngredientsNames = extractNames(query.get("inIngs"));
-        List<String> excludedIngredientsNames = extractNames(query.get("exIngs"));
-        List<String> additionalIngredientsNames = extractNames(query.get("addIngs"));
-        List<String> includedIngredientTagNames = extractNames(query.get("inIngTags"));
-        List<String> excludedIngredientTagNames = extractNames(query.get("exIngTags"));
-        List<String> additionalIngredientTagNames = extractNames(query.get("addIngTags"));
-        List<String> sourcePageNames = extractNames(query.get("sourcePages"));
-
-        assertTrue(includedIngredientsNames.containsAll(Arrays.asList("ingredient_1", "ingredient_2", "ingredient_3")));
-        assertTrue(excludedIngredientsNames.containsAll(Arrays.asList("ingredient_4", "ingredient_7")));
-        assertTrue(additionalIngredientsNames.containsAll(Arrays.asList("ingredient_5")));
-        assertTrue(includedIngredientTagNames.containsAll(Arrays.asList("ingredient_tag_1")));
-        assertTrue(excludedIngredientTagNames.containsAll(Arrays.asList("ingredient_tag_2")));
-        assertTrue(additionalIngredientTagNames.containsAll(Arrays.asList("ingredient_tag_6")));
-        assertTrue(sourcePageNames.containsAll(Arrays.asList("src_pg_1", "src_pg_2")));
+        assertThat(includedIngredientsOfSingleRecipeSearchOf(result), containsInAnyOrder("ingredient_1", "ingredient_2", "ingredient_3"));
+        assertThat(includedIngredientTagsOfSingleRecipeSearchOf(result), containsInAnyOrder("ingredient_tag_1"));
+        assertThat(excludedIngredientsOfSingleRecipeSearchOf(result), containsInAnyOrder("ingredient_4", "ingredient_7"));
+        assertThat(excludedIngredientTagsOfSingleRecipeSearchOf(result), containsInAnyOrder("ingredient_tag_2"));
+        assertThat(additionalIngredientsOfSingleRecipeSearchOf(result), containsInAnyOrder("ingredient_5"));
+        assertThat(additionalIngredientTagsOfSingleRecipeSearchOf(result), containsInAnyOrder("ingredient_tag_6"));
+        assertThat(sourcePagesOfSingleRecipeSearchOf(result), containsInAnyOrder("src_pg_1", "src_pg_2"));
     }
 
     @Test
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testExpires() throws InterruptedException {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testExpires");
-        logger.info("------------------------------------------------------------------------------------------------");
-
+        // Given
         RecipeSearch search = new RecipeSearch();
         search.setQuery("someQuery");
         search.setLastAccessed(Instant.now());
         search.setPermanent(false);
         Ebean.save(search);
 
+        // When
         Thread.sleep(15000L);
+
+        // Then
         int count = Ebean.createQuery(RecipeSearch.class).findCount();
         assertEquals("Expired searches are not deleted!", 2, count);
 
@@ -159,28 +144,11 @@ public class RecipeSearchesControllerTest {
     @Test
     @DataSet(value = "datasets/yml/recipesearches-limit.yml", disableConstraints = true, cleanBefore = true)
     public void testQueryCountLimitReached() throws Exception {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testQueryCountLimitReached");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        createMaxNumberOfSearches();
 
-        EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository) (application.getApplication().injector().instanceOf(RecipeSearchRepository.class));
-        Class repoClass = Class.forName("data.repositories.imp.EbeanRecipeSearchRepository");
-        Field countField = repoClass.getDeclaredField("count");
-        countField.setAccessible(true);
-        AtomicInteger count = (AtomicInteger) (countField.get(repository));
-        count.set(0);
-
-        // Fill DB with max number of searches.
-        int maxSearches = application.getApplication().config().getInt("receptnekem.recipesearches.maxquerycount");
-        List<Long> createdIds = new ArrayList<>();
-        for (int i = 0; i < maxSearches; i++) {
-            Long id = repository.create("someQuery", true)
-                    .toCompletableFuture()
-                    .get().getId();
-            createdIds.add(id);
-        }
-
-        JsonNode searchJson = Json.parse("" +
+        // When
+        Result result = client.create(
                 "{" +
                 "  \"searchMode\": \"composed-of-number\"," +
                 "  \"goodIngs\": 3," +
@@ -188,58 +156,39 @@ public class RecipeSearchesControllerTest {
                 "  \"inIngs\": [1, 2, 3]," +
                 "  \"unknownIngs\": 0," +
                 "  \"unknownIngsRel\": \"ge\"" +
-                "}"
-        );
+                "}");
 
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
+        // Then
+        assertThat(statusOf(result), equalTo(FORBIDDEN));
 
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals("Created request above the maximum threshold!", FORBIDDEN, response.status());
-        for (Long id : createdIds) {
-            repository.delete(id).toCompletableFuture().get();
-        }
+        dropCreatedMaxNumberSearches();
     }
 
     @Test
     public void testCreate_InvalidSearchMode() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_InvalidSearchMode");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        JsonNode searchJson = Json.parse("" +
+        // When
+        Result result = client.create(
                 "{" +
                 "  \"searchMode\": \"some-random-search-mode\"," +
                 "  \"goodIngs\": 3," +
                 "  \"goodIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3]" +
-                "}"
-        );
+                "}");
 
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
-
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals(BAD_REQUEST, response.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidNotMutuallyExclusive() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_InvalidNotMutuallyExclusive");
-        logger.info("------------------------------------------------------------------------------------------------");
+        boolean isMutualExclusiveCheckDisabled = ruleChainForTests
+                .getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+        assumeFalse("Mutual exclusion check is disabled.", isMutualExclusiveCheckDisabled);
 
-        boolean shouldSkip = application.getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
-        if (shouldSkip) {
-            return;
-        }
-
-        JsonNode searchJson = Json.parse("" +
+        // When
+        Result result = client.create(
                 "{" +
                 "  \"searchMode\": \"composed-of-number\"," +
                 "  \"goodIngs\": 3," +
@@ -249,24 +198,154 @@ public class RecipeSearchesControllerTest {
                 "  \"unknownIngsRel\": \"ge\"," +
                 "  \"inIngs\": [1, 2, 3]," +
                 "  \"exIngs\": [1, 5, 6]" +
-                "}"
-        );
+                "}");
 
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
 
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals(BAD_REQUEST, response.status());
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void testCreate_InvalidNotMutuallyExclusive_Disabled() {
+        boolean isMutualExclusiveCheckDisabled = ruleChainForTests
+                .getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+        assumeTrue("Mutual exclusion check is enabled.", isMutualExclusiveCheckDisabled);
+
+        // When
+        Result result = client.create(
+                "{" +
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]," +
+                        "  \"exIngs\": [1, 5, 6]" +
+                        "}");
+
+        // Then
+        assertThat(statusOf(result), equalTo(CREATED));
     }
 
     @Test
     public void testQuerySizeLimitReached() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testQuerySizeLimitReached");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        prepareForQuerySizeLimit();
 
+        // When
+        Result result = client.create(
+                "{" +
+                "  \"searchMode\": \"composed-of-number\"," +
+                "  \"goodIngs\": 3," +
+                "  \"goodIngsRel\": \"ge\"," +
+                "  \"unknownIngs\": \"0\"," +
+                "  \"unknownIngsRel\": \"ge\"," +
+                "  \"goodAdditionalIngs\": 2," +
+                "  \"goodAdditionalIngsRel\": \"ge\"," +
+                "  \"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
+                "  \"inIngTags\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]," +
+                "  \"exIngs\": [21, 22, 23, 24, 25]," +
+                "  \"exIngTags\": [6, 7, 8]," +
+                "  \"addIngs\": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]," +
+                "  \"addIngTags\": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]," +
+                "  \"sourcePages\": [1, 2]" +
+                "}");
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(contentAsString(result), containsString("too long"));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void testCreate_InvalidEntityDoesntExist() {
+        // When
+        Result result = client.create(
+                "{" +
+                    "  \"searchMode\": \"composed-of-number\"," +
+                    "  \"goodIngs\": 3," +
+                    "  \"goodIngsRel\": \"ge\"," +
+                    "  \"unknownIngs\": \"0\"," +
+                    "  \"unknownIngsRel\": \"ge\"," +
+                    "  \"goodAdditionalIngs\": 2," +
+                    "  \"goodAdditionalIngsRel\": \"ge\"," +
+                    "  \"inIngs\": [1, 2, 3, 42]," +
+                    "  \"inIngTags\": [1]," +
+                    "  \"exIngs\": [4, 7]," +
+                    "  \"exIngTags\": [2]," +
+                    "  \"addIngs\": [5]," +
+                    "  \"addIngTags\": [6]," +
+                    "  \"sourcePages\": [1, 2]" +
+                    "}");
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void testCreate_UseFavoritesOnly() {
+        // When
+        Result result = client.create(
+                "{" +
+                "  \"searchMode\": \"composed-of-number\"," +
+                "  \"goodIngs\": 3," +
+                "  \"goodIngsRel\": \"ge\"," +
+                "  \"unknownIngs\": \"0\"," +
+                "  \"unknownIngsRel\": \"ge\"," +
+                "  \"inIngs\": [1, 2, 3]," +
+                "  \"inIngTags\": [1]," +
+                "  \"exIngs\": [4, 7]," +
+                "  \"exIngTags\": [2]," +
+                "  \"useFavoritesOnly\": true" +
+                "}",
+                1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(CREATED));
+        assertThat(result, hasLocationHeader());
+
+        String location = result.header(LOCATION).get();
+
+        result = client.byLocation(location);
+
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(result, hasNullForField("$.query.useFavoritesOnly"));
+    }
+
+    private void createMaxNumberOfSearches() throws Exception {
+        Application application = ruleChainForTests.getApplication();
+        EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository) (application.injector().instanceOf(RecipeSearchRepository.class));
+        Class repoClass = Class.forName("data.repositories.imp.EbeanRecipeSearchRepository");
+        Field countField = repoClass.getDeclaredField("count");
+        countField.setAccessible(true);
+        AtomicInteger count = (AtomicInteger) (countField.get(repository));
+        count.set(0);
+
+        // Fill DB with max number of searches.
+        int maxSearches = application.config().getInt("receptnekem.recipesearches.maxquerycount");
+        createdIds = new ArrayList<>();
+        for (int i = 0; i < maxSearches; i++) {
+            Long id = repository.create("someQuery", true)
+                    .toCompletableFuture()
+                    .get().getId();
+            createdIds.add(id);
+        }
+    }
+
+    private void dropCreatedMaxNumberSearches() throws ExecutionException, InterruptedException {
+        Application application = ruleChainForTests.getApplication();
+        EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository) (application.injector().instanceOf(RecipeSearchRepository.class));
+        for (Long id : createdIds) {
+            repository.delete(id).toCompletableFuture().get();
+        }
+    }
+
+    private void prepareForQuerySizeLimit() {
         Language language = new Language();
         language.setIsoName("hu");
         Ebean.save(language);
@@ -285,125 +364,5 @@ public class RecipeSearchesControllerTest {
             IngredientTag ingredientTag = new IngredientTag();
             Ebean.save(ingredientTag);
         }
-
-        JsonNode searchJson = Json.parse("" +
-                "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"goodAdditionalIngs\": 2," +
-                "  \"goodAdditionalIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
-                "  \"inIngTags\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]," +
-                "  \"exIngs\": [21, 22, 23, 24, 25]," +
-                "  \"exIngTags\": [6, 7, 8]," +
-                "  \"addIngs\": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]," +
-                "  \"addIngTags\": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]," +
-                "  \"sourcePages\": [1, 2]" +
-                "}"
-        );
-
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
-
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals(BAD_REQUEST, response.status());
-        String respText = contentAsString(response);
-        assertTrue("Wrong error reason!", respText.toLowerCase().contains("too long"));
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_InvalidEntityDoesntExist() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_InvalidEntityDoesntExist");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        JsonNode searchJson = Json.parse("" +
-                "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"goodAdditionalIngs\": 2," +
-                "  \"goodAdditionalIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3, 42]," +
-                "  \"inIngTags\": [1]," +
-                "  \"exIngs\": [4, 7]," +
-                "  \"exIngTags\": [2]," +
-                "  \"addIngs\": [5]," +
-                "  \"addIngTags\": [6]," +
-                "  \"sourcePages\": [1, 2]" +
-                "}"
-        );
-
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
-
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals(BAD_REQUEST, response.status());
-    }
-
-    @Test
-    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_UseFavoritesOnly() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_UseFavoritesOnly");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        JsonNode searchJson = Json.parse("" +
-                "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3]," +
-                "  \"inIngTags\": [1]," +
-                "  \"exIngs\": [4, 7]," +
-                "  \"exIngTags\": [2]," +
-                "  \"useFavoritesOnly\": true" +
-                "}"
-        );
-
-        Http.RequestBuilder httpCreateRequest = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(searchJson)
-                .uri(routes.RecipeSearchesController.create().url());
-        String token = JwtTestUtils.createToken(1000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpCreateRequest, token);
-
-        Result response = route(application.getApplication(), httpCreateRequest);
-        assertEquals("Response status is not CREATED!", CREATED, response.status());
-        assertTrue("Missing Location header!", response.header(LOCATION).isPresent());
-
-        String location = response.header(LOCATION).get();
-
-        Http.RequestBuilder httpGetRequest = new Http.RequestBuilder()
-                .method(GET)
-                .uri(location);
-
-
-        response = route(application.getApplication(), httpGetRequest);
-        assertEquals("Response status is not OK!", OK, response.status());
-
-        String responseStr = contentAsString(response);
-        JsonNode responseJson = Json.parse(responseStr);
-        JsonNode query = responseJson.get("query");
-        assertTrue("Use favorites only shouldn't be present!", query.get("useFavoritesOnly").isNull());
-    }
-
-    private List<String> extractNames(JsonNode node) {
-        List<String> names = new ArrayList<>();
-        ArrayNode arrayNode = (ArrayNode) node;
-        arrayNode.forEach(n -> names.add(n.get("name").asText()));
-        return names;
     }
 }

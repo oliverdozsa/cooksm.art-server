@@ -2,29 +2,22 @@ package controllers;
 
 import clients.RecipesTestClient;
 import clients.SourcePagesTestClient;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
 import data.entities.*;
 import io.ebean.Ebean;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
 import rules.RuleChainForTests;
-import utils.JwtTestUtils;
 
 import java.time.Instant;
 
 import static extractors.DataFromResult.*;
 import static extractors.RecipesFromResult.recipeIdsOf;
 import static extractors.RecipesFromResult.singleRecipeIdOf;
-import static junit.framework.TestCase.*;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeFalse;
