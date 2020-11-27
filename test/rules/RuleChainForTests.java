@@ -2,6 +2,7 @@ package rules;
 
 import org.junit.rules.RuleChain;
 import play.Application;
+import play.inject.guice.GuiceApplicationBuilder;
 
 public class RuleChainForTests {
     private PlayApplicationWithGuiceDbRiderRule applicationRule;
@@ -9,7 +10,16 @@ public class RuleChainForTests {
     private RuleChain ruleChain;
 
     public RuleChainForTests() {
-        applicationRule = new PlayApplicationWithGuiceDbRiderRule();
+        this(null);
+    }
+
+    public RuleChainForTests(GuiceApplicationBuilder appBuilder) {
+        if(appBuilder != null) {
+            applicationRule = new PlayApplicationWithGuiceDbRiderRule(appBuilder);
+        } else {
+            applicationRule = new PlayApplicationWithGuiceDbRiderRule();
+        }
+
         methodNameLoggerRule = new TestMethodNameLoggerRule();
         ruleChain = RuleChain.outerRule(applicationRule)
                 .around(methodNameLoggerRule);

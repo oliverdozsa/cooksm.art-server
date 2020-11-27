@@ -11,11 +11,9 @@ import static play.test.Helpers.route;
 
 public class SourcePagesTestClient {
     private final Application application;
-    private final Config config;
 
     public SourcePagesTestClient(Application application) {
         this.application = application;
-        this.config = application.config();
     }
 
     public Result all() {

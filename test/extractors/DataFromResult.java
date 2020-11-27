@@ -25,6 +25,11 @@ public class DataFromResult {
         return toJson(result).size();
     }
 
+    public static String jwtOf(Result result) {
+        JsonNode json = toJson(result);
+        return json.get("jwtAuthToken").asText();
+    }
+
     static JsonNode toJson(Result result) {
         String jsonStr = contentAsString(result);
         return Json.parse(jsonStr);

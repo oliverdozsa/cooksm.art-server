@@ -1,29 +1,23 @@
 package controllers;
 
+import clients.SecurityTestClient;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
 import data.entities.FavoriteRecipe;
 import data.entities.RecipeSearch;
 import data.entities.UserSearch;
-import lombokized.dto.UserSocialLoginDto;
 import io.ebean.Ebean;
-import lombokized.security.VerifiedFacebookUserInfo;
 import lombokized.security.VerifiedGoogleUserInfo;
 import lombokized.security.VerifiedUserInfo;
-import data.entities.User;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import play.Logger;
+import org.junit.rules.RuleChain;
 import play.inject.guice.GuiceApplicationBuilder;
-import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRiderRule;
+import rules.RuleChainForTests;
 import security.SocialTokenVerifier;
-import utils.JwtTestUtils;
 import utils.MockSocialTokenVerifier;
 
 import java.time.Instant;
@@ -31,255 +25,200 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static extractors.DataFromResult.jwtOf;
+import static extractors.DataFromResult.statusOf;
 import static io.ebean.Expr.eq;
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertTrue;
+import static matchers.ResultHasJwt.hasJwt;
+import static matchers.UserExistsInDb.existsInDb;
+import static matchers.UserHasName.hasName;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 import static play.inject.Bindings.bind;
-import static play.mvc.Http.HttpVerbs.POST;
 import static play.mvc.Http.Status.*;
-import static play.test.Helpers.*;
 
 public class SecurityControllerTest {
     @Rule
-    public PlayApplicationWithGuiceDbRiderRule application;
+    public RuleChain chain;
 
-    private static final Logger.ALogger logger = Logger.of(SecurityControllerTest.class);
+    private SecurityTestClient client;
+    private final RuleChainForTests ruleChainForTests;
 
     public SecurityControllerTest() {
-        application = new PlayApplicationWithGuiceDbRiderRule(
-                new GuiceApplicationBuilder()
-                        .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
-                        .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class))
-        );
+        GuiceApplicationBuilder appBuilder = new GuiceApplicationBuilder()
+                .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Google").to(MockSocialTokenVerifier.class))
+                .overrides(bind(SocialTokenVerifier.class).qualifiedWith("Facebook").to(MockSocialTokenVerifier.class));
+        ruleChainForTests = new RuleChainForTests(appBuilder);
+        chain = ruleChainForTests.getRuleChain();
+    }
+
+    @Before
+    public void setUp() {
+        client = new SecurityTestClient(ruleChainForTests.getApplication());
     }
 
     @Test
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testLoginThroughGoogle_OK_UserCreated() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGoogle_OK_UserCreated");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        assertThat("some@one", not(existsInDb()));
 
-        UserSocialLoginDto dto = new UserSocialLoginDto("SomeRandomGoogleToken");
-        String email = "some@one.com";
+        // When
+        mockVerificationWillSucceedFor("Some One", "some@one", "4242");
+        Result result = client.loginThroughGoogle("SomeRandomGoogleToken");
 
-        Optional<User> entityOpt = Ebean.createQuery(User.class)
-                .where()
-                .eq("email", email)
-                .findOneOrEmpty();
-        assertFalse("Entity shouldn't be present!", entityOpt.isPresent());
-
-        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo("Some One", email, "4242");
-        MockSocialTokenVerifier.setMockResult(mockResult);
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.loginThroughGoogle().url())
-                .bodyJson(Json.toJson(dto));
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", OK, result.status());
-
-        JsonNode resultJson = Json.parse(contentAsString(result));
-        assertNotNull("JWT is missing!", resultJson.get("jwtAuthToken"));
-
-        entityOpt = Ebean.createQuery(User.class)
-                .where()
-                .eq("email", email)
-                .findOneOrEmpty();
-        assertTrue("Entity should be present!", entityOpt.isPresent());
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat("some@one", existsInDb());
+        assertThat(result, hasJwt());
     }
 
     @Test
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
-    public void testLoginThroughFacebook_OK_UserExists() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughFacebook_OK_UserExists");
-        logger.info("------------------------------------------------------------------------------------------------");
+    public void testLoginThroughFacebook_OK_UserExists_NameChanges() {
+        // Given
+        assertThat("user1@example.com", existsInDb());
+        assertThat("user1@example.com", hasName("John Doe"));
 
-        UserSocialLoginDto dto = new UserSocialLoginDto("SomeRandomGoogleToken");
-        String email = "user1@example.com";
+        // When
+        mockVerificationWillSucceedFor("John Doe Jack", "user1@example.com", "2424");
+        Result result = client.loginThroughFacebook("SomeRandomGoogleToken");
 
-        Optional<User> entityOpt = Ebean.createQuery(User.class)
-                .where()
-                .eq("email", email)
-                .findOneOrEmpty();
-        assertTrue("Entity should be present!", entityOpt.isPresent());
-        assertEquals("User name is wrong!", "John Doe", entityOpt.get().getFullName());
-
-        VerifiedUserInfo userInfo = new VerifiedFacebookUserInfo("John Doe Jack", email, "2424");
-        MockSocialTokenVerifier.setMockResult(userInfo);
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.loginThroughFacebook().url())
-                .bodyJson(Json.toJson(dto));
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", OK, result.status());
-
-        JsonNode resultJson = Json.parse(contentAsString(result));
-        assertNotNull("JWT is missing!", resultJson.get("jwtAuthToken"));
-
-        entityOpt = Ebean.createQuery(User.class)
-                .where()
-                .eq("email", email)
-                .findOneOrEmpty();
-        assertTrue("Entity should be present!", entityOpt.isPresent());
-        assertEquals("User name is wrong!", "John Doe Jack", entityOpt.get().getFullName());
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat("user1@example.com", existsInDb());
+        assertThat("user1@example.com", hasName("John Doe Jack"));
+        assertThat(result, hasJwt());
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testLoginThroughGoogle_Unauthorized() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGoogle_Unauthorized");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        mockVerificationWillFailFor("Some One", "some@one.com", "4242");
+        Result result = client.loginThroughGoogle("SomeRandomGoogleToken");
 
-        UserSocialLoginDto dto = new UserSocialLoginDto("SomeRandomGoogleToken");
-
-        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo("Some One", "some@one.com", "4242");
-        MockSocialTokenVerifier.setMockResult(mockResult);
-        MockSocialTokenVerifier.shouldThrowException(true);
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.loginThroughGoogle().url())
-                .bodyJson(Json.toJson(dto));
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", UNAUTHORIZED, result.status());
-        MockSocialTokenVerifier.shouldThrowException(false);
+        // Then
+        assertThat(statusOf(result), equalTo(UNAUTHORIZED));
     }
 
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testLoginThroughGoogle_BadRequest() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testLoginThroughGoogle_BadRequest");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.loginThroughFacebook(null);
 
-        UserSocialLoginDto dto = new UserSocialLoginDto(null);
-
-        MockSocialTokenVerifier.setMockResult(null);
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.loginThroughGoogle().url())
-                .bodyJson(Json.toJson(dto));
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", BAD_REQUEST, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testRenewToken_OK() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testRenewToken_OK");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        mockVerificationWillSucceedFor("John Doe Jack", "user1@example.com", "2424");
+        Result result = client.loginThroughFacebook("SomeRandomGoogleToken");
 
-        // Get token
-        UserSocialLoginDto dto = new UserSocialLoginDto("someRandomGoogleToken");
+        assertThat(statusOf(result), equalTo(OK));
 
-        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo("Some One", "some@one.com", "4242");
-        MockSocialTokenVerifier.setMockResult(mockResult);
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.loginThroughGoogle().url())
-                .bodyJson(Json.toJson(dto));
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", OK, result.status());
+        String jwt = jwtOf(result);
+        result = client.renew(jwt);
 
-        JsonNode resultJson = Json.parse(contentAsString(result));
-        String jwt = resultJson.get("jwtAuthToken").asText();
-
-        // Renew it
-        httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.renew().url());
-
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
-
-        result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", OK, result.status());
-        resultJson = Json.parse(contentAsString(result));
-        assertNotNull("JWT is missing!", resultJson.get("jwtAuthToken"));
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(result, hasJwt());
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/security.yml", disableConstraints = true, cleanBefore = true)
     public void testRenewToken_InvalidToken() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testRenewToken_InvalidToken");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.renew(createExpiredJwt());
 
-        String secret = application.getApplication().config().getString("play.http.secret.key");
-        String issuer = application.getApplication().config().getString("receptnekem.jwt.issuer");
-        Date past = Date.from(Instant.now().minus(70, ChronoUnit.MINUTES));
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        String tokenPast = JWT.create()
-                .withIssuer(issuer)
-                .withClaim("user_id", 3L)
-                .withExpiresAt(past)
-                .sign(algorithm);
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(POST)
-                .uri(routes.SecurityController.renew().url());
-
-        JwtTestUtils.addJwtTokenTo(httpRequest, tokenPast);
-
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Result of request is wrong!", FORBIDDEN, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(FORBIDDEN));
     }
 
     @Test
     @DataSet(value = "datasets/yml/delete-registration.yml", disableConstraints = true, cleanBefore = true)
     public void testDeleteRegistration() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testDeleteRegistration");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        assertThat(favoriteRecipesOfUserInDb(1L), hasSize(2));
 
-        List<FavoriteRecipe> favoriteRecipesBeforeDelete = Ebean.createQuery(FavoriteRecipe.class)
+        List<UserSearch> userSearches = searchesOfUserInDb(1L);
+        assertThat(userSearches, hasSize(2));
+
+        List<RecipeSearch> recipeSearches = recipeSearchesOfUserSearches(userSearches);
+        assertThat(recipeSearches, hasSize(2));
+
+        assertThat("user1@example.com", existsInDb());
+
+        // When
+        Result result = client.deregister(1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThat(favoriteRecipesOfUserInDb(1L), hasSize(0));
+        assertThat(searchesOfUserInDb(1L), hasSize(0));
+        assertTrue(areRecipeSearchesDeleted(recipeSearches));
+        assertThat("user1@example.com", not(existsInDb()));
+    }
+
+    private void mockVerificationWillSucceedFor(String fullName, String email, String socialId) {
+        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo(fullName, email, socialId);
+        MockSocialTokenVerifier.setMockResult(mockResult);
+        MockSocialTokenVerifier.shouldThrowException(false);
+    }
+
+    private void mockVerificationWillFailFor(String fullName, String email, String socialId) {
+        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo(fullName, email, socialId);
+        MockSocialTokenVerifier.setMockResult(mockResult);
+        MockSocialTokenVerifier.shouldThrowException(true);
+    }
+
+    private String createExpiredJwt() {
+        String secret = ruleChainForTests.getApplication().config().getString("play.http.secret.key");
+        String issuer = ruleChainForTests.getApplication().config().getString("receptnekem.jwt.issuer");
+        Date past = Date.from(Instant.now().minus(70, ChronoUnit.MINUTES));
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+
+        return JWT.create()
+                .withIssuer(issuer)
+                .withClaim("user_id", 3L)
+                .withExpiresAt(past)
+                .sign(algorithm);
+    }
+
+    private List<FavoriteRecipe> favoriteRecipesOfUserInDb(Long userId) {
+        return Ebean.createQuery(FavoriteRecipe.class)
                 .where(eq("user.id", 1L))
                 .findList();
-        assertEquals("Favorite recipes before delete is wrong!", 2, favoriteRecipesBeforeDelete.size());
+    }
 
-        List<UserSearch> userSearchesBeforeDelete = Ebean.createQuery(UserSearch.class)
+    private List<UserSearch> searchesOfUserInDb(Long userId) {
+        return Ebean.createQuery(UserSearch.class)
                 .where(eq("user.id", 1L))
                 .findList();
-        List<RecipeSearch> recipesSearchesOfUserSearch = userSearchesBeforeDelete.stream()
+    }
+
+    private List<RecipeSearch> recipeSearchesOfUserSearches(List<UserSearch> userSearches) {
+        return userSearches.stream()
                 .map(UserSearch::getSearch)
                 .collect(Collectors.toList());
-        assertEquals("User searches before delete is wrong!",2, userSearchesBeforeDelete.size());
-        assertEquals("Recipe searches of user before delete is wrong!",2, recipesSearchesOfUserSearch.size());
+    }
 
-        User user = Ebean.find(User.class, 1L);
-        assertNotNull("User to delete not found!", user);
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(DELETE)
-                .uri(routes.SecurityController.deregister().url());
-        String jwt = JwtTestUtils.createToken(4000L, 1L, application.getApplication().config());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwt);
-
-        Result result = route(application.getApplication(), httpRequest);
-        assertEquals("Failed to delete user!", NO_CONTENT, result.status());
-
-        List<FavoriteRecipe> favoriteRecipesAfterDelete = Ebean.createQuery(FavoriteRecipe.class)
-                .where(eq("user.id", 1L))
-                .findList();
-        assertEquals("Favorite recipes still exist after deletion!", 0, favoriteRecipesAfterDelete.size());
-
-        List<UserSearch> userSearchesAfterDelete = Ebean.createQuery(UserSearch.class)
-                .where(eq("user.id", 1L))
-                .findList();
-        assertEquals("User searches still exist after deletion!",0, userSearchesAfterDelete.size());
-
-        List<Long> recipeSearchIdsInDbAfterDelete = recipesSearchesOfUserSearch.stream()
+    private boolean areRecipeSearchesDeleted(List<RecipeSearch> recipeSearches) {
+        return recipeSearches.stream()
                 .map(r -> Ebean.find(RecipeSearch.class, r.getId()))
-                .filter(Objects::nonNull)
-                .map(RecipeSearch::getId)
-                .collect(Collectors.toList());
-        assertEquals("Recipe searches left in DB after delete profile!",0, recipeSearchIdsInDbAfterDelete.size());
-
-        user = Ebean.find(User.class, 1L);
-        assertNull("Deleted user still exists!", user);
+                .noneMatch(Objects::nonNull);
     }
 }
