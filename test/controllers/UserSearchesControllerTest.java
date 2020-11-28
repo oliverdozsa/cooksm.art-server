@@ -1,150 +1,107 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import clients.RecipeSearchesTestClient;
+import clients.UserSearchesTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import play.Logger;
-import play.libs.Json;
-import play.mvc.Http;
+import org.junit.rules.RuleChain;
 import play.mvc.Result;
-import rules.PlayApplicationWithGuiceDbRiderRule;
-import utils.Base62Utils;
-import utils.JwtTestUtils;
+import rules.RuleChainForTests;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static junit.framework.TestCase.*;
-import static play.mvc.Http.HttpVerbs.GET;
-import static play.mvc.Http.HttpVerbs.PATCH;
+import static extractors.DataFromResult.statusOf;
+import static extractors.RecipeSearchesFromResult.*;
+import static extractors.UserSearchesFromResult.*;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+import static matchers.ResultHasLocationHeader.hasLocationHeader;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 import static play.test.Helpers.*;
 
 public class UserSearchesControllerTest {
+    private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
+
     @Rule
-    public PlayApplicationWithGuiceDbRiderRule application = new PlayApplicationWithGuiceDbRiderRule();
+    public RuleChain chain = ruleChainForTests.getRuleChain();
 
-    private static final Logger.ALogger logger = Logger.of(UserSearchesControllerTest.class);
-
-    String jwtToken;
+    private UserSearchesTestClient client;
+    private RecipeSearchesTestClient recipeSearchesClient;
 
     @Before
     public void setup() {
-        jwtToken = JwtTestUtils.createToken(10000L, 1L, application.getApplication().config());
+        client = new UserSearchesTestClient(ruleChainForTests.getApplication());
+        recipeSearchesClient = new RecipeSearchesTestClient(ruleChainForTests.getApplication());
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/usersearches-base.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.create(
+                "{" +
+                        "  \"name\": \"someName\"," +
+                        "  \"query\": {" +
+                        "    \"searchMode\": \"composed-of-number\"," +
+                        "    \"goodIngs\": 3," +
+                        "    \"goodIngsRel\": \"ge\"," +
+                        "    \"unknownIngs\": \"0\"," +
+                        "    \"unknownIngsRel\": \"ge\"," +
+                        "    \"goodAdditionalIngs\": 2," +
+                        "    \"goodAdditionalIngsRel\": \"ge\"," +
+                        "    \"inIngs\": [1, 2, 3]," +
+                        "    \"inIngTags\": [1]," +
+                        "    \"exIngs\": [4, 7]," +
+                        "    \"exIngTags\": [2]," +
+                        "    \"addIngs\": [5]," +
+                        "    \"addIngTags\": [6]," +
+                        "    \"sourcePages\": [1, 2]," +
+                        "    \"useFavoritesOnly\": true" +
+                        "  }" +
+                        "}", 1L);
 
-        String jsonStr = "{" +
-                "  \"name\": \"someName\"," +
-                "  \"query\": {" +
-                "    \"searchMode\": \"composed-of-number\"," +
-                "    \"goodIngs\": 3," +
-                "    \"goodIngsRel\": \"ge\"," +
-                "    \"unknownIngs\": \"0\"," +
-                "    \"unknownIngsRel\": \"ge\"," +
-                "    \"goodAdditionalIngs\": 2," +
-                "    \"goodAdditionalIngsRel\": \"ge\"," +
-                "    \"inIngs\": [1, 2, 3]," +
-                "    \"inIngTags\": [1]," +
-                "    \"exIngs\": [4, 7]," +
-                "    \"exIngTags\": [2]," +
-                "    \"addIngs\": [5]," +
-                "    \"addIngTags\": [6]," +
-                "    \"sourcePages\": [1, 2]," +
-                "    \"useFavoritesOnly\": true" +
-                "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
+        // Then
+        assertThat(statusOf(result), equalTo(CREATED));
+        assertThat(result, hasLocationHeader());
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.create().url());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
+        String url = result.header("Location").get();
+        result = client.byLocation(url, 1L);
 
-        Result result = route(application.getApplication(), httpRequestCreate);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(nameOfSingleUserSearchOf(result), equalTo("someName"));
+        assertNotNull(idOfSingleUserSearchOf(result));
 
-        assertEquals("Result status is not created.", CREATED, result.status());
-        Optional<String> locationOpt = result.header(LOCATION);
-        assertTrue("Location is not present!", locationOpt.isPresent());
-        String location = locationOpt.get();
+        String recipeSearchId = recipeSearchIdOfSingleUserSearchOf(result);
+        result = recipeSearchesClient.single(recipeSearchId);
 
-        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
-                .method(GET)
-                .uri(location);
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
-
-        result = route(application.getApplication(), httpRequestGet);
-
-        assertEquals(OK, result.status());
-        String resultJsonStr = contentAsString(result);
-        JsonNode resultJson = Json.parse(resultJsonStr);
-        assertEquals("someName", resultJson.get("name").asText());
-        assertNotNull("ID field is missing!", resultJson.get("id"));
-
-        String searchId = resultJson.get("searchId").asText();
-        httpRequestGet = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.RecipeSearchesController.single(searchId).url());
-
-        result = route(application.getApplication(), httpRequestGet);
-        resultJsonStr = contentAsString(result);
-        resultJson = Json.parse(resultJsonStr);
-        JsonNode queryJson = resultJson.get("query");
-        assertTrue("Use favorites only is not true!", queryJson.get("useFavoritesOnly").asBoolean());
+        assertTrue(useFavoritesOnlyOf(result));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testGetAll() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testGetAll");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.all(2L);
 
-        Long userId = 2L;
-        String jwtUser2 = JwtTestUtils.createToken(10000L, userId, application.getApplication().config());
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.UserSearchesController.all().url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtUser2);
-
-        Result result = route(application.getApplication(), httpRequest);
-
-        logger.warn("result content = {}", contentAsString(result));
-
-        assertEquals(OK, result.status());
-        String jsonResultStr = contentAsString(result);
-        JsonNode jsonResult = Json.parse(jsonResultStr);
-
-        assertEquals(3, jsonResult.size());
-        List<String> queryNames = new ArrayList<>();
-        List<String> searchIds = new ArrayList<>();
-        jsonResult.forEach(q -> queryNames.add(q.get("name").asText()));
-        jsonResult.forEach(q -> searchIds.add(q.get("searchId").asText()));
-        assertTrue(queryNames.containsAll(Arrays.asList("user2query1", "user2query2", "user2query3")));
-        assertTrue(searchIds.containsAll(Arrays.asList(Base62Utils.encode(239329L), Base62Utils.encode(239330L), Base62Utils.encode(239331L))));
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(namesOfUserSearchesOf(result), hasSize(3));
+        assertThat(namesOfUserSearchesOf(result), containsInAnyOrder("user2query1", "user2query2", "user2query3"));
+        assertThat(searchIdsOfUserSearchesOf(result), hasSize(3));
+        assertThat(searchIdsOfUserSearchesOf(result), containsInAnyOrder(239329L, 239330L, 239331L));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testPatchFully() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testPatchFully");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        // update existing user1query1 to user1query1renamed
-        String jsonStr = "{" +
+        // When
+        Result result = client.patch("{" +
                 "  \"name\": \"user1query1renamed\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
@@ -155,57 +112,29 @@ public class UserSearchesControllerTest {
                 "    \"exIngTags\": [2]," +
                 "    \"sourcePages\": [1]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        Long id = 1L;
+                "}", 1L, 1L);
 
-        Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
-                .method(PATCH)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.patch(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        Result response = route(application.getApplication(), httpRequestUpdate);
-        assertEquals(NO_CONTENT, response.status());
+        result = client.single(1L, 1L);
+        assertThat(nameOfSingleUserSearchOf(result), equalTo("user1query1renamed"));
 
-        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.UserSearchesController.single(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
+        String recipeSearchId = recipeSearchIdOfSingleUserSearchOf(result);
+        result = recipeSearchesClient.single(recipeSearchId);
 
-        response = route(application.getApplication(), httpRequestGet);
-
-        assertEquals(OK, response.status());
-        String resultJsonStr = contentAsString(response);
-        JsonNode resultJson = Json.parse(resultJsonStr);
-        assertEquals("user1query1renamed", resultJson.get("name").asText());
-        String searchId = resultJson.get("searchId").asText();
-
-        Http.RequestBuilder httpRequestGetRecipeSearch = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.RecipeSearchesController.single(searchId).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
-
-        response = route(application.getApplication(), httpRequestGetRecipeSearch);
-
-        assertEquals(OK, response.status());
-
-        resultJsonStr = contentAsString(response);
-        JsonNode responseJson = Json.parse(resultJsonStr);
-        JsonNode queryJson = responseJson.get("query");
-
-        assertEquals("composed-of-ratio", queryJson.get("searchMode").asText());
-        assertEquals(0.6, queryJson.get("goodIngsRatio").asDouble());
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(searchModeOfSingleRecipeSearchOf(result), equalTo("composed-of-ratio"));
+        assertThat(goodIngredientsRatioOf(result), equalTo(0.6));
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/usersearches-base.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidName() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_InvalidName");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        String jsonStr = "{" +
+        // When
+        Result result = client.create(
+                "{" +
                 "  \"name\": \"s\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
@@ -223,28 +152,19 @@ public class UserSearchesControllerTest {
                 "    \"addIngTags\": [6]," +
                 "    \"sourcePages\": [1, 2]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
+                "}", 1L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.create().url());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(BAD_REQUEST, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = "datasets/yml/usersearches-base.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidQuery() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_InvalidQuery");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        // Missing included ingredients
-        String jsonStr = "{" +
+        // When
+        Result result = client.create(
+                "{" +
                 "  \"name\": \"someName\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
@@ -260,27 +180,20 @@ public class UserSearchesControllerTest {
                 "    \"addIngTags\": [6]," +
                 "    \"sourcePages\": [1, 2]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
+                "}", 1L);
 
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.create().url());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals(BAD_REQUEST, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
     @DataSet(value = "datasets/yml/usersearches-base.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_LimitReached() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testCreate_LimitReached");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // Given
+        createMaxUserSearches();
 
-        String jsonStr = "{" +
+        // When
+        Result result = client.create("{" +
                 "  \"name\": \"someName\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-number\"," +
@@ -298,40 +211,18 @@ public class UserSearchesControllerTest {
                 "    \"addIngTags\": [6]," +
                 "    \"sourcePages\": [1, 2]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        int maxSearches = application.getApplication()
-                .config().getInt("receptnekem.usersearches.maxperuser");
+                "}", 1L);
 
-        for (int i = 0; i < maxSearches; i++) {
-            Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                    .method(POST)
-                    .bodyJson(jsonNode)
-                    .uri(routes.UserSearchesController.create().url());
-            JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
-
-            Result result = route(application.getApplication(), httpRequestCreate);
-            assertEquals("Result status is not created.", CREATED, result.status());
-        }
-
-        Http.RequestBuilder httpRequestCreate = new Http.RequestBuilder()
-                .method(POST)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.create().url());
-        JwtTestUtils.addJwtTokenTo(httpRequestCreate, jwtToken);
-
-        Result result = route(application.getApplication(), httpRequestCreate);
-        assertEquals("Created request over limit!", FORBIDDEN, result.status());
+        // Then
+        assertThat(statusOf(result), equalTo(FORBIDDEN));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testPatch_InvalidName() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testPatch_InvalidName");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        String jsonStr = "{" +
+        // When
+        Result result = client.patch("{" +
                 "  \"name\": \"u\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
@@ -342,29 +233,19 @@ public class UserSearchesControllerTest {
                 "    \"exIngTags\": [2]," +
                 "    \"sourcePages\": [1]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        Long id = 1L;
+                "}", 1L, 1L);
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(PATCH)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.patch(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, response.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testPatch_InvalidQuery() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testPatch_InvalidQuery");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        // Missing included ingredients
-        String jsonStr = "{" +
+        // When
+        Result result = client.patch(
+                "{" +
                 "  \"name\": \"user1query1renamed\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
@@ -373,29 +254,19 @@ public class UserSearchesControllerTest {
                 "    \"exIngTags\": [2]," +
                 "    \"sourcePages\": [1]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        Long id = 1L;
+                "}", 1L, 1L);
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(PATCH)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.patch(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequest);
-        assertEquals(BAD_REQUEST, response.status());
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testPatch_OtherUser() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testUpdate_OtherUser");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        // User 2 owns query 3, and user 1 tries to update it
-        String jsonStr = "{" +
+        // When
+        Result result = client.patch(
+                "{" +
                 "  \"name\": \"user1query1renamed\"," +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
@@ -406,145 +277,84 @@ public class UserSearchesControllerTest {
                 "    \"exIngTags\": [2]," +
                 "    \"sourcePages\": [1]" +
                 "  }" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        Long id = 3L;
+                "}", 1L, 3L);
 
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(PATCH)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.patch(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, response.status());
+        //Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testDelete() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testDelete");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.delete(1L, 2L);
 
-        Long id = 2L;
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        Http.RequestBuilder httpRequestDelete = new Http.RequestBuilder()
-                .method(DELETE)
-                .uri(routes.UserSearchesController.delete(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestDelete, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequestDelete);
-        assertEquals(NO_CONTENT, response.status());
-
-        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.UserSearchesController.single(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
-        response = route(application.getApplication(), httpRequestGet);
-        assertEquals(NOT_FOUND, response.status());
+        result = client.single(1L, 2L);
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testDelete_InvalidId() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testDelete_InvalidId");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.delete(1L, 42L);
 
-        Long id = 42L;
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(DELETE)
-                .uri(routes.UserSearchesController.delete(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, response.status());
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testDelete_OtherUser() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testDelete_OtherUser");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.delete(1L, 3L);
 
-        // User 2 owns query 3, and user 1 tries to delete it
-        Long id = 3L;
-
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(DELETE)
-                .uri(routes.UserSearchesController.delete(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, response.status());
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testSingle_OtherUser() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testSingle_OtherUser");
-        logger.info("------------------------------------------------------------------------------------------------");
+        // When
+        Result result = client.single(2L, 1L);
 
-        jwtToken = JwtTestUtils.createToken(10000L, 2L, application.getApplication().config());
-
-        Long id = 1L; // User 1 owns user search 1
-        Http.RequestBuilder httpRequest = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.UserSearchesController.single(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequest, jwtToken);
-
-        Result response = route(application.getApplication(), httpRequest);
-        assertEquals(NOT_FOUND, response.status());
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testPatchName() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testPatchName");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        // update existing user1query1 to user1query1renamed
-        String jsonStr = "{" +
+        // When
+        Result result = client.patch(
+                "{" +
                 "  \"name\": \"user1query1renamed\"" +
-                "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        Long id = 1L;
+                "}", 1L, 1L);
 
-        Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
-                .method(PATCH)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.patch(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        Result response = route(application.getApplication(), httpRequestUpdate);
-        assertEquals(NO_CONTENT, response.status());
+        result = client.single(1L, 1L);
 
-        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.UserSearchesController.single(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
-
-        response = route(application.getApplication(), httpRequestGet);
-
-        assertEquals(OK, response.status());
-        String resultJsonStr = contentAsString(response);
-        JsonNode resultJson = Json.parse(resultJsonStr);
-        assertEquals("user1query1renamed", resultJson.get("name").asText());
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(nameOfSingleUserSearchOf(result), equalTo("user1query1renamed"));
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/usersearches-base.yml", "datasets/yml/usersearches.yml"}, disableConstraints = true, cleanBefore = true)
     public void testPatchQuery() {
-        logger.info("------------------------------------------------------------------------------------------------");
-        logger.info("-- RUNNING TEST: testPatchQuery");
-        logger.info("------------------------------------------------------------------------------------------------");
-
-        String jsonStr = "{" +
+        // When
+        Result result = client.patch("{" +
                 "  \"query\": {" +
                 "    \"searchMode\": \"composed-of-ratio\"," +
                 "    \"goodIngsRatio\": 0.6," +
@@ -554,46 +364,52 @@ public class UserSearchesControllerTest {
                 "    \"exIngTags\": [2]," +
                 "    \"sourcePages\": [1]" +
                 "  }" +
+                "}", 1L, 1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+
+        result = client.single(1L, 1L);
+
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(nameOfSingleUserSearchOf(result), equalTo("user1query1"));
+
+        String searchId = recipeSearchIdOfSingleUserSearchOf(result);
+
+        result = recipeSearchesClient.single(searchId);
+
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(searchModeOfSingleRecipeSearchOf(result), equalTo("composed-of-ratio"));
+        assertThat(goodIngredientsRatioOf(result), equalTo(0.6));
+    }
+
+    private void createMaxUserSearches(){
+        String queryStr = "{" +
+                "  \"name\": \"someName\"," +
+                "  \"query\": {" +
+                "    \"searchMode\": \"composed-of-number\"," +
+                "    \"goodIngs\": 3," +
+                "    \"goodIngsRel\": \"ge\"," +
+                "    \"unknownIngs\": \"0\"," +
+                "    \"unknownIngsRel\": \"ge\"," +
+                "    \"goodAdditionalIngs\": 2," +
+                "    \"goodAdditionalIngsRel\": \"ge\"," +
+                "    \"inIngs\": [1, 2, 3]," +
+                "    \"inIngTags\": [1]," +
+                "    \"exIngs\": [4, 7]," +
+                "    \"exIngTags\": [2]," +
+                "    \"addIngs\": [5]," +
+                "    \"addIngTags\": [6]," +
+                "    \"sourcePages\": [1, 2]" +
+                "  }" +
                 "}";
-        JsonNode jsonNode = Json.parse(jsonStr);
-        Long id = 1L;
 
-        Http.RequestBuilder httpRequestUpdate = new Http.RequestBuilder()
-                .method(PATCH)
-                .bodyJson(jsonNode)
-                .uri(routes.UserSearchesController.patch(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestUpdate, jwtToken);
+        int maxSearches = ruleChainForTests.getApplication()
+                .config().getInt("receptnekem.usersearches.maxperuser");
 
-        Result response = route(application.getApplication(), httpRequestUpdate);
-        assertEquals(NO_CONTENT, response.status());
-
-        Http.RequestBuilder httpRequestGet = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.UserSearchesController.single(id).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
-
-        response = route(application.getApplication(), httpRequestGet);
-
-        assertEquals(OK, response.status());
-        String resultJsonStr = contentAsString(response);
-        JsonNode resultJson = Json.parse(resultJsonStr);
-        assertEquals("user1query1", resultJson.get("name").asText());
-        String searchId = resultJson.get("searchId").asText();
-
-        Http.RequestBuilder httpRequestGetRecipeSearch = new Http.RequestBuilder()
-                .method(GET)
-                .uri(routes.RecipeSearchesController.single(searchId).url());
-        JwtTestUtils.addJwtTokenTo(httpRequestGet, jwtToken);
-
-        response = route(application.getApplication(), httpRequestGetRecipeSearch);
-
-        assertEquals(OK, response.status());
-
-        resultJsonStr = contentAsString(response);
-        JsonNode responseJson = Json.parse(resultJsonStr);
-        JsonNode queryJson = responseJson.get("query");
-
-        assertEquals("composed-of-ratio", queryJson.get("searchMode").asText());
-        assertEquals(0.6, queryJson.get("goodIngsRatio").asDouble());
+        for (int i = 0; i < maxSearches; i++) {
+            Result result = client.create(queryStr, 1L);
+            assertThat(statusOf(result), equalTo(CREATED));
+        }
     }
 }

@@ -1,12 +1,11 @@
 package extractors;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
 
-import static play.test.Helpers.contentAsString;
+import static extractors.DataFromResult.toJson;
 
 public class RecipeSearchesFromResult {
     public static String searchModeOfSingleRecipeSearchOf(Result result) {
@@ -17,6 +16,16 @@ public class RecipeSearchesFromResult {
     public static int goodIngredientsOfSingleRecipeSearchOf(Result result) {
         JsonNode queryJson = queryJsonOf(result);
         return queryJson.get("goodIngs").asInt();
+    }
+
+    public static double goodIngredientsRatioOf(Result result) {
+        JsonNode queryJson = queryJsonOf(result);
+        return queryJson.get("goodIngsRatio").asDouble();
+    }
+
+    public static boolean useFavoritesOnlyOf(Result result) {
+        JsonNode queryJson = queryJsonOf(result);
+        return queryJson.get("useFavoritesOnly").asBoolean();
     }
 
     public static List<String> includedIngredientsOfSingleRecipeSearchOf(Result result) {
@@ -56,10 +65,7 @@ public class RecipeSearchesFromResult {
     }
 
     private static JsonNode queryJsonOf(Result result) {
-        String jsonStr = contentAsString(result);
-        JsonNode json = Json.parse(jsonStr);
-
+        JsonNode json = toJson(result);
         return json.get("query");
-
     }
 }

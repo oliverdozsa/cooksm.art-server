@@ -6,6 +6,7 @@ import play.mvc.Result;
 
 import java.util.List;
 
+import static extractors.DataFromResult.toJson;
 import static play.test.Helpers.contentAsString;
 
 public class RecipesFromResult {
@@ -18,9 +19,7 @@ public class RecipesFromResult {
     }
 
     public static Long singleRecipeIdOf(Result result) {
-        String jsonStr = contentAsString(result);
-        JsonNode json = Json.parse(jsonStr);
-
+        JsonNode json = toJson(result);
         return json.get("id").asLong();
     }
 }

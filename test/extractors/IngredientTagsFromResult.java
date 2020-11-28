@@ -6,6 +6,7 @@ import play.mvc.Result;
 
 import java.util.List;
 
+import static extractors.DataFromResult.toJson;
 import static play.test.Helpers.contentAsString;
 
 public class IngredientTagsFromResult {
@@ -43,9 +44,7 @@ public class IngredientTagsFromResult {
     }
 
     public static String singleIngredientTagNameOf(Result result) {
-        String jsonStr = contentAsString(result);
-        JsonNode json = Json.parse(jsonStr);
-
+        JsonNode json = toJson(result);
         return json.get("name").asText();
     }
 }

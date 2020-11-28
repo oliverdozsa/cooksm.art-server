@@ -25,9 +25,13 @@ public class RecipeSearchesTestClient {
 
     public Result single(Long id) {
         String encodedId = Base62Utils.encode(id);
+        return single(encodedId);
+    }
+
+    public Result single(String id) {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
-                .uri(routes.RecipeSearchesController.single(encodedId).url());
+                .uri(routes.RecipeSearchesController.single(id).url());
 
         return route(application, request);
     }
