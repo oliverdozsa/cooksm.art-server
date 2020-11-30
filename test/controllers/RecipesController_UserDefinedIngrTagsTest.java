@@ -184,7 +184,7 @@ public class RecipesController_UserDefinedIngrTagsTest {
                 "goodAdditionalIngs=1&goodAdditionalIngsRel=ge&" +
                 "orderBy=name&orderBySort=asc&" +
                 "minIngs=1&maxIngs=5&" +
-                "inIngs[0]=4&&addIngTags[0]=9&addIngTags[1]=10", 1L);
+                "inIngs[0]=4&&addIngTags[0]=8&addIngTags[1]=10", 1L);
 
         // Then
         assertThat(statusOf(result), equalTo(OK));

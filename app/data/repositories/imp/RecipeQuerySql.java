@@ -130,7 +130,8 @@ class RecipeQuerySql {
             join = " JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id ";
         }
 
-        if (QueryType.NUMBER.equals(config.queryType) && config.useAdditionalIngrs) {
+        if ((QueryType.RATIO.equals(config.queryType) || QueryType.NUMBER.equals(config.queryType))
+                && config.useAdditionalIngrs) {
             join = join + " JOIN (" + createAdditionalIngredientsQuery() + ") AS additionals " +
                     " ON recipe.id = additionals.recipe_id ";
         }
@@ -165,8 +166,7 @@ class RecipeQuerySql {
         return " SELECT recipe.id AS recipe_id " +
                 " FROM recipe " +
                 " JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id " +
-                " WHERE recipe_ingredient.ingredient_id IN (:additionalIngredientIds) AND " +
-                "  recipe_ingredient.ingredient_id NOT IN (:includedIngredients) " +
+                " WHERE recipe_ingredient.ingredient_id IN (:additionalIngredientIds) " +
                 " GROUP BY recipe.id " +
                 " HAVING " +
                 "   COUNT(recipe_ingredient.ingredient_id) :goodAdditionalIngredientRelation :goodAdditionalIngredientIds ";

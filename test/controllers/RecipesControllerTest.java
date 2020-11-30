@@ -150,7 +150,6 @@ public class RecipesControllerTest {
                 "goodIngsRatio=1.0&" +
                 "limit=50&offset=0&" +
                 "orderBy=name&orderBySort=asc&" +
-                "isAdditiveIngs=true&" +
                 "minIngs=1&maxIngs=4&" +
                 "inIngs[0]=1&inIngs[1]=2&inIngs[2]=3&inIngs[3]=4");
 
@@ -469,8 +468,8 @@ public class RecipesControllerTest {
 
         // Then
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(recipeIdsOf(result), hasSize(2));
-        assertThat(recipeIdsOf(result), containsInAnyOrder(2L, 3L));
+        assertThat(recipeIdsOf(result), hasSize(3));
+        assertThat(recipeIdsOf(result), containsInAnyOrder(2L, 3L, 5L));
     }
 
     @Test
@@ -547,6 +546,25 @@ public class RecipesControllerTest {
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
+    public void testByRatio_WithAdditionals(){
+        // When
+        Result result = client.page("searchMode=composed-of-ratio&" +
+                "goodIngsRatio=0.9&" +
+                "limit=50&offset=0&" +
+                "orderBy=name&orderBySort=asc&" +
+                "goodAdditionalIngs=1&goodAdditionalIngsRel=ge&" +
+                "minIngs=1&maxIngs=5&" +
+                "inIngs[0]=1&inIngs[1]=2&inIngs[2]=3&inIngs[3]=4&addIngs[0]=1");
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(recipeIdsOf(result), hasSize(1));
+        assertThat(recipeIdsOf(result), containsInAnyOrder(1L));
     }
 
     @Test

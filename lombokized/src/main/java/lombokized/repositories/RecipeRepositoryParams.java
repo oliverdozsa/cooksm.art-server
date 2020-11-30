@@ -31,6 +31,11 @@ public class RecipeRepositoryParams {
         Float goodIngredientsRatio;
         Common common;
         IncludedIngredients includedIngredients;
+        AdditionalIngredients additionalIngredients;
+
+        public Optional<AdditionalIngredients> getAdditionalIngredients() {
+            return Optional.ofNullable(additionalIngredients);
+        }
     }
 
     public enum Relation {

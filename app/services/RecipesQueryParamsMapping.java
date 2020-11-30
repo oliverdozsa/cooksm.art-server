@@ -93,6 +93,7 @@ class RecipesQueryParamsMapping {
         builder.common(commonParams);
         builder.goodIngredientsRatio(queryParams.goodIngsRatio);
         builder.includedIngredients(toIncludedIngredients(queryParams));
+        builder.additionalIngredients(toAdditionalIngredients(queryParams));
 
         return builder.build();
     }

@@ -50,8 +50,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
             String sqlString = RecipeQuerySql.create(configuration);
 
             sqlString = replaceQueryTypeRatioParams(sqlString, params);
+
             Query<Recipe> query = prepare(sqlString, params.getCommon());
             setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
+            if(params.getAdditionalIngredients().isPresent()) {
+                setAdditionalIngredientsConditions(query, params.getAdditionalIngredients().get(), params.getCommon().getUserId());
+            }
 
             return new Page<>(query.findList(), query.findCount());
 
@@ -87,11 +91,9 @@ public class EbeanRecipeRepository implements RecipeRepository {
         replaced = replaced.replace(":goodIngredients", params.getGoodIngredients().toString());
         replaced = replaced.replace(":unknownIngredientsRelation", params.getUnknownIngredientsRelation().getStringRep());
         replaced = replaced.replace(":unknownIngredients", params.getUnknownIngredients().toString());
+
         if (params.getAdditionalIngredients().isPresent()) {
-            Integer goodAdditionalIngredients = params.getAdditionalIngredients().get().getGoodAdditionalIngredients();
-            replaced = replaced.replace(":goodAdditionalIngredientIds", goodAdditionalIngredients.toString());
-            String relation = params.getAdditionalIngredients().get().getGoodAdditionalIngredientsRelation().getStringRep();
-            replaced = replaced.replace(":goodAdditionalIngredientRelation", relation);
+            replaced = replaceAdditionalIngredients(replaced, params.getAdditionalIngredients().get());
         }
 
         return replaced;
@@ -206,6 +208,10 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private String replaceQueryTypeRatioParams(String sql, QueryTypeRatio params) {
         String replaced = sql;
         replaced = replaced.replace(":ratio", params.getGoodIngredientsRatio().toString());
+        if (params.getAdditionalIngredients().isPresent()) {
+            replaced = replaceAdditionalIngredients(replaced, params.getAdditionalIngredients().get());
+        }
+
         return replaced;
     }
 
@@ -219,7 +225,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     private static RecipeQuerySql.Configuration createConfig(QueryTypeRatio params) {
-        return createConfigForIncludedIngredients(RecipeQuerySql.QueryType.RATIO, params.getCommon());
+        RecipeQuerySql.Configuration configuration = createConfigForIncludedIngredients(RecipeQuerySql.QueryType.RATIO, params.getCommon());
+        if (params.getAdditionalIngredients().isPresent()) {
+            configuration.useAdditionalIngrs = true;
+        }
+
+        return configuration;
     }
 
     private static RecipeQuerySql.Configuration createConfigForIncludedIngredients(RecipeQuerySql.QueryType queryType, Common params) {
@@ -237,5 +248,15 @@ public class EbeanRecipeRepository implements RecipeRepository {
         if (params.getUserId() != null && Boolean.TRUE.equals(params.getUseFavoritesOnly())) {
             config.useFavoritesOnly = true;
         }
+    }
+
+    private String replaceAdditionalIngredients(String currentSql, AdditionalIngredients additionals){
+        String replaced = currentSql;
+        Integer goodAdditionalIngredients = additionals.getGoodAdditionalIngredients();
+        replaced = replaced.replace(":goodAdditionalIngredientIds", goodAdditionalIngredients.toString());
+        String relation = additionals.getGoodAdditionalIngredientsRelation().getStringRep();
+        replaced = replaced.replace(":goodAdditionalIngredientRelation", relation);
+
+        return replaced;
     }
 }
