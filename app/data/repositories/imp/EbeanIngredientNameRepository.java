@@ -33,6 +33,8 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
     @Override
     public CompletionStage<Page<IngredientName>> page(String nameLike, Long languageId, int limit, int offset) {
         return supplyAsync(() -> {
+            logger.info("page(): nameLike = {}, languageId = {}, limit = {}, offset = {}",
+                    nameLike, languageId, limit, offset);
             Query<IngredientName> query = ebean.createQuery(IngredientName.class);
 
             query.where()
@@ -54,7 +56,7 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
     public CompletionStage<List<IngredientName>> byIngredientIds(List<Long> ids, Long languageId) {
         return supplyAsync(() -> {
             List<IngredientName> names = new ArrayList<>();
-            logger.info("byIngredientIds(): ids = {}", ids.toString());
+            logger.info("byIngredientIds(): ids = {}, languageId", ids.toString(), languageId);
             ids.forEach(id -> {
                 Ingredient ingredient = ebean.find(Ingredient.class, id);
 

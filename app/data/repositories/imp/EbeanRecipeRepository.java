@@ -5,6 +5,7 @@ import data.entities.Recipe;
 import data.repositories.RecipeRepository;
 import io.ebean.*;
 import lombokized.repositories.Page;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
@@ -19,6 +20,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private static final int DEFAULT_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 50;
 
+    private static final Logger.ALogger logger = Logger.of(EbeanRecipeRepository.class);
+
     @Inject
     public EbeanRecipeRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext) {
         this.ebean = Ebean.getServer(dbConfig.defaultServer());
@@ -28,6 +31,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     @Override
     public CompletionStage<Page<Recipe>> pageOfQueryTypeNumber(QueryTypeNumber params) {
         return supplyAsync(() -> {
+            logger.info("pageOfQueryTypeNumber()");
             RecipeQuerySql.Configuration configuration = createConfig(params);
             String sqlString = RecipeQuerySql.create(configuration);
 
@@ -46,6 +50,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     @Override
     public CompletionStage<Page<Recipe>> pageOfQueryTypeRatio(QueryTypeRatio params) {
         return supplyAsync(() -> {
+            logger.info("pageOfQueryTypeRatio()");
             RecipeQuerySql.Configuration configuration = createConfig(params);
             String sqlString = RecipeQuerySql.create(configuration);
 
@@ -65,6 +70,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     @Override
     public CompletionStage<Page<Recipe>> pageOfQueryTypeNone(Common params) {
         return supplyAsync(() -> {
+            logger.info("pageOfQueryTypeNone()");
             RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
                     true,
                     useExclude(params),
@@ -81,7 +87,10 @@ public class EbeanRecipeRepository implements RecipeRepository {
 
     @Override
     public CompletionStage<Recipe> single(Long id) {
-        return supplyAsync(() -> ebean.find(Recipe.class, id), executionContext);
+        return supplyAsync(() -> {
+            logger.info("single(): id = {}", id);
+            return ebean.find(Recipe.class, id);
+        }, executionContext);
     }
 
     private String replaceByQueryTypeNumberParameters(String sql, QueryTypeNumber params) {

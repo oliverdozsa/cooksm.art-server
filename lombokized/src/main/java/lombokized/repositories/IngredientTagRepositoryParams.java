@@ -1,8 +1,10 @@
 package lombokized.repositories;
 
 import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
 
+@ToString
 public class IngredientTagRepositoryParams {
     @Value
     @Builder(builderClassName = "Builder", toBuilder = true)

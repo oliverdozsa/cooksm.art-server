@@ -38,6 +38,7 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
     @Override
     public CompletionStage<Page<IngredientTag>> page(IngredientTagRepositoryParams.Page params) {
         return supplyAsync(() -> {
+            logger.info("page(): params = {}", params);
             Query<IngredientTag> query = ebean.createQuery(IngredientTag.class);
             query.where().ilike("name", "%" + params.getNameLike() + "%");
             query.where().eq("language.id", params.getLanguageId());
@@ -59,32 +60,43 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
     @Override
     public CompletionStage<List<IngredientTag>> byIds(List<Long> ids) {
-        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
-                .where()
-                .in("id", ids)
-                .findList(), executionContext);
+        return supplyAsync(() -> {
+            logger.info("byIds(): ids = {}", ids);
+            return ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .in("id", ids)
+                    .findList();
+        }, executionContext);
     }
 
     @Override
     public CompletionStage<IngredientTag> byNameOfUser(Long userId, String name) {
-        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
-                .where()
-                .eq("name", name)
-                .eq("user.id", userId)
-                .findOne(), executionContext);
+        return supplyAsync(() -> {
+            logger.info("byNameOfUser(): userId = {}, name = {}", userId, name);
+            return ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .eq("name", name)
+                    .eq("user.id", userId)
+                    .findOne();
+        }, executionContext);
     }
 
     @Override
     public CompletionStage<Integer> count(Long userId) {
-        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
-                .where()
-                .eq("user.id", userId)
-                .findCount(), executionContext);
+        return supplyAsync(() -> {
+            logger.info("count(): userId = {}", userId);
+            return ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .findCount();
+        }, executionContext);
     }
 
     @Override
     public CompletionStage<IngredientTag> create(Long userId, String name, List<Long> ingredientIds, Long languageId) {
         return supplyAsync(() -> {
+            logger.info("create(): userId = {}, name = {}, languageId = {}, ingredientIds = {}",
+                    userId, name, languageId, ingredientIds);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
 
@@ -106,13 +118,14 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
     @Override
     public CompletionStage<IngredientTag> byId(Long id, Long userId) {
         return supplyAsync(() -> {
+            logger.info("byId(): id = {}, userId = {}", id, userId);
             IngredientTag entity = ebean.createQuery(IngredientTag.class)
                     .where()
                     .eq("id", id)
                     .eq("user.id", userId)
                     .findOne();
 
-            if(entity == null) {
+            if (entity == null) {
                 throwNotFoundException(id, userId);
             }
 
@@ -153,9 +166,8 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
     @Override
     public CompletionStage<Void> delete(Long id, Long userId) {
-        logger.info("delete(): id = {}, userId = {}", id, userId);
-
         return runAsync(() -> {
+            logger.info("delete(): id = {}, userId = {}", id, userId);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
             IngredientTag entity = ebean.createQuery(IngredientTag.class)
@@ -164,7 +176,7 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                     .eq("user.id", userId)
                     .findOne();
 
-            if(entity == null) {
+            if (entity == null) {
                 throwNotFoundException(id, userId);
             }
 

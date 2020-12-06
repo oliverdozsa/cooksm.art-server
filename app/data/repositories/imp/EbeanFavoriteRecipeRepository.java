@@ -35,6 +35,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Override
     public CompletionStage<FavoriteRecipe> single(Long id, Long userId) {
         return supplyAsync(() -> {
+                    logger.info("single(): id = {}, userId = {}", id, userId);
                     EbeanRepoUtils.assertEntityExists(ebean, FavoriteRecipe.class, id);
                     EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
@@ -50,6 +51,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Override
     public CompletionStage<List<FavoriteRecipe>> all(Long userId) {
         return supplyAsync(() -> {
+            logger.info("all(): userId = {}", userId);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
             return ebean.createQuery(FavoriteRecipe.class)
@@ -62,6 +64,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Override
     public CompletionStage<FavoriteRecipe> create(Long userId, Long recipeId) {
         return supplyAsync(() -> {
+            logger.info("create(): userId = {}, recipeId = {}", userId, recipeId);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, Recipe.class, recipeId);
             assertNotExists(userId, recipeId);
@@ -79,6 +82,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Override
     public CompletionStage<Boolean> delete(Long id, Long userId) {
         return supplyAsync(() -> {
+            logger.info("delete(): id = {}, userId = {}", id, userId);
             EbeanRepoUtils.assertEntityExists(ebean, FavoriteRecipe.class, id);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 

@@ -36,6 +36,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<RecipeSearch> create(String query, boolean isPermanent) {
         return supplyAsync(() -> {
+            logger.info("create(): isPermanent = {}, query = {}", isPermanent, query);
             if (query == null || query.length() == 0) {
                 throw new IllegalArgumentException("query is empty!");
             }
@@ -56,6 +57,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<Boolean> delete(Long id) {
         return supplyAsync(() -> {
+            logger.info("delete(): id = {}", id);
             boolean isDeleted = ebean.delete(RecipeSearch.class, id) == 1;
             if (isDeleted) {
                 count.decrementAndGet();
@@ -68,6 +70,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<RecipeSearch> single(Long id) {
         return supplyAsync(() -> {
+            logger.info("single(): id = {}", id);
             EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, id);
             RecipeSearch entity = ebean.find(RecipeSearch.class, id);
             entity.setLastAccessed(Instant.now());
@@ -78,11 +81,13 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
 
     @Override
     public int countAll() {
+        logger.info("countAll()");
         return count.get();
     }
 
     @Override
     public List<Long> queryNonPermanentOlderThan(Instant instant) {
+        logger.info("queryNonPermanentOlderThan(): instant = {}", instant);
         return ebean.createQuery(RecipeSearch.class)
                 .where()
                 .eq("isPermanent", false)
@@ -95,6 +100,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
 
     @Override
     public Integer deleteAll(List<Long> ids) {
+        logger.info("deleteAll(): ids = {}", ids);
         int deleted = 0;
         for (Long id : ids) {
             boolean isDeleted = ebean.delete(RecipeSearch.class, id) == 1;
@@ -111,6 +117,7 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     @Override
     public CompletionStage<RecipeSearch> update(String query, boolean isPermanent, Long id) {
         return supplyAsync(() -> {
+            logger.info("update(): query = {}, isPermanent = {}, id = {}", query, isPermanent, id);
             EbeanRepoUtils.assertEntityExists(ebean, RecipeSearch.class, id);
             RecipeSearch entity = ebean.find(RecipeSearch.class, id);
 

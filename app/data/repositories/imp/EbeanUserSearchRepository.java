@@ -13,6 +13,7 @@ import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
 import lombokized.repositories.Page;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 import play.db.ebean.Transactional;
 
@@ -28,6 +29,8 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     private EbeanServer ebean;
     private RecipeSearchRepository recipeSearchRepository;
 
+    private static final Logger.ALogger logger = Logger.of(EbeanUserSearchRepository.class);
+
     @Inject
     public EbeanUserSearchRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext, Config config,
                                      RecipeSearchRepository recipeSearchRepository) {
@@ -39,6 +42,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     public CompletionStage<UserSearch> create(String name, Long userId, Long recipeSearchId) {
         return recipeSearchRepository.single(recipeSearchId).thenApplyAsync(recipeSearch -> {
+            logger.info("create(): name = {}, userId = {}, recipeSearchId = {}", name, userId, recipeSearchId);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             if (name == null || name.length() == 0) {
                 throw new IllegalArgumentException("name is empty!");
@@ -59,6 +63,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     public CompletionStage<Boolean> delete(Long id, Long userId) {
         return supplyAsync(() -> {
+            logger.info("delete(): id = {}, userId = {}", id, userId);
             EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             UserSearch entity = ebean.createQuery(UserSearch.class)
@@ -77,6 +82,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     public CompletionStage<Page<UserSearch>> page(Long userId, int limit, int offset) {
         return supplyAsync(() -> {
+            logger.info("page(): userId = {}, limit = {}, offset = {}", userId, limit, offset);
             Query<UserSearch> query = ebean.createQuery(UserSearch.class)
                     .where()
                     .eq("user.id", userId)
@@ -90,6 +96,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     public CompletionStage<UserSearch> update(String name, Long userId, Long id) {
         return supplyAsync(() -> {
+            logger.info("update(): name = {}, userId = {}, id = {}", name, userId, id);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
             UserSearch entity = ebean.createQuery(UserSearch.class)
@@ -110,6 +117,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     public CompletionStage<List<UserSearch>> all(Long userId) {
         return supplyAsync(() -> {
+            logger.info("all()");
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             return ebean.createQuery(UserSearch.class)
                     .where()
@@ -121,6 +129,7 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     @Override
     public CompletionStage<UserSearch> single(Long id, Long userId) {
         return supplyAsync(() -> {
+            logger.info("single(): id = {}, userId = {}", id, userId);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, UserSearch.class, id);
             UserSearch entity = ebean.createQuery(UserSearch.class)
@@ -138,10 +147,13 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
 
     @Override
     public CompletionStage<Integer> count(Long userId) {
-        return supplyAsync(() -> ebean.createQuery(UserSearch.class)
-                .where()
-                .eq("user.id", userId)
-                .findCount(), executionContext);
+        return supplyAsync(() -> {
+            logger.info("count(): userId = {}", userId);
+            return ebean.createQuery(UserSearch.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .findCount();
+        }, executionContext);
     }
 
     private void throwNotFoundException(Long id, Long userId) {

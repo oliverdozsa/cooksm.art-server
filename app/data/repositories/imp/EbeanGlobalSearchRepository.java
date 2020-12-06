@@ -6,6 +6,7 @@ import data.repositories.GlobalSearchRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
@@ -18,6 +19,8 @@ public class EbeanGlobalSearchRepository implements GlobalSearchRepository {
     private EbeanServer ebean;
     private DatabaseExecutionContext executionContext;
 
+    private static final Logger.ALogger logger = Logger.of(EbeanGlobalSearchRepository.class);
+
     @Inject
     public EbeanGlobalSearchRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext) {
         this.ebean = Ebean.getServer(ebeanConfig.defaultServer());
@@ -26,6 +29,7 @@ public class EbeanGlobalSearchRepository implements GlobalSearchRepository {
 
     @Override
     public CompletionStage<List<GlobalSearch>> all() {
+        logger.info("all()");
         return supplyAsync(() -> {
             Query<GlobalSearch> query = ebean.createQuery(GlobalSearch.class);
             return query.findList();

@@ -37,8 +37,8 @@ public class EbeanUserRepository implements UserRepository {
 
     @Override
     public CompletionStage<User> createOrUpdate(UserCreateUpdateDto dto) {
-        logger.debug("createOrUpdate(): dto = {}", dto.toString());
         return supplyAsync(() -> {
+            logger.debug("createOrUpdate(): dto = {}", dto.toString());
             User existing = findByDto(dto);
             if (existing == null) {
                 return create(dto);
@@ -51,6 +51,7 @@ public class EbeanUserRepository implements UserRepository {
     @Override
     public CompletionStage<User> byId(Long id) {
         return supplyAsync(() -> {
+            logger.info("byId(): id = {}", id);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
             return ebean.find(User.class, id);
         }, executionContext);
@@ -59,6 +60,7 @@ public class EbeanUserRepository implements UserRepository {
     @Override
     public CompletionStage<Void> delete(Long id) {
         return runAsync(() -> {
+            logger.info("delete(): id = {}", id);
             EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
             int count = ebean.delete(User.class, id);
             if (count != 1) {
