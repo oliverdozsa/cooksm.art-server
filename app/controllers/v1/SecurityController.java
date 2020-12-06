@@ -1,18 +1,17 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
+import data.repositories.UserRepository;
 import lombokized.dto.UserCreateUpdateDto;
 import lombokized.dto.UserInfoDto;
 import lombokized.dto.UserSocialLoginDto;
 import lombokized.security.VerifiedFacebookUserInfo;
 import lombokized.security.VerifiedGoogleUserInfo;
 import lombokized.security.VerifiedUserInfo;
-import data.repositories.UserRepository;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.libs.Json;
-import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -95,7 +94,7 @@ public class SecurityController extends Controller {
         Form<UserSocialLoginDto> form = formFactory.form(UserSocialLoginDto.class).bindFromRequest(request);
 
         if (form.hasErrors()) {
-            logger.warn("loginThroughSocial(): form has errors!");
+            logger.warn("loginThroughSocial(): form has errors! errors = {}", form.errorsAsJson().toPrettyString());
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 

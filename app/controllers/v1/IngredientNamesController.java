@@ -37,7 +37,7 @@ public class IngredientNamesController extends Controller {
                 formFactory.form(IngredientNameQueryParams.class).bindFromRequest(request);
 
         if (form.hasErrors()) {
-            logger.warn("pageNames(): form has errors!");
+            logger.warn("pageNames(): form has errors! errors = {}", form.errorsAsJson().toPrettyString());
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
             IngredientNameQueryParams params = form.get();

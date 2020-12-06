@@ -51,13 +51,16 @@ public class RecipesController extends Controller {
         Form<RecipesQueryParams.Params> form = retriever.retrieve();
 
         if (form.hasErrors()) {
+            logger.warn("pageRecipes(): form has error!");
             return completedFuture(badRequest(form.errorsAsJson()));
         } else {
+            logger.info("pageRecipes()");
             return refineRequest(form, request);
         }
     }
 
     public CompletionStage<Result> singleRecipe(Long id, Long languageId) {
+        logger.info("singleRecipe(): id = {}, languageId = {}", id, languageId);
         return service.single(id, languageId)
                 .thenApplyAsync(dto -> {
                     if (dto == null) {

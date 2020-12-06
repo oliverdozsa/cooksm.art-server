@@ -38,6 +38,8 @@ public class RecipeSearchesController extends Controller {
             return completedFuture(badRequest(Json.toJson(error.messages())));
         }
 
+        logger.info("single(): id = {}", id);
+
         return service.single(id)
                 .thenApplyAsync(this::toResult)
                 .exceptionally(mapExceptionWithUnpack);

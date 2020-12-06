@@ -43,7 +43,7 @@ public class IngredientTagsController extends Controller {
                 formFactory.form(IngredientTagQueryParams.class).bindFromRequest(request);
 
         if (form.hasErrors()) {
-            logger.warn("page(): form has errors!");
+            logger.warn("page(): form has errors! errors = {}", form.errorsAsJson().toPrettyString());
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 
@@ -70,6 +70,7 @@ public class IngredientTagsController extends Controller {
                 .bindFromRequest(request);
 
         if (form.hasErrors()) {
+            logger.warn("create(): form has error! errors = {}", form.errorsAsJson().toPrettyString());
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 
@@ -90,23 +91,26 @@ public class IngredientTagsController extends Controller {
     public CompletionStage<Result> single(Long id, Long languageId, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
 
+        logger.info("single(): id = {}, languageId = {}, userId = ", id, languageId, jwt.getUserId());
+
         return service.single(id, languageId, jwt.getUserId())
                 .thenApplyAsync(this::toResult)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> update(Long id, Http.Request request) {
-        logger.info("update()");
-
         Form<IngredientTagCreateUpdateDto> form = formFactory.form(IngredientTagCreateUpdateDto.class)
                 .bindFromRequest(request);
 
         if (form.hasErrors()) {
+            logger.warn("update(): form has errors! errors = {}", form.errorsAsJson().toPrettyString());
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         IngredientTagCreateUpdateDto dto = form.get();
+
+        logger.info("update(): id = {}, userId = {}", id, jwt.getUserId());
 
         return service.update(id, dto, jwt.getUserId())
                 .thenApplyAsync(v -> (Result) noContent())
@@ -114,9 +118,9 @@ public class IngredientTagsController extends Controller {
     }
 
     public CompletionStage<Result> delete(Long id, Http.Request request) {
-        logger.info("delete(): id = {}", id);
-
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        logger.info("delete(): id = {}, userId = {}", id, jwt.getUserId());
 
         return service.delete(id, jwt.getUserId())
                 .thenApplyAsync(v -> (Result) noContent())

@@ -7,7 +7,6 @@ import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
 import play.libs.Json;
-import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -41,6 +40,7 @@ public class UserSearchesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         CompletionStage<Result> errorResult = checkUpdateCreateRequestForErrors(request);
         if (errorResult != null) {
+            logger.warn("create(): form has errors!");
             return errorResult;
         }
 
@@ -71,6 +71,7 @@ public class UserSearchesController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         CompletionStage<Result> errorResult = checkUpdateCreateRequestForErrors(request);
         if (errorResult != null) {
+            logger.warn("patch(): form has errors!");
             return errorResult;
         }
 

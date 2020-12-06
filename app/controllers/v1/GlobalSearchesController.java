@@ -1,14 +1,9 @@
 package controllers.v1;
 
-import data.entities.GlobalSearch;
-import data.entities.RecipeSearch;
 import data.repositories.GlobalSearchRepository;
 import lombokized.dto.GlobalSearchDto;
-import lombokized.dto.PageDto;
-import lombokized.repositories.Page;
 import play.Logger;
 import play.libs.Json;
-import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.DtoMapper;
