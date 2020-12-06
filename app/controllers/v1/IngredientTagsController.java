@@ -52,7 +52,7 @@ public class IngredientTagsController extends Controller {
         queryParams.setOffset(queryParams.getOffset() == null ? 0 : queryParams.getOffset());
         logger.info("page(): queryParams = {}", queryParams);
 
-        if(SecurityUtils.hasVerifiedJwt(request)) {
+        if (SecurityUtils.hasVerifiedJwt(request)) {
             logger.info("page(): request is authenticated.");
             VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
             return service.page(queryParams, jwt.getUserId())
@@ -69,7 +69,7 @@ public class IngredientTagsController extends Controller {
         Form<IngredientTagCreateUpdateDto> form = formFactory.form(IngredientTagCreateUpdateDto.class)
                 .bindFromRequest(request);
 
-        if(form.hasErrors()) {
+        if (form.hasErrors()) {
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 
@@ -96,10 +96,12 @@ public class IngredientTagsController extends Controller {
     }
 
     public CompletionStage<Result> update(Long id, Http.Request request) {
+        logger.info("update()");
+
         Form<IngredientTagCreateUpdateDto> form = formFactory.form(IngredientTagCreateUpdateDto.class)
                 .bindFromRequest(request);
 
-        if(form.hasErrors()) {
+        if (form.hasErrors()) {
             return completedFuture(badRequest(form.errorsAsJson()));
         }
 
@@ -111,9 +113,20 @@ public class IngredientTagsController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> delete(Long id, Http.Request request) {
+        logger.info("delete(): id = {}", id);
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.delete(id, jwt.getUserId())
+                .thenApplyAsync(v -> (Result) noContent())
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
     private Result toResult(Page<IngredientTagDto> pageDto) {
         return ok(toJson(pageDto));
     }
+
     private Result toResult(IngredientTagResolvedDto dto) {
         return ok(toJson(dto));
     }

@@ -13,6 +13,7 @@ import static extractors.DataFromResult.*;
 import static extractors.IngredientTagsFromResult.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static play.mvc.Http.Status.NOT_FOUND;
 import static play.test.Helpers.BAD_REQUEST;
 import static play.test.Helpers.OK;
 
@@ -128,5 +129,16 @@ public class IngredientTagsControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(OK));
         assertThat(ingredientNamesOfSingleIngredientTagOf(result), containsInAnyOrder("en_1", "en_2"));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testUserDefined_Single_InvalidId() {
+        // When
+        Result result = client.single(1L, 42L, 0L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 }

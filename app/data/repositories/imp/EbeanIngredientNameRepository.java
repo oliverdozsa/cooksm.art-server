@@ -54,7 +54,7 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
     public CompletionStage<List<IngredientName>> byIngredientIds(List<Long> ids, Long languageId) {
         return supplyAsync(() -> {
             List<IngredientName> names = new ArrayList<>();
-            logger.info("ids = {}", ids.toString());
+            logger.info("byIngredientIds(): ids = {}", ids.toString());
             ids.forEach(id -> {
                 Ingredient ingredient = ebean.find(Ingredient.class, id);
 

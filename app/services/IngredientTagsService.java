@@ -16,6 +16,7 @@ import lombokized.dto.IngredientTagResolvedDto;
 import lombokized.queryparams.IngredientTagQueryParams;
 import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
+import play.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ public class IngredientTagsService {
     private IngredientNameRepository ingredientNameRepository;
     private LanguageService languageService;
     private int maxPerUser;
+
+    private static final Logger.ALogger logger = Logger.of(IngredientTagsService.class);
 
     @Inject
     public IngredientTagsService(IngredientTagRepository repository, IngredientNameRepository ingredientNameRepository, LanguageService languageService, Config config) {
@@ -74,7 +77,12 @@ public class IngredientTagsService {
         List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
 
         return checkAllIngredientIdsExist(dto.ingredientIds)
-                .thenAcceptAsync(v -> repository.update(id, userId, dto.name, uniqueIngredientIds, languageService.getDefault()));
+                .thenComposeAsync(v -> repository.update(id, userId, dto.name, uniqueIngredientIds, languageService.getDefault()));
+    }
+
+    public CompletionStage<Void> delete(Long id, Long userId) {
+        logger.info("delete(): id = {}, userId = {}", id, userId);
+        return repository.delete(id, userId);
     }
 
     private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams) {

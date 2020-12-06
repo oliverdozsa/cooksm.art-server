@@ -48,11 +48,7 @@ public class IngredientTagsControllerTest_UpdateTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        // Because of parallel execution of SQL command, we need o wait until PUT finishes.
-        // I haven't found any better way here :(. This can make the test flaky.
-        Thread.sleep(2000);
-
-        result = client.single(1L, 10L, 0L);
+        result = client.single(1L, 10L);
 
         assertThat(statusOf(result), equalTo(OK));
         assertThat(singleIngredientTagNameOf(result), equalTo("user_1_ingredient_tag_1_updated"));
@@ -102,11 +98,7 @@ public class IngredientTagsControllerTest_UpdateTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        // Because of parallel execution of SQL command, we need o wait until PUT finishes.
-        // I haven't found any better way here :(. This can make the test flaky.
-        Thread.sleep(2000);
-
-        result = client.single(1L, 10L, 0L);
+        result = client.single(1L, 10L);
 
         assertThat(statusOf(result), equalTo(OK));
         assertThat(singleIngredientTagNameOf(result), equalTo("user_1_ingredient_tag_1_updated"));
@@ -127,5 +119,20 @@ public class IngredientTagsControllerTest_UpdateTest {
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testUserDefined_UpdateTagOfOtherUser() {
+        // When
+        IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
+        dto.name = "user_1_ingredient_tag_1_updated";
+        dto.ingredientIds = Arrays.asList(3L, 4L);
+
+        Result result = client.update(14L, dto, 1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 }

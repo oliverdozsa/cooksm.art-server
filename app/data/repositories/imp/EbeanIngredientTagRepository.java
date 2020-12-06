@@ -6,11 +6,13 @@ import data.entities.IngredientTag;
 import data.entities.Language;
 import data.entities.User;
 import data.repositories.IngredientTagRepository;
+import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
 import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
+import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
@@ -24,6 +26,8 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class EbeanIngredientTagRepository implements IngredientTagRepository {
     private EbeanServer ebean;
     private DatabaseExecutionContext executionContext;
+
+    private static final Logger.ALogger logger = Logger.of(EbeanIngredientTagRepository.class);
 
     @Inject
     public EbeanIngredientTagRepository(EbeanConfig config, DatabaseExecutionContext executionContext) {
@@ -67,7 +71,7 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 .where()
                 .eq("name", name)
                 .eq("user.id", userId)
-                .findOne());
+                .findOne(), executionContext);
     }
 
     @Override
@@ -75,7 +79,7 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
                 .where()
                 .eq("user.id", userId)
-                .findCount());
+                .findCount(), executionContext);
     }
 
     @Override
@@ -101,16 +105,27 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
 
     @Override
     public CompletionStage<IngredientTag> byId(Long id, Long userId) {
-        return supplyAsync(() -> ebean.createQuery(IngredientTag.class)
-                .where()
-                .eq("id", id)
-                .eq("user.id", userId)
-                .findOne());
+        return supplyAsync(() -> {
+            IngredientTag entity = ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .eq("id", id)
+                    .eq("user.id", userId)
+                    .findOne();
+
+            if(entity == null) {
+                throwNotFoundException(id, userId);
+            }
+
+            return entity;
+        }, executionContext);
     }
 
     @Override
     public CompletionStage<Void> update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId) {
         return runAsync(() -> {
+            logger.info("update(): id = {}, userId = {}, name = {}, language = {}, ingredientIds = {}",
+                    id, userId, name, ingredientIds, languageId);
+
             EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
             EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
 
@@ -120,6 +135,11 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                     .eq("user.id", userId)
                     .findOne();
 
+            if (entity == null) {
+                logger.warn("update(): not found user defined tag with id = {}, userId = {}", id, userId);
+                throwNotFoundException(id, userId);
+            }
+
             List<Ingredient> ingredients = ingredientByIds(ingredientIds);
             Language language = ebean.find(Language.class, languageId);
 
@@ -128,8 +148,29 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
             entity.setLanguage(language);
 
             ebean.update(entity);
-            ebean.flush();
-        });
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Void> delete(Long id, Long userId) {
+        logger.info("delete(): id = {}, userId = {}", id, userId);
+
+        return runAsync(() -> {
+            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+
+            IngredientTag entity = ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .eq("id", id)
+                    .eq("user.id", userId)
+                    .findOne();
+
+            if(entity == null) {
+                throwNotFoundException(id, userId);
+            }
+
+            ebean.delete(entity);
+
+        }, executionContext);
     }
 
     private List<Ingredient> ingredientByIds(List<Long> ingredientIds) {
@@ -137,5 +178,11 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 .where()
                 .in("id", ingredientIds)
                 .findList();
+    }
+
+    private void throwNotFoundException(Long id, Long userId) {
+        String message = String.format("Not found user defined tag with id = %d, userId = %d",
+                id, userId);
+        throw new NotFoundException(message);
     }
 }
