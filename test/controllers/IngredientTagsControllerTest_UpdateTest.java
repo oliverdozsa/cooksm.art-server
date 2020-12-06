@@ -37,7 +37,7 @@ public class IngredientTagsControllerTest_UpdateTest {
     @Test
     // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
-    public void testUserDefined_Update() throws InterruptedException {
+    public void testUserDefined_Update() {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
@@ -88,7 +88,7 @@ public class IngredientTagsControllerTest_UpdateTest {
     @Test
     // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
-    public void testUserDefined_UpdateWithDuplicateIngredientIds() throws InterruptedException {
+    public void testUserDefined_UpdateWithDuplicateIngredientIds() {
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
         dto.ingredientIds = Arrays.asList(3L, 3L, 4L, 4L);
