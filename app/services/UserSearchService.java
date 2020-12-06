@@ -6,6 +6,7 @@ import data.repositories.UserSearchRepository;
 import data.repositories.exceptions.ForbiddenExeption;
 import dto.UserSearchCreateUpdateDto;
 import lombokized.dto.UserSearchDto;
+import play.Logger;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -19,6 +20,8 @@ public class UserSearchService {
     private RecipeSearchService recipeSearchService;
     private Integer maxPerUser;
 
+    private static final Logger.ALogger logger = Logger.of(UserSearchService.class);
+
     @Inject
     public UserSearchService(UserSearchRepository userSearchRepository, RecipeSearchService recipeSearchService, Config config) {
         this.userSearchRepository = userSearchRepository;
@@ -27,12 +30,14 @@ public class UserSearchService {
     }
 
     public CompletionStage<List<UserSearchDto>> all(Long userId) {
+        logger.info("all(): userId = {}", userId);
         return userSearchRepository.all(userId)
                 .thenApplyAsync(l -> l.stream().map(DtoMapper::toDto)
                         .collect(Collectors.toList()));
     }
 
     public CompletionStage<Long> create(UserSearchCreateUpdateDto dto, Long userId) {
+        logger.info("create(): userId = {}, dto = {}", userId, dto);
         return userSearchRepository.count(userId).thenAcceptAsync(c -> {
             if (c >= maxPerUser) {
                 throw new ForbiddenExeption("User reached max limit! userId = " + userId);
@@ -44,15 +49,18 @@ public class UserSearchService {
     }
 
     public CompletionStage<UserSearchDto> single(Long id, Long userId) {
+        logger.info("single(): id = {}, userId = {}", id, userId);
         return userSearchRepository.single(id, userId)
                 .thenApplyAsync(DtoMapper::toDto);
     }
 
     public CompletionStage<Boolean> delete(Long id, Long userId) {
+        logger.info("delete(): id = {}, userId = {}", id, userId);
         return userSearchRepository.delete(id, userId);
     }
 
     public CompletionStage<Void> patch(Long id, Long userId, UserSearchCreateUpdateDto dto) {
+        logger.info("patch(): id = {}, userId = {}, dto = {}", id, userId, dto);
         CompletionStage<UserSearch> userSearchCompletionStage;
         if (dto.name != null) {
             userSearchCompletionStage = userSearchRepository.update(dto.name, userId, id);

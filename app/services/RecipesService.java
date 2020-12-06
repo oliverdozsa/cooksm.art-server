@@ -2,6 +2,7 @@ package services;
 
 import com.typesafe.config.Config;
 import lombokized.repositories.RecipeRepositoryParams;
+import play.Logger;
 import queryparams.RecipesQueryParams;
 import data.entities.Recipe;
 import data.repositories.RecipeRepository;
@@ -33,37 +34,46 @@ public class RecipesService {
     @Inject
     private RecipeRepositoryQueryCheck queryCheck;
 
+    private static final Logger.ALogger logger = Logger.of(RecipesService.class);
+
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams) {
+        logger.info("pageOfQueryTypeNumber(): queryParams = {}", queryParams);
         Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams);
         return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams, Long userId) {
+        logger.info("pageOfQueryTypeNumber(): userId = {}, queryParams = {}", userId, queryParams);
         Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams, userId);
         return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params queryParams) {
+        logger.info("pageOfQueryTypeRatio(): queryParams = {}", queryParams);
         Supplier<QueryTypeRatio> repositoryParamsSupplier = () -> toQueryTypeRatio(queryParams);
         return pageOfQueryTypeRatio(repositoryParamsSupplier, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params queryParams, Long userId) {
+        logger.info("pageOfQueryTypeRatio(): userId = {}. queryParams = {}", userId, queryParams);
         Supplier<QueryTypeRatio> repositoryParamsSupplier = () -> toQueryTypeRatio(queryParams, userId);
         return pageOfQueryTypeRatio(repositoryParamsSupplier, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params queryParams) {
+        logger.info("pageOfQueryTypeNone(): queryParams = {}", queryParams);
         CompletionStage<RecipeRepositoryParams.Common> repositoryParams = supplyAsync(() -> toCommon(queryParams));
         return queryRecipesByCommonParams(repositoryParams, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params queryParams, Long userId) {
+        logger.info("pageOfQueryTypeNone(): userId = {}, queryParams = {}", userId, queryParams);
         CompletionStage<RecipeRepositoryParams.Common> repositoryParams = supplyAsync(() -> toCommon(queryParams, userId));
         return queryRecipesByCommonParams(repositoryParams, queryParams.languageId);
     }
 
     public CompletionStage<RecipeDto> single(Long id, Long languageId) {
+        logger.info("single(): id = {}, languageId = {}", id, languageId);
         return repository.single(id)
                 .thenApplyAsync(e -> {
                     if (e != null) {

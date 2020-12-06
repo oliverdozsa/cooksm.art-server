@@ -42,18 +42,21 @@ public class IngredientTagsService {
     }
 
     public CompletionStage<Page<IngredientTagDto>> page(IngredientTagQueryParams queryParams) {
+        logger.info("page(): queryParams = {}", queryParams);
         IngredientTagRepositoryParams.Page repositoryParams = toPageParams(queryParams);
         return repository.page(repositoryParams)
                 .thenApplyAsync(this::toPageDto);
     }
 
     public CompletionStage<Page<IngredientTagDto>> page(IngredientTagQueryParams queryParams, Long userId) {
+        logger.info("page(): queryParams = {}, userId = {}", queryParams, userId);
         IngredientTagRepositoryParams.Page repositoryParams = toPageParams(queryParams, userId);
         return repository.page(repositoryParams)
                 .thenApplyAsync(this::toPageDto);
     }
 
     public CompletionStage<Long> create(IngredientTagCreateUpdateDto dto, Long userId) {
+        logger.info("create(): userId = {}, dto = {}", userId, dto);
         List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
 
         return repository.count(userId)
@@ -65,6 +68,7 @@ public class IngredientTagsService {
     }
 
     public CompletionStage<IngredientTagResolvedDto> single(Long id, Long languageId, Long userId) {
+        logger.info("single(): id = {}, languageId = {}, userId = {}", id, languageId, userId);
         CompletionStage<IngredientTag> tagCompletionStage = repository.byId(id, userId);
         CompletionStage<List<IngredientName>> ingredientNamesDtoCompletionStage =
                 tagCompletionStage.thenComposeAsync(tag -> namesOfTag(tag, languageId));
@@ -74,6 +78,7 @@ public class IngredientTagsService {
     }
 
     public CompletionStage<Void> update(Long id, IngredientTagCreateUpdateDto dto, Long userId) {
+        logger.info("update(): id = {}, userId = {}, dto = {}", id, userId, dto);
         List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
 
         return checkAllIngredientIdsExist(dto.ingredientIds)

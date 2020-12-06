@@ -52,10 +52,12 @@ public class RecipeSearchService {
     }
 
     public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
+        logger.info("create(): isPermanent = {}, query = {}", isPermanent, query);
         return createHelper.create(query, isPermanent);
     }
 
     public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
+        logger.info("createWithLongId(): isPermanent = {}, query = {}", isPermanent, query);
         return createHelper.createWithLongId(query, isPermanent);
     }
 
@@ -68,6 +70,7 @@ public class RecipeSearchService {
     }
 
     public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id){
+        logger.info("update(): isPermanent = {}, id = {}, query = {}", isPermanent, id, query);
         return createHelper.update(query, isPermanent, id);
     }
 
