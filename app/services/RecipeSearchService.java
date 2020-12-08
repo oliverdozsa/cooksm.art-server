@@ -1,10 +1,8 @@
 package services;
 
 import com.typesafe.config.Config;
-import data.repositories.IngredientNameRepository;
-import data.repositories.IngredientTagRepository;
-import data.repositories.RecipeSearchRepository;
-import data.repositories.SourcePageRepository;
+import data.repositories.*;
+import data.repositories.exceptions.BusinessLogicViolationException;
 import lombokized.dto.RecipeSearchDto;
 import play.Logger;
 import queryparams.RecipesQueryParams;
@@ -12,6 +10,7 @@ import queryparams.RecipesQueryParams;
 import javax.inject.Inject;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -51,9 +50,16 @@ public class RecipeSearchService {
         return getHelper.single(id);
     }
 
-    public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
-        logger.info("create(): isPermanent = {}, query = {}", isPermanent, query);
-        return createHelper.create(query, isPermanent);
+    public CompletionStage<String> createShared(RecipesQueryParams.Params query) {
+        logger.info("create(): isPermanent = {}", query);
+        return containsUserDefinedIngredientTag(query)
+                .thenComposeAsync(doesContain -> {
+                    if (doesContain) {
+                        throw new BusinessLogicViolationException("Recipe query to share contains user defined tags!");
+                    }
+
+                    return createHelper.create(query, false);
+                });
     }
 
     public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
@@ -69,7 +75,7 @@ public class RecipeSearchService {
         logger.info("deleteExpired(): deleted {} / {}", deletedCount, ids.size());
     }
 
-    public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id){
+    public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id) {
         logger.info("update(): isPermanent = {}, id = {}, query = {}", isPermanent, id, query);
         return createHelper.update(query, isPermanent, id);
     }
@@ -93,5 +99,20 @@ public class RecipeSearchService {
         createHelper.recipeSearchRepository = recipeSearchRepository;
         createHelper.sourcePageRepository = sourcePageRepository;
         createHelper.queryCheck = queryCheck;
+    }
+
+    private CompletionStage<Boolean> containsUserDefinedIngredientTag(RecipesQueryParams.Params queryParams) {
+        List<Long> ingredientTagIds = new ArrayList<>();
+        addAllOf(queryParams.inIngTags, ingredientTagIds);
+        addAllOf(queryParams.exIngTags, ingredientTagIds);
+        addAllOf(queryParams.addIngTags, ingredientTagIds);
+
+        return ingredientTagRepository.containsUserDefined(ingredientTagIds);
+    }
+
+    private void addAllOf(List<Long> source, List<Long> target) {
+        if (source != null) {
+            target.addAll(source);
+        }
     }
 }

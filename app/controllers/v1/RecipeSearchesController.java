@@ -58,7 +58,7 @@ public class RecipeSearchesController extends Controller {
         RecipesQueryParams.Params params = form.get();
         nullifyUseFavoritesOnly(params);
 
-        return service.create(params, false)
+        return service.createShared(params)
                 .thenApplyAsync(id -> {
                     String location = routes.RecipeSearchesController.single(id).absoluteURL(request);
                     logger.info("create(): created query with location = {}", location);

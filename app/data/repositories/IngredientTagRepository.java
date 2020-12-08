@@ -18,4 +18,5 @@ public interface IngredientTagRepository {
     CompletionStage<Void> update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId);
     CompletionStage<Void> delete(Long id, Long userId);
     CompletionStage<List<UserSearch>> userSearchesOf(Long id, Long userId);
+    CompletionStage<Boolean> containsUserDefined(List<Long> tags);
 }

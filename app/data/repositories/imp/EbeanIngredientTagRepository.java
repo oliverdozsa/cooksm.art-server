@@ -207,6 +207,19 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 });
     }
 
+    @Override
+    public CompletionStage<Boolean> containsUserDefined(List<Long> ids) {
+        return supplyAsync(() -> {
+            logger.info("containsUserDefined(): tags = {}", ids);
+
+            return ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .in("id", ids)
+                    .isNotNull("user.id")
+                    .exists();
+        }, executionContext);
+    }
+
     private List<Ingredient> ingredientByIds(List<Long> ingredientIds) {
         return ebean.createQuery(Ingredient.class)
                 .where()
@@ -233,8 +246,8 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         return allTagIds.contains(tagId);
     }
 
-    private void addAllOf(List<Long> source, List<Long> target){
-        if(source != null) {
+    private void addAllOf(List<Long> source, List<Long> target) {
+        if (source != null) {
             target.addAll(source);
         }
     }

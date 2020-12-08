@@ -78,21 +78,21 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"goodAdditionalIngs\": 2," +
-                "  \"goodAdditionalIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3]," +
-                "  \"inIngTags\": [1]," +
-                "  \"exIngs\": [4, 7]," +
-                "  \"exIngTags\": [2]," +
-                "  \"addIngs\": [5]," +
-                "  \"addIngTags\": [6]," +
-                "  \"sourcePages\": [1, 2]" +
-                "}");
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"goodAdditionalIngs\": 2," +
+                        "  \"goodAdditionalIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]," +
+                        "  \"inIngTags\": [1]," +
+                        "  \"exIngs\": [4, 7]," +
+                        "  \"exIngTags\": [2]," +
+                        "  \"addIngs\": [5]," +
+                        "  \"addIngTags\": [6]," +
+                        "  \"sourcePages\": [1, 2]" +
+                        "}");
 
         // Then
         assertThat(statusOf(result), equalTo(CREATED));
@@ -150,13 +150,13 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3]," +
-                "  \"unknownIngs\": 0," +
-                "  \"unknownIngsRel\": \"ge\"" +
-                "}");
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]," +
+                        "  \"unknownIngs\": 0," +
+                        "  \"unknownIngsRel\": \"ge\"" +
+                        "}");
 
         // Then
         assertThat(statusOf(result), equalTo(FORBIDDEN));
@@ -169,11 +169,11 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                "  \"searchMode\": \"some-random-search-mode\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3]" +
-                "}");
+                        "  \"searchMode\": \"some-random-search-mode\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]" +
+                        "}");
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
@@ -190,15 +190,15 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3]," +
-                "  \"exIngs\": [1, 5, 6]" +
-                "}");
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]," +
+                        "  \"exIngs\": [1, 5, 6]" +
+                        "}");
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
@@ -237,21 +237,21 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"goodAdditionalIngs\": 2," +
-                "  \"goodAdditionalIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
-                "  \"inIngTags\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]," +
-                "  \"exIngs\": [21, 22, 23, 24, 25]," +
-                "  \"exIngTags\": [6, 7, 8]," +
-                "  \"addIngs\": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]," +
-                "  \"addIngTags\": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]," +
-                "  \"sourcePages\": [1, 2]" +
-                "}");
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"goodAdditionalIngs\": 2," +
+                        "  \"goodAdditionalIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]," +
+                        "  \"inIngTags\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]," +
+                        "  \"exIngs\": [21, 22, 23, 24, 25]," +
+                        "  \"exIngTags\": [6, 7, 8]," +
+                        "  \"addIngs\": [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]," +
+                        "  \"addIngTags\": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]," +
+                        "  \"sourcePages\": [1, 2]" +
+                        "}");
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
@@ -265,21 +265,21 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                    "  \"searchMode\": \"composed-of-number\"," +
-                    "  \"goodIngs\": 3," +
-                    "  \"goodIngsRel\": \"ge\"," +
-                    "  \"unknownIngs\": \"0\"," +
-                    "  \"unknownIngsRel\": \"ge\"," +
-                    "  \"goodAdditionalIngs\": 2," +
-                    "  \"goodAdditionalIngsRel\": \"ge\"," +
-                    "  \"inIngs\": [1, 2, 3, 42]," +
-                    "  \"inIngTags\": [1]," +
-                    "  \"exIngs\": [4, 7]," +
-                    "  \"exIngTags\": [2]," +
-                    "  \"addIngs\": [5]," +
-                    "  \"addIngTags\": [6]," +
-                    "  \"sourcePages\": [1, 2]" +
-                    "}");
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"goodAdditionalIngs\": 2," +
+                        "  \"goodAdditionalIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3, 42]," +
+                        "  \"inIngTags\": [1]," +
+                        "  \"exIngs\": [4, 7]," +
+                        "  \"exIngTags\": [2]," +
+                        "  \"addIngs\": [5]," +
+                        "  \"addIngTags\": [6]," +
+                        "  \"sourcePages\": [1, 2]" +
+                        "}");
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
@@ -292,17 +292,17 @@ public class RecipeSearchesControllerTest {
         // When
         Result result = client.create(
                 "{" +
-                "  \"searchMode\": \"composed-of-number\"," +
-                "  \"goodIngs\": 3," +
-                "  \"goodIngsRel\": \"ge\"," +
-                "  \"unknownIngs\": \"0\"," +
-                "  \"unknownIngsRel\": \"ge\"," +
-                "  \"inIngs\": [1, 2, 3]," +
-                "  \"inIngTags\": [1]," +
-                "  \"exIngs\": [4, 7]," +
-                "  \"exIngTags\": [2]," +
-                "  \"useFavoritesOnly\": true" +
-                "}",
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]," +
+                        "  \"inIngTags\": [1]," +
+                        "  \"exIngs\": [4, 7]," +
+                        "  \"exIngTags\": [2]," +
+                        "  \"useFavoritesOnly\": true" +
+                        "}",
                 1L);
 
         // Then
@@ -315,6 +315,33 @@ public class RecipeSearchesControllerTest {
 
         assertThat(statusOf(result), equalTo(OK));
         assertThat(result, hasNullForField("$.query.useFavoritesOnly"));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
+    public void createWithUserDefinedTags() {
+        // When
+        Result result = client.create(
+                "{" +
+                        "  \"searchMode\": \"composed-of-number\"," +
+                        "  \"goodIngs\": 3," +
+                        "  \"goodIngsRel\": \"ge\"," +
+                        "  \"unknownIngs\": \"0\"," +
+                        "  \"unknownIngsRel\": \"ge\"," +
+                        "  \"goodAdditionalIngs\": 2," +
+                        "  \"goodAdditionalIngsRel\": \"ge\"," +
+                        "  \"inIngs\": [1, 2, 3]," +
+                        "  \"inIngTags\": [1]," +
+                        "  \"exIngs\": [4, 7]," +
+                        "  \"exIngTags\": [7]," +
+                        "  \"addIngs\": [5]," +
+                        "  \"addIngTags\": [6]," +
+                        "  \"sourcePages\": [1, 2]" +
+                        "}");
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     private void createMaxNumberOfSearches() throws Exception {
