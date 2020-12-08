@@ -1,10 +1,8 @@
 package data.repositories.imp;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import data.DatabaseExecutionContext;
-import data.entities.Ingredient;
-import data.entities.IngredientTag;
-import data.entities.Language;
-import data.entities.User;
+import data.entities.*;
 import data.repositories.IngredientTagRepository;
 import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
@@ -14,11 +12,14 @@ import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
+import play.libs.Json;
+import queryparams.RecipesQueryParams;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -185,6 +186,27 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         }, executionContext);
     }
 
+    @Override
+    public CompletionStage<List<UserSearch>> userSearchesOf(Long id, Long userId) {
+        logger.info("userSearchesOf(): id = {}, userId = {}", id, userId);
+        return byId(id, userId)
+                .thenApplyAsync(e -> {
+                    List<UserSearch> userSearches = ebean.createQuery(UserSearch.class)
+                            .where()
+                            .eq("user.id", userId)
+                            .findList();
+
+                    List<UserSearch> userSearchesContainingTag = userSearches.stream()
+                            .filter(userSearch -> containsTag(userSearch, id))
+                            .collect(Collectors.toList());
+
+                    logger.info("userSearchesOf(): found {} user searches containing tag {}",
+                            userSearchesContainingTag.size(), id);
+
+                    return userSearchesContainingTag;
+                });
+    }
+
     private List<Ingredient> ingredientByIds(List<Long> ingredientIds) {
         return ebean.createQuery(Ingredient.class)
                 .where()
@@ -196,5 +218,24 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         String message = String.format("Not found user defined tag with id = %d, userId = %d",
                 id, userId);
         throw new NotFoundException(message);
+    }
+
+    private boolean containsTag(UserSearch entity, Long tagId) {
+        String jsonQueryStr = entity.getSearch().getQuery();
+        JsonNode queryJson = Json.parse(jsonQueryStr);
+        RecipesQueryParams.Params queryParams = Json.fromJson(queryJson, RecipesQueryParams.Params.class);
+
+        List<Long> allTagIds = new ArrayList<>();
+        addAllOf(queryParams.inIngTags, allTagIds);
+        addAllOf(queryParams.exIngTags, allTagIds);
+        addAllOf(queryParams.addIngTags, allTagIds);
+
+        return allTagIds.contains(tagId);
+    }
+
+    private void addAllOf(List<Long> source, List<Long> target){
+        if(source != null) {
+            target.addAll(source);
+        }
     }
 }

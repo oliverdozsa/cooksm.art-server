@@ -10,10 +10,11 @@ import play.mvc.Result;
 import rules.RuleChainForTests;
 
 import static extractors.DataFromResult.statusOf;
+import static extractors.IngredientTagsFromResult.conflictingUserSearchNamesOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
-import static play.mvc.Http.Status.NOT_FOUND;
-import static play.mvc.Http.Status.NO_CONTENT;
+import static play.mvc.Http.Status.*;
 
 public class IngredientTagsControllerTest_DeleteTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
@@ -43,6 +44,7 @@ public class IngredientTagsControllerTest_DeleteTest {
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Delete_InvalidId() {
         // When
@@ -53,6 +55,7 @@ public class IngredientTagsControllerTest_DeleteTest {
     }
 
     @Test
+    // Given
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Delete_TagOfOtherUser() {
         // When
@@ -60,5 +63,21 @@ public class IngredientTagsControllerTest_DeleteTest {
 
         // Then
         assertThat(statusOf(result), equalTo(NOT_FOUND));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {
+            "datasets/yml/ingredienttags.yml",
+            "datasets/yml/ingredienttags-user-defined.yml",
+            "datasets/yml/ingredienttags-user-defined-user-search.yml"
+    }, disableConstraints = true, cleanBefore = true)
+    public void testUserDefined_Delete_UserSearchExistsWithTagToDelete() {
+        // When
+        Result result = client.delete(10L, 1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(conflictingUserSearchNamesOf(result), containsInAnyOrder("user1query1", "user1query2"));
     }
 }

@@ -1,9 +1,11 @@
 package services;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
 import data.entities.Ingredient;
 import data.entities.IngredientName;
 import data.entities.IngredientTag;
+import data.entities.UserSearch;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
@@ -13,10 +15,12 @@ import dto.IngredientTagCreateUpdateDto;
 import lombokized.dto.IngredientNameDto;
 import lombokized.dto.IngredientTagDto;
 import lombokized.dto.IngredientTagResolvedDto;
+import lombokized.dto.UserSearchDto;
 import lombokized.queryparams.IngredientTagQueryParams;
 import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
 import play.Logger;
+import play.libs.Json;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -87,7 +91,14 @@ public class IngredientTagsService {
 
     public CompletionStage<Void> delete(Long id, Long userId) {
         logger.info("delete(): id = {}, userId = {}", id, userId);
-        return repository.delete(id, userId);
+        return repository.userSearchesOf(id, userId)
+                .thenAcceptAsync(list -> {
+                    if (list != null && list.size() > 0) {
+                        logger.warn("delete(): user defined tag is referenced by user search(es)!");
+                        throw createConlictingUserSearchesException(id, list);
+                    }
+                })
+                .thenComposeAsync(v -> repository.delete(id, userId));
     }
 
     private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams) {
@@ -131,7 +142,8 @@ public class IngredientTagsService {
 
     private CompletionStage<Void> checkAllIngredientIdsExist(List<Long> ingredientIds) {
         return ingredientNameRepository.byIngredientIds(ingredientIds, languageService.getDefault())
-                .thenRunAsync(() -> {});
+                .thenRunAsync(() -> {
+                });
     }
 
     private List<Long> toIds(List<Ingredient> ingredients) {
@@ -141,7 +153,7 @@ public class IngredientTagsService {
     }
 
     private CompletionStage<List<IngredientName>> namesOfTag(IngredientTag tag, Long languageId) {
-        if(tag != null) {
+        if (tag != null) {
             List<Long> ingredientIds = toIds(tag.getIngredients());
             return ingredientNameRepository
                     .byIngredientIds(ingredientIds, languageService.getLanguageIdOrDefault(languageId));
@@ -151,7 +163,7 @@ public class IngredientTagsService {
     }
 
     private IngredientTagResolvedDto createResolvedDto(IngredientTag tag, List<IngredientName> names) {
-        if(tag == null) {
+        if (tag == null) {
             throw new NotFoundException("Not found tag!");
         }
 
@@ -160,5 +172,16 @@ public class IngredientTagsService {
                 .collect(Collectors.toList());
 
         return DtoMapper.toDto(tag, namesDto);
+    }
+
+    private BusinessLogicViolationException createConlictingUserSearchesException(Long id, List<UserSearch> searches) {
+        ObjectNode json = Json.newObject();
+        List<UserSearchDto> searchDtos = searches.stream()
+                .map(DtoMapper::toDto)
+                .collect(Collectors.toList());
+        json.set("usersearches", Json.toJson(searchDtos));
+
+        return new BusinessLogicViolationException(json,
+                "There are user searches containing the user defined tag: " + id + "!");
     }
 }

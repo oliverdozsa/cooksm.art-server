@@ -1,6 +1,7 @@
 package data.repositories;
 
 import data.entities.IngredientTag;
+import data.entities.UserSearch;
 import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
 
@@ -16,4 +17,5 @@ public interface IngredientTagRepository {
     CompletionStage<IngredientTag> byId(Long id, Long userId);
     CompletionStage<Void> update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId);
     CompletionStage<Void> delete(Long id, Long userId);
+    CompletionStage<List<UserSearch>> userSearchesOf(Long id, Long userId);
 }

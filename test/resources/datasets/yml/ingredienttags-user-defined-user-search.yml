@@ -1,0 +1,33 @@
+recipe_search:
+  - id: 239327
+    query: >
+      {
+        "searchMode": "composed-of-number",
+        "goodIngs": 3,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3],
+        "exIngTags": [10]
+      }
+    is_permanent: true
+
+  - id: 239328
+    query: >
+      {
+        "searchMode": "composed-of-number",
+        "goodIngs": 3,
+        "goodIngsRel": "ge",
+        "inIngs": [1, 2, 3],
+        "inIngTags": [10]
+      }
+    is_permanent: true
+
+user_search:
+  - id: 1
+    name: user1query1
+    user_id: 1
+    search_id: 239327
+
+  - id: 2
+    name: user1query2
+    user_id: 1
+    search_id: 239328

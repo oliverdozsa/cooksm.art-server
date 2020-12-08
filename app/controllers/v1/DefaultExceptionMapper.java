@@ -21,8 +21,12 @@ class DefaultExceptionMapper implements Function<Throwable, Result> {
 
     @Override
     public Result apply(Throwable input) {
-        if (input instanceof IllegalArgumentException ||
-                input instanceof BusinessLogicViolationException) {
+        if (input instanceof BusinessLogicViolationException) {
+            logger.warn("Bad Request due to business logic violation!", input);
+            return badRequest(((BusinessLogicViolationException) input).errorContent);
+        }
+
+        if (input instanceof IllegalArgumentException) {
             logger.warn("Bad Request!", input);
             ValidationError ve = new ValidationError("", input.getMessage());
             return badRequest(Json.toJson(ve.messages()));

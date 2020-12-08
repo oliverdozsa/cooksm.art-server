@@ -47,4 +47,12 @@ public class IngredientTagsFromResult {
         JsonNode json = toJson(result);
         return json.get("name").asText();
     }
+
+    public static List<String> conflictingUserSearchNamesOf(Result result) {
+        ListOfValuesFromResult<String> values = new ListOfValuesFromResult<String>()
+                .select("$.usersearches")
+                .converting(n -> n.get("name").asText());
+
+        return values.of(result);
+    }
 }
