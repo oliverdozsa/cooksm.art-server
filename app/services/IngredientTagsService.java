@@ -101,6 +101,13 @@ public class IngredientTagsService {
                 .thenComposeAsync(v -> repository.delete(id, userId));
     }
 
+    public CompletionStage<List<IngredientTagDto>> userDefined(Long userId) {
+        logger.info("userDefined(): userId = {}", userId);
+
+        return repository.userDefinedOnly(userId)
+                .thenApplyAsync(this::toDtoList);
+    }
+
     private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams) {
         IngredientTagRepositoryParams.Page.Builder builder = IngredientTagRepositoryParams.Page.builder();
         builder.nameLike(queryParams.getNameLike());
@@ -118,11 +125,14 @@ public class IngredientTagsService {
     }
 
     private Page<IngredientTagDto> toPageDto(Page<IngredientTag> page) {
-        List<IngredientTagDto> items = page.getItems().stream()
+        List<IngredientTagDto> items = toDtoList(page.getItems());
+        return new Page<>(items, page.getTotalCount());
+    }
+
+    private List<IngredientTagDto> toDtoList(List<IngredientTag> entities) {
+        return entities.stream()
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());
-
-        return new Page<>(items, page.getTotalCount());
     }
 
     private void checkTagCountLimitReached(int currentValue) {

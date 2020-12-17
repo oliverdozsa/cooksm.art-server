@@ -19,4 +19,5 @@ public interface IngredientTagRepository {
     CompletionStage<Void> delete(Long id, Long userId);
     CompletionStage<List<UserSearch>> userSearchesOf(Long id, Long userId);
     CompletionStage<Boolean> containsUserDefined(List<Long> tags);
+    CompletionStage<List<IngredientTag>> userDefinedOnly(Long userId);
 }

@@ -17,6 +17,7 @@ import security.VerifiedJwt;
 import services.IngredientTagsService;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
@@ -127,11 +128,25 @@ public class IngredientTagsController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> userDefined(Http.Request request) {
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        logger.info("userDefined(): userId = {}", jwt.getUserId());
+
+        return service.userDefined(jwt.getUserId())
+                .thenApplyAsync(this::toResult)
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
     private Result toResult(Page<IngredientTagDto> pageDto) {
         return ok(toJson(pageDto));
     }
 
     private Result toResult(IngredientTagResolvedDto dto) {
         return ok(toJson(dto));
+    }
+
+    private Result toResult(List<IngredientTagDto> tagDtos) {
+        return ok(toJson(tagDtos));
     }
 }

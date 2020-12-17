@@ -10,10 +10,12 @@ GET    /ingredienttags                controllers.v1.IngredientTagsController.pa
 + jwtFilter
 POST   /ingredienttags/create         controllers.v1.IngredientTagsController.create(request: Request)
 + jwtFilter
+GET    /ingredienttags/userdefined    controllers.v1.IngredientTagsController.userDefined(request: Request)
++ jwtFilter
 GET    /ingredienttags/:id            controllers.v1.IngredientTagsController.single(id: Long, language: Long ?= 0, request: Request)
 + jwtFilter
 PUT    /ingredienttags/:id            controllers.v1.IngredientTagsController.update(id: Long, request: Request)
-+jwtFilter
++ jwtFilter
 DELETE /ingredienttags/:id            controllers.v1.IngredientTagsController.delete(id: Long, request: Request)
 
 # Favorite recipes

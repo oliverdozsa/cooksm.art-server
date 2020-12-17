@@ -55,4 +55,11 @@ public class IngredientTagsFromResult {
 
         return values.of(result);
     }
+
+    public static List<Long> idsOfUserDefinedOnlyTagsOf(Result result) {
+        ListOfValuesFromResult<Long> values = new ListOfValuesFromResult<Long>()
+                .converting(n -> n.get("id").asLong());
+
+        return values.of(result);
+    }
 }

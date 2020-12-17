@@ -82,6 +82,16 @@ public class IngredientTagsTestClient {
         return route(application, request);
     }
 
+    public Result userDefinedOnly(Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.IngredientTagsController.userDefined().url());
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
     private Http.RequestBuilder createPageRequest(String queryParams) {
         return new Http.RequestBuilder().method(GET)
                 .uri(routes.IngredientTagsController.page().url() + "?" + queryParams);

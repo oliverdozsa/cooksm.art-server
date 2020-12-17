@@ -220,6 +220,18 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         }, executionContext);
     }
 
+    @Override
+    public CompletionStage<List<IngredientTag>> userDefinedOnly(Long userId) {
+        return supplyAsync(() -> {
+            logger.info("userDefinedOnly(): userId = {}", userId);
+
+            return ebean.createQuery(IngredientTag.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .findList();
+        }, executionContext);
+    }
+
     private List<Ingredient> ingredientByIds(List<Long> ingredientIds) {
         return ebean.createQuery(Ingredient.class)
                 .where()

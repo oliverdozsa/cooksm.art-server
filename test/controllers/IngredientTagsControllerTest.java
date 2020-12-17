@@ -141,4 +141,17 @@ public class IngredientTagsControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testListTags_UserDefinedOny() {
+        // When
+        Result result = client.userDefinedOnly(1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(sizeAsJsonOf(result), equalTo(3));
+        assertThat(idsOfUserDefinedOnlyTagsOf(result), containsInAnyOrder(10L, 11L, 12L));
+    }
 }
