@@ -229,7 +229,7 @@ recipe:
   - id: 1
     name: recipe_1
     url: recipe_1_url
-    time: 10
+    time: 0
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 1
@@ -237,7 +237,7 @@ recipe:
   - id: 2
     name: recipe_2
     url: recipe_2_url
-    time: 10
+    time: 1
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 2
@@ -245,7 +245,7 @@ recipe:
   - id: 3
     name: recipe_3
     url: recipe_3_url
-    time: 10
+    time: 2
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 3
@@ -253,7 +253,7 @@ recipe:
   - id: 4
     name: recipe_4
     url: recipe_4_url
-    time: 10
+    time: 0
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 4
@@ -261,7 +261,7 @@ recipe:
   - id: 5
     name: recipe_5
     url: recipe_5_url
-    time: 10
+    time: 1
     date_added: 2020-04-25 04:02:00
     numofings: 0
     source_page_id: 4

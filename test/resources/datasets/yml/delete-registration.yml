@@ -136,7 +136,7 @@ recipe:
   - id: 1
     name: recipe_1
     url: recipe_1_url
-    time: 10
+    time: 0
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 1
@@ -144,7 +144,7 @@ recipe:
   - id: 2
     name: recipe_2
     url: recipe_2_url
-    time: 10
+    time: 1
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 1

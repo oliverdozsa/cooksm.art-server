@@ -27,7 +27,8 @@ public class Recipe {
     private Integer numofings;
 
     @Column(name = "time")
-    private Integer time;
+    @Enumerated(EnumType.ORDINAL)
+    private Time time;
 
     @OneToMany(mappedBy = "recipe", fetch = FetchType.EAGER)
     private List<RecipeIngredient> ingredients;
@@ -79,11 +80,11 @@ public class Recipe {
         this.numofings = numofings;
     }
 
-    public Integer getTime() {
+    public Time getTime() {
         return time;
     }
 
-    public void setTime(Integer time) {
+    public void setTime(Time time) {
         this.time = time;
     }
 
@@ -109,5 +110,9 @@ public class Recipe {
 
     public void setSourcePage(SourcePage sourcePage) {
         this.sourcePage = sourcePage;
+    }
+
+    public enum Time {
+        QUICK, AVERAGE, LENGTHY
     }
 }
