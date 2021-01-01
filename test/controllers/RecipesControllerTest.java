@@ -625,7 +625,7 @@ public class RecipesControllerTest {
     public void testFilterByTime() {
         // When
         Result result = client.page("limit=50&offset=0&" +
-                "orderBy=name&orderBySort=asc&" +
+                "orderBy=time&orderBySort=desc&" +
                 "times[0]=0&times[1]=2&" +
                 "sourcePages[0]=1&sourcePages[1]=2&sourcePages[2]=3&sourcePages[3]=4");
 
@@ -633,6 +633,7 @@ public class RecipesControllerTest {
         assertThat(statusOf(result), equalTo(OK));
         assertThat(recipeIdsOf(result), hasSize(3));
         assertThat(recipeIdsOf(result), containsInAnyOrder(1L, 3L, 4L));
+        assertThat(recipeIdsOf(result).get(0), equalTo(3L));
     }
 
     private void createRecipesInDbForPaging() {

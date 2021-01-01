@@ -25,7 +25,7 @@ public class RecipesQueryParams {
         @Constraints.Min(0)
         public Integer maxIngs;
 
-        @Constraints.Pattern("(name|numofings)")
+        @Constraints.Pattern("(name|numofings|time)")
         public String orderBy;
 
         @Constraints.Pattern("(asc|desc)")
