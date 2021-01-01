@@ -52,6 +52,7 @@ class RecipesQueryParamsMapping {
         builder.orderBy(queryParams.orderBy);
         builder.orderBySort(queryParams.orderBySort);
         builder.sourcePageIds(queryParams.sourcePages);
+        builder.times(queryParams.times);
 
         return builder.build();
     }

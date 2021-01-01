@@ -497,7 +497,7 @@ public class RecipesControllerTest {
     @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testComposedOfNumber_WithAdditionals_WithTags() {
         // When
-        Result result =  client.page("searchMode=composed-of-number&" +
+        Result result = client.page("searchMode=composed-of-number&" +
                 "limit=50&offset=0&" +
                 "unknownIngs=0&unknownIngsRel=ge&" +
                 "goodIngs=1&goodIngsRel=eq&" +
@@ -551,7 +551,7 @@ public class RecipesControllerTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
-    public void testByRatio_WithAdditionals(){
+    public void testByRatio_WithAdditionals() {
         // When
         Result result = client.page("searchMode=composed-of-ratio&" +
                 "goodIngsRatio=0.9&" +
@@ -617,6 +617,22 @@ public class RecipesControllerTest {
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/recipes.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testFilterByTime() {
+        // When
+        Result result = client.page("limit=50&offset=0&" +
+                "orderBy=name&orderBySort=asc&" +
+                "times[0]=0&times[1]=2&" +
+                "sourcePages[0]=1&sourcePages[1]=2&sourcePages[2]=3&sourcePages[3]=4");
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(recipeIdsOf(result), hasSize(3));
+        assertThat(recipeIdsOf(result), containsInAnyOrder(1L, 3L, 4L));
     }
 
     private void createRecipesInDbForPaging() {

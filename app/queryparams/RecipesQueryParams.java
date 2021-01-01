@@ -80,6 +80,8 @@ public class RecipesQueryParams {
 
         public List<Long> sourcePages;
 
+        public List<Long> times;
+
         public Long languageId;
 
         public Boolean useFavoritesOnly;
@@ -136,6 +138,7 @@ public class RecipesQueryParams {
                     ", addIngs=" + addIngs +
                     ", addIngTags=" + addIngTags +
                     ", sourcePages=" + sourcePages +
+                    ", times=" + times +
                     ", languageId=" + languageId +
                     ", useFavoritesOnly=" + useFavoritesOnly +
                     '}';

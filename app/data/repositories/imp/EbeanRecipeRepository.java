@@ -133,6 +133,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         setNumberOfIngredientsCondition(query, params);
         setOrderByCondition(query, params);
         setSourcePagesCondition(query, params);
+        setTimesCondition(query, params);
         setNameLikeCondition(query, params);
         setPagingCondition(query, params);
         setExcludedIngredientsCondition(query, params);
@@ -165,6 +166,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private void setSourcePagesCondition(Query<Recipe> query, Common params) {
         if (params.getSourcePageIds() != null && params.getSourcePageIds().size() > 0) {
             query.where().in("sourcePage.id", params.getSourcePageIds());
+        }
+    }
+
+    private void setTimesCondition(Query<Recipe> query, Common params) {
+        if(params.getTimes() != null && params.getTimes().size() > 0) {
+            query.where().in("time", params.getTimes());
         }
     }
 
