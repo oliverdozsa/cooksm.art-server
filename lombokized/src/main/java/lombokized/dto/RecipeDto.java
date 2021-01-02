@@ -12,4 +12,5 @@ public class RecipeDto {
     private final Integer numofings;
     private final SourcePageDto sourcePage;
     private final List<IngredientNameDto> ingredients;
+    private final Integer time;
 }

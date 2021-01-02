@@ -647,6 +647,7 @@ public class RecipesControllerTest {
             recipe.setDateAdded(Instant.now());
             recipe.setNumofings(1);
             recipe.setSourcePage(Ebean.createQuery(SourcePage.class).where().eq("id", 1).findOne());
+            recipe.setTime(Recipe.Time.AVERAGE);
             Ebean.save(recipe);
 
             RecipeIngredient recipeIngredient = new RecipeIngredient();
