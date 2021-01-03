@@ -113,6 +113,6 @@ public class Recipe {
     }
 
     public enum Time {
-        QUICK, AVERAGE, LENGTHY
+        QUICK, AVERAGE, LENGTHY, UNKNOWN
     }
 }
