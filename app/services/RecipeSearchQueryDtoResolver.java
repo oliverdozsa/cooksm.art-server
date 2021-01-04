@@ -170,6 +170,7 @@ class RecipeSearchQueryDtoResolver {
                 .exIngs(excludedIngredients)
                 .exIngTags(excludedIngredientTags)
                 .sourcePages(sourcePages)
+                .times(queryParams.times)
                 .build();
     }
 }

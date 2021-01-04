@@ -73,7 +73,7 @@ public class RecipeRepositoryParams {
         Integer limit;
         String nameLike;
         List<Long> sourcePageIds;
-        List<Long> times;
+        List<Integer> times;
         Long userId;
         Boolean useFavoritesOnly;
     }

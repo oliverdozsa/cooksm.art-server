@@ -80,7 +80,7 @@ public class RecipesQueryParams {
 
         public List<Long> sourcePages;
 
-        public List<Long> times;
+        public List<Integer> times;
 
         public Long languageId;
 

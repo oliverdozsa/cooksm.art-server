@@ -30,6 +30,7 @@ public class RecipeSearchQueryDto {
     List<IngredientNameDto> addIngs;
     List<IngredientTagDto> addIngTags;
     List<SourcePageDto> sourcePages;
+    List<Integer> times;
 
     Long languageId;
 }
