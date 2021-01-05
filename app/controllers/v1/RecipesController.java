@@ -29,9 +29,6 @@ public class RecipesController extends Controller {
     private FormFactory formFactory;
 
     @Inject
-    private Config config;
-
-    @Inject
     private RecipesService service;
 
     private Function<Throwable, Result> mapException = t -> {

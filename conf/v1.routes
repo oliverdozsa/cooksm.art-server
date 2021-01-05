@@ -55,3 +55,9 @@ POST  /security/loginfacebook     controllers.v1.SecurityController.loginThrough
 POST  /security/renew             controllers.v1.SecurityController.renew(request: Request)
 + jwtFilter
 DELETE /security/deregister       controllers.v1.SecurityController.deregister(request: Request)
+
+# Recipe books
++ jwtFilter
+GET   /recipebooks/all            controllers.v1.RecipeBooksController.all(request: Request)
++ jwtFilter
+POST  /recipebooks                controllers.v1.RecipeBooksController.create(request: Request)
