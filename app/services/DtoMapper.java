@@ -89,4 +89,8 @@ public class DtoMapper {
     public static IngredientTagResolvedDto toDto(IngredientTag tag, List<IngredientNameDto> names) {
         return new IngredientTagResolvedDto(tag.getId(), tag.getName(), names);
     }
+
+    public static RecipeBookDto toDto(RecipeBook entity) {
+        return new RecipeBookDto(entity.getName(), entity.getLastAccessed());
+    }
 }

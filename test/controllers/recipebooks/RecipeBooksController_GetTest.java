@@ -24,6 +24,20 @@ public class RecipeBooksController_GetTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetSingle() {
+        // TODO
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetSingle_OtherUser() {
+        // TODO
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAllOfUser() {
         // TODO
     }
@@ -32,6 +46,13 @@ public class RecipeBooksController_GetTest {
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAllOfUser_UserHasNoBooks() {
+        // TODO
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testNotFound(){
         // TODO
     }
 }

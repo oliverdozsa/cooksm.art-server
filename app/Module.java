@@ -29,10 +29,12 @@ public class Module extends AbstractModule {
         bind(RecipeSearchRepository.class).to(EbeanRecipeSearchRepository.class).asEagerSingleton();
         bind(UserSearchRepository.class).to(EbeanUserSearchRepository.class).asEagerSingleton();
         bind(GlobalSearchRepository.class).to(EbeanGlobalSearchRepository.class).asEagerSingleton();
+        bind(RecipeBookRepository.class).to(EbeanRecipeBookRepository.class).asEagerSingleton();
         bind(RecipeSearchService.class).asEagerSingleton();
         bind(LanguageService.class).asEagerSingleton();
         bind(UserSearchService.class).asEagerSingleton();
         bind(RecipeRepositoryQueryCheck.class).asEagerSingleton();
         bind(IngredientTagsService.class).asEagerSingleton();
+        bind(RecipeBooksService.class).asEagerSingleton();
     }
 }

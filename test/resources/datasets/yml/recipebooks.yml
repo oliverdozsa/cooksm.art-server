@@ -1,0 +1,18 @@
+users:
+  - id: 1
+    email: user1@example.com
+    full_name: John Doe
+
+  - id: 2
+    email: user2@example.com
+    full_name: Jane Doe
+
+  - id: 3
+    email: user3@example.com
+    full_name: Jack Doe
+
+recipe_book:
+  - id: 1
+    name: recipe-book-1-user-1
+    last_accessed: 2021-01-01 04:02:00
+    user_id: 1
