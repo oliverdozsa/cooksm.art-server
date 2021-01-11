@@ -63,3 +63,5 @@ GET   /recipebooks/all            controllers.v1.RecipeBooksController.all(reque
 POST  /recipebooks                controllers.v1.RecipeBooksController.create(request: Request)
 + jwtFilter
 GET   /recipebooks/:id            controllers.v1.RecipeBooksController.single(id: Long, request: Request)
++ jwtFilter
+PUT   /recipebooks/:id            controllers.v1.RecipeBooksController.update(id: Long, request: Request)

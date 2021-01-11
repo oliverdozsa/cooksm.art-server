@@ -57,7 +57,7 @@ public class IngredientTagsTestClient {
         Http.RequestBuilder request = new Http.RequestBuilder().method(PUT)
                 .bodyJson(Json.toJson(dto))
                 .uri(routes.IngredientTagsController.update(id).url());
-        String jwt = JwtTestUtils.createToken(1L, application.config());
+        String jwt = JwtTestUtils.createToken(userId, application.config());
         JwtTestUtils.addJwtTokenTo(request, jwt);
 
         return route(application, request);

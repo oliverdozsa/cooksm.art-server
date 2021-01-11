@@ -72,6 +72,13 @@ public class RecipeBooksController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> update(Long id, Http.Request request) {
+        logger.info("update(): id = {}", id);
+
+        // TODO
+        return null;
+    }
+
     private Result toResult(List<RecipeBookDto> dtoList) {
         return ok(Json.toJson(dtoList));
     }

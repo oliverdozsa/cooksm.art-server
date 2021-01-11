@@ -48,4 +48,18 @@ public class RecipeBooksControllerTest_UpdateTest {
     public void testUpdateName_NewNameAlreadyExistsButForAnotherUser() {
         // TODO
     }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testUpdateName_UserDoesNotExist() {
+        // TODO
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testUpdateName_RecipeBookDoesNotExist() {
+        // TODO
+    }
 }

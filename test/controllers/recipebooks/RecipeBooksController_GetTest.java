@@ -74,6 +74,17 @@ public class RecipeBooksController_GetTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetAllOfUserNotExisting() {
+        // When
+        Result result = client.allOf(42L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAllOfUser_UserHasNoBooks() {
         // When
         Result result = client.single(1L, 3L);
@@ -96,7 +107,7 @@ public class RecipeBooksController_GetTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testUserDoesNotExist() {
+    public void testSingleUserDoesNotExist() {
         // When
         Result result = client.single(1L, 42L);
 

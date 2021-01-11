@@ -9,8 +9,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import utils.JwtTestUtils;
 
-import static play.mvc.Http.HttpVerbs.GET;
-import static play.mvc.Http.HttpVerbs.POST;
+import static play.mvc.Http.HttpVerbs.*;
 import static play.test.Helpers.route;
 
 public class RecipeBooksTestClient {
@@ -59,6 +58,18 @@ public class RecipeBooksTestClient {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
                 .uri(routes.RecipeBooksController.all().url());
+
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
+    public Result update(Long id, RecipeBookCreateUpdateDto dto, Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(PUT)
+                .bodyJson(Json.toJson(dto))
+                .uri(routes.RecipeBooksController.update(id).url());
 
         String jwt = JwtTestUtils.createToken(userId, application.config());
         JwtTestUtils.addJwtTokenTo(request, jwt);
