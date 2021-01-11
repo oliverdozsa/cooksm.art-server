@@ -16,3 +16,18 @@ recipe_book:
     name: recipe-book-1-user-1
     last_accessed: 2021-01-01 04:02:00
     user_id: 1
+
+  - id: 2
+    name: recipe-book-2-user-2
+    last_accessed: 2021-01-01 04:02:42
+    user_id: 2
+
+  - id: 3
+    name: recipe-book-3-user-2
+    last_accessed: 2021-01-01 04:42:42
+    user_id: 2
+
+  - id: 4
+    name: recipe-book-4-user-2
+    last_accessed: 2021-01-01 04:21:42
+    user_id: 2

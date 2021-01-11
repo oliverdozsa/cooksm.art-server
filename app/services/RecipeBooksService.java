@@ -12,6 +12,9 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+
+import static services.DtoMapper.toDto;
 
 public class RecipeBooksService {
     @Inject
@@ -39,8 +42,9 @@ public class RecipeBooksService {
 
     public CompletionStage<List<RecipeBookDto>> all(Long user) {
         logger.info("all(): user = {}", user);
-        // TODO
-        return null;
+
+        return repository.allOf(user)
+                .thenApplyAsync(this::toDtoList);
     }
 
     public CompletionStage<RecipeBookDto> single(Long user, Long id) {
@@ -59,5 +63,11 @@ public class RecipeBooksService {
         if (doesExist) {
             throw new ForbiddenExeption("Recipe book with name already exists! name = " + name + ", userId = " + userId);
         }
+    }
+
+    private List<RecipeBookDto> toDtoList(List<RecipeBook> entities) {
+        return entities.stream()
+                .map(DtoMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

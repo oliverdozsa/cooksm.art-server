@@ -44,4 +44,25 @@ public class RecipeBooksTestClient {
 
         return route(application, request);
     }
+
+    public Result single(Long id, Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeBooksController.single(id).url());
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
+    public Result allOf(Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeBooksController.all().url());
+
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
 }

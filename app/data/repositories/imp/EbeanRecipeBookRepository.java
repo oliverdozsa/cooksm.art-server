@@ -12,6 +12,7 @@ import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
@@ -73,10 +74,10 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     }
 
     @Override
-    public CompletionStage<Integer> countOf(Long user) {
+    public CompletionStage<Integer> countOf(Long userId) {
         return supplyAsync(() -> ebean.createQuery(RecipeBook.class)
                         .where()
-                        .eq("user.id", user)
+                        .eq("user.id", userId)
                         .findCount()
                 , executionContext);
     }
@@ -89,6 +90,18 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
                         .eq("name", name)
                         .findOneOrEmpty()
                 , executionContext);
+    }
+
+    @Override
+    public CompletionStage<List<RecipeBook>> allOf(Long userId) {
+        return supplyAsync(() -> {
+            assertEntityExists(ebean, User.class, userId);
+
+            return ebean.createQuery(RecipeBook.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .findList();
+        });
     }
 
     private void throwNotFoundException(Long id, Long userId) {

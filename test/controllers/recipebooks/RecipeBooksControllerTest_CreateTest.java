@@ -126,15 +126,15 @@ public class RecipeBooksControllerTest_CreateTest {
         assertThat(statusOf(result), equalTo(FORBIDDEN));
     }
 
-    private void createMaxRecipeBooks(Long user) {
+    private void createMaxRecipeBooks(Long userId) {
         Config config = ruleChainForTests.getApplication().config();
         int maxPerUser = config.getInt("receptnekem.recipebooks.maxperuser");
 
         for (int i = 0; i < maxPerUser; i++) {
             RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-            dto.name = "recipe-book-" + (i + 1) + "-user-" + user;
+            dto.name = "recipe-book-" + (i + 1) + "-user-" + userId;
 
-            Result result = client.create(dto, user);
+            Result result = client.create(dto, userId);
             assertThat(statusOf(result), equalTo(CREATED));
         }
     }
