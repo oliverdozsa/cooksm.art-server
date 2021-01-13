@@ -14,8 +14,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
-import static services.DtoMapper.toDto;
-
 public class RecipeBooksService {
     @Inject
     private RecipeBookRepository repository;
@@ -53,6 +51,14 @@ public class RecipeBooksService {
                 .thenApplyAsync(DtoMapper::toDto);
     }
 
+    public CompletionStage<Void> update(Long userId, Long id, RecipeBookCreateUpdateDto dto) {
+        logger.info("update(): userId = {}, id = {}, dto = {}", userId, id, dto);
+        return repository
+                .byNameOfUser(userId, dto.name)
+                .thenAcceptAsync(o -> checkNameToUpdate(o, dto.name, userId, id))
+                .thenComposeAsync(v -> repository.update(id, dto.name, userId));
+    }
+
     private void checkCount(int count, Long user) {
         if (count >= maxPerUser) {
             throw new ForbiddenExeption("User reached max limit! user = " + user);
@@ -62,6 +68,14 @@ public class RecipeBooksService {
     private void checkNameExists(boolean doesExist, String name, Long userId) {
         if (doesExist) {
             throw new ForbiddenExeption("Recipe book with name already exists! name = " + name + ", userId = " + userId);
+        }
+    }
+
+    private void checkNameToUpdate(Optional<RecipeBook> recipeBookOptional, String name, Long userId, Long updateId) {
+        boolean doesNameExistForOtherEntity = recipeBookOptional.isPresent() &&
+                !updateId.equals(recipeBookOptional.get().getId());
+        if (doesNameExistForOtherEntity) {
+            throw new ForbiddenExeption("Other recipe book with name already exists! name = " + name + ", userId = " + userId);
         }
     }
 

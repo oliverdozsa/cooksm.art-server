@@ -75,8 +75,18 @@ public class RecipeBooksController extends Controller {
     public CompletionStage<Result> update(Long id, Http.Request request) {
         logger.info("update(): id = {}", id);
 
-        // TODO
-        return null;
+        Form<RecipeBookCreateUpdateDto> form = formFactory.form(RecipeBookCreateUpdateDto.class)
+                .bindFromRequest(request);
+
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.update(jwt.getUserId(), id, form.get())
+                .thenApplyAsync(v -> (Result) noContent())
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     private Result toResult(List<RecipeBookDto> dtoList) {

@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import static data.repositories.imp.EbeanRepoUtils.assertEntityExists;
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanRecipeBookRepository implements RecipeBookRepository {
@@ -102,6 +103,31 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
                     .eq("user.id", userId)
                     .findList();
         });
+    }
+
+    @Override
+    public CompletionStage<Void> update(Long id, String name, Long userId) {
+        return runAsync(() -> {
+            logger.info("update(): id = {}, name = {}, userId = {}", id, name, userId);
+
+            assertEntityExists(ebean, RecipeBook.class, id);
+            assertEntityExists(ebean, User.class, userId);
+
+            RecipeBook entity = ebean.createQuery(RecipeBook.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .eq("id", id)
+                    .findOne();
+
+            if (entity == null) {
+                throwNotFoundException(id, userId);
+            }
+
+            entity.setName(name);
+            entity.setLastAccessed(Instant.now());
+            ebean.save(entity);
+
+        }, executionContext);
     }
 
     private void throwNotFoundException(Long id, Long userId) {

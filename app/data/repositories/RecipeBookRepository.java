@@ -12,4 +12,5 @@ public interface RecipeBookRepository {
     CompletionStage<Integer> countOf(Long user);
     CompletionStage<Optional<RecipeBook>> byNameOfUser(Long userId, String name);
     CompletionStage<List<RecipeBook>> allOf(Long userId);
+    CompletionStage<Void> update(Long id, String name, Long userId);
 }

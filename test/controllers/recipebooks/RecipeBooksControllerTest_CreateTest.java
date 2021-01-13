@@ -62,7 +62,7 @@ public class RecipeBooksControllerTest_CreateTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_InvalidName() {
+    public void testCreateWithInvalidName() {
         // When
         RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
         dto.name = "s";
@@ -76,7 +76,7 @@ public class RecipeBooksControllerTest_CreateTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_AlreadyExistingWithName() {
+    public void testCreateWithAlreadyExistingName() {
         // When
         RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
         dto.name = "recipe-book-1-user-1";
@@ -90,7 +90,7 @@ public class RecipeBooksControllerTest_CreateTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_AlreadyExistingWithNameButForOtherUser() {
+    public void testCreateWithAlreadyExistingNameButForOtherUser() {
         // When
         Instant beforeCreate = Instant.now();
         RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
@@ -112,7 +112,7 @@ public class RecipeBooksControllerTest_CreateTest {
 
     @Test
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testCreate_LimitReached() {
+    public void testCreateLimitReached() {
         // Given
         createMaxRecipeBooks(3L);
 
