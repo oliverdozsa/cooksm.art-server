@@ -67,3 +67,7 @@ GET     /recipebooks/:id            controllers.v1.RecipeBooksController.single(
 PUT     /recipebooks/:id            controllers.v1.RecipeBooksController.update(id: Long, request: Request)
 + jwtFilter
 DELETE  /recipebooks/:id            controllers.v1.RecipeBooksController.delete(id: Long, request: Request)
++ jwtFilter
+POST    /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.addRecipes(id: Long, request: Request)
++ jwtFilter
+GET     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.recipesOf(id: Long, request: Request)

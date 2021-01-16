@@ -10,6 +10,7 @@ import play.mvc.Result;
 import utils.JwtTestUtils;
 
 import static play.mvc.Http.HttpVerbs.*;
+import static play.test.Helpers.GET;
 import static play.test.Helpers.route;
 
 public class RecipeBooksTestClient {
@@ -83,6 +84,27 @@ public class RecipeBooksTestClient {
                 .uri(routes.RecipeBooksController.delete(id).url());
         String jwt = JwtTestUtils.createToken(userId, application.config());
         JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
+
+    public Result addRecipes(Long id, Long[] recipeIds) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeBooksController.addRecipes(id).url());
+
+        // TODO
+
+        return route(application, request);
+    }
+
+    public Result recipesOf(Long id) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipeBooksController.recipesOf(id).url());
+
+        // TODO
 
         return route(application, request);
     }

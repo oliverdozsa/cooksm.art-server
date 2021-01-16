@@ -99,6 +99,14 @@ public class RecipeBooksController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> addRecipes(Long id, Http.Request request) {
+        return null;
+    }
+
+    public CompletionStage<Result> recipesOf(Long id, Http.Request request) {
+        return null;
+    }
+
     private Result toResult(List<RecipeBookDto> dtoList) {
         return ok(Json.toJson(dtoList));
     }

@@ -33,35 +33,35 @@ public class RecipeBooksControllerTest_AddRecipesTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testAddRecipesTo_AlreadyAdded() {
+    public void testAddRecipesAlreadyAdded() {
         // TODO
     }
 
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testAddRecipesTo_NotExistingBook() {
+    public void testAddRecipesNotExistingBook() {
         // TODO
     }
 
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testAddRecipesTo_OtherUsersBook() {
+    public void testAddRecipesToOtherUsersBook() {
         // TODO
     }
 
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testAddRecipesTo_NotExistingRecipe() {
+    public void testAddRecipesToNotExistingRecipe() {
         // TODO
     }
 
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
-    public void testAddRecipesTo_LimitReached() {
+    public void testAddRecipesToLimitReached() {
         // TODO
     }
 }
