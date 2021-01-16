@@ -76,4 +76,14 @@ public class RecipeBooksTestClient {
 
         return route(application, request);
     }
+
+    public Result delete(Long id, Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(DELETE)
+                .uri(routes.RecipeBooksController.delete(id).url());
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
 }

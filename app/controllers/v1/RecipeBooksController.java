@@ -89,6 +89,16 @@ public class RecipeBooksController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> delete(Long id, Http.Request request) {
+        logger.info("delete(): id = {}", id);
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.delete(id, jwt.getUserId())
+                .thenApplyAsync(v -> (Result) noContent())
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
     private Result toResult(List<RecipeBookDto> dtoList) {
         return ok(Json.toJson(dtoList));
     }

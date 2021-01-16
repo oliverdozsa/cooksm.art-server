@@ -59,6 +59,11 @@ public class RecipeBooksService {
                 .thenComposeAsync(v -> repository.update(id, dto.name, userId));
     }
 
+    public CompletionStage<Void> delete(Long userId, Long id) {
+        logger.info("delete(): userId = {}, id = {}", userId, id);
+        return repository.delete(id, userId);
+    }
+
     private void checkCount(int count, Long user) {
         if (count >= maxPerUser) {
             throw new ForbiddenExeption("User reached max limit! user = " + user);

@@ -58,10 +58,12 @@ DELETE /security/deregister       controllers.v1.SecurityController.deregister(r
 
 # Recipe books
 + jwtFilter
-GET   /recipebooks/all            controllers.v1.RecipeBooksController.all(request: Request)
+GET     /recipebooks/all            controllers.v1.RecipeBooksController.all(request: Request)
 + jwtFilter
-POST  /recipebooks                controllers.v1.RecipeBooksController.create(request: Request)
+POST    /recipebooks                controllers.v1.RecipeBooksController.create(request: Request)
 + jwtFilter
-GET   /recipebooks/:id            controllers.v1.RecipeBooksController.single(id: Long, request: Request)
+GET     /recipebooks/:id            controllers.v1.RecipeBooksController.single(id: Long, request: Request)
 + jwtFilter
-PUT   /recipebooks/:id            controllers.v1.RecipeBooksController.update(id: Long, request: Request)
+PUT     /recipebooks/:id            controllers.v1.RecipeBooksController.update(id: Long, request: Request)
++ jwtFilter
+DELETE  /recipebooks/:id            controllers.v1.RecipeBooksController.delete(id: Long, request: Request)

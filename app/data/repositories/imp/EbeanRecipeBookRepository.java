@@ -130,6 +130,28 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
         }, executionContext);
     }
 
+    @Override
+    public CompletionStage<Void> delete(Long id, Long userId) {
+        logger.info("delete(): id = {}, userId = {}", id, userId);
+
+        return runAsync(() -> {
+            assertEntityExists(ebean, RecipeBook.class, id);
+            assertEntityExists(ebean, User.class, id);
+
+            RecipeBook entity = ebean.createQuery(RecipeBook.class)
+                    .where()
+                    .eq("id", id)
+                    .eq("user.id", userId)
+                    .findOne();
+
+            if(entity == null) {
+                throwNotFoundException(id, userId);
+            }
+
+            ebean.delete(entity);
+        }, executionContext);
+    }
+
     private void throwNotFoundException(Long id, Long userId) {
         String message = String.format("Not found recipe book with id = %d, userId = %d",
                 id, userId);
