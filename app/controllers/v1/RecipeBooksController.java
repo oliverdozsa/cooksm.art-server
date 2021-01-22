@@ -1,7 +1,9 @@
 package controllers.v1;
 
 import dto.RecipeBookCreateUpdateDto;
+import dto.RecipeBookRecipesCreateUpdateDto;
 import lombokized.dto.RecipeBookDto;
+import lombokized.dto.RecipeBookWithRecipesDto;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -100,11 +102,29 @@ public class RecipeBooksController extends Controller {
     }
 
     public CompletionStage<Result> addRecipes(Long id, Http.Request request) {
-        return null;
+        logger.info("addRecipes(): id = {}", id);
+
+        Form<RecipeBookRecipesCreateUpdateDto> form = formFactory.form(RecipeBookRecipesCreateUpdateDto.class)
+                .bindFromRequest(request);
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.addRecipes(jwt.getUserId(), id, form.get())
+                .thenApplyAsync(v -> (Result) noContent())
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     public CompletionStage<Result> recipesOf(Long id, Http.Request request) {
-        return null;
+        logger.info("recipesOf(): id = {}", id);
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.recipesOf(jwt.getUserId(), id)
+                .thenApplyAsync(this::toResult)
+                .exceptionally(mapExceptionWithUnpack);
     }
 
     private Result toResult(List<RecipeBookDto> dtoList) {
@@ -112,6 +132,10 @@ public class RecipeBooksController extends Controller {
     }
 
     private Result toResult(RecipeBookDto dto) {
+        return ok(Json.toJson(dto));
+    }
+
+    private Result toResult(RecipeBookWithRecipesDto dto) {
         return ok(Json.toJson(dto));
     }
 }

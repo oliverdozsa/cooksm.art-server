@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import rules.RuleChainForTests;
 
-public class RecipeBooksControllerTest_DeleteRecipesTest {
+public class RecipeBooksControllerTest_UpdateRecipesTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
 
     @Rule
@@ -32,6 +32,14 @@ public class RecipeBooksControllerTest_DeleteRecipesTest {
     @Test
     // Given
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testUpdateRecipes() {
+        // TODO: bulk delete
+        // TODO
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testDeleteRecipes_ContainsNotExistingRecipe() {
         // TODO
     }
@@ -48,5 +56,12 @@ public class RecipeBooksControllerTest_DeleteRecipesTest {
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testDeleteRecipes_OtherUsersBook() {
         // TODO
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testRecipeIdsDoesNotExist() {
+
     }
 }

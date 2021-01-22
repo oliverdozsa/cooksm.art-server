@@ -3,9 +3,12 @@ package services;
 import com.typesafe.config.Config;
 import data.entities.RecipeBook;
 import data.repositories.RecipeBookRepository;
+import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.ForbiddenExeption;
 import dto.RecipeBookCreateUpdateDto;
+import dto.RecipeBookRecipesCreateUpdateDto;
 import lombokized.dto.RecipeBookDto;
+import lombokized.dto.RecipeBookWithRecipesDto;
 import play.Logger;
 
 import javax.inject.Inject;
@@ -19,12 +22,14 @@ public class RecipeBooksService {
     private RecipeBookRepository repository;
 
     private int maxPerUser;
+    private int maxRecipesPerBook;
 
     private static final Logger.ALogger logger = Logger.of(RecipeBooksService.class);
 
     @Inject
     public RecipeBooksService(Config config) {
         maxPerUser = config.getInt("receptnekem.recipebooks.maxperuser");
+        maxRecipesPerBook = config.getInt("receptnekem.recipebooks.maxrecipesperbook");
     }
 
     public CompletionStage<Long> create(RecipeBookCreateUpdateDto dto, Long userId) {
@@ -64,6 +69,20 @@ public class RecipeBooksService {
         return repository.delete(id, userId);
     }
 
+    public CompletionStage<Void> addRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateDto dto) {
+        logger.info("addRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
+        return repository
+                .futureCountOf(id, userId, dto.recipeIds)
+                .thenAcceptAsync(this::checkFutureRecipeCount)
+                .thenComposeAsync(v -> repository.addRecipes(id, userId, dto.recipeIds));
+    }
+
+    public CompletionStage<RecipeBookWithRecipesDto> recipesOf(Long userId, Long id) {
+        logger.info("recipesOf(): userId = {}, id = {}", userId, id);
+        return repository.single(id, userId)
+                .thenApplyAsync(DtoMapper::toRecipeBookWithRecipesDto);
+    }
+
     private void checkCount(int count, Long user) {
         if (count >= maxPerUser) {
             throw new ForbiddenExeption("User reached max limit! user = " + user);
@@ -88,5 +107,12 @@ public class RecipeBooksService {
         return entities.stream()
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    private void checkFutureRecipeCount(int count) {
+        logger.info("checkFutureRecipeCount(): count = {}", count);
+        if(count > maxRecipesPerBook) {
+            throw new ForbiddenExeption("Max recipes per book would be violated! count = " + count);
+        }
     }
 }

@@ -32,6 +32,11 @@ recipe_book:
     last_accessed: 2021-01-01 04:21:42
     user_id: 2
 
+  - id: 5
+    name: recipe-book-5-user-2
+    last_accessed: 2021-01-01 04:21:21
+    user_id: 2
+
 recipe_book_recipe:
   - recipe_book_id: 1
     recipe_id: 1

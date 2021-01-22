@@ -1,21 +1,24 @@
 package data.repositories.imp;
 
 import data.DatabaseExecutionContext;
+import data.entities.Recipe;
 import data.entities.RecipeBook;
 import data.entities.User;
 import data.repositories.RecipeBookRepository;
 import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
+import io.ebean.SqlUpdate;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
+import static data.repositories.imp.EbeanRepoUtils.assertEntitiesExist;
 import static data.repositories.imp.EbeanRepoUtils.assertEntityExists;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -144,17 +147,84 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
                     .eq("user.id", userId)
                     .findOne();
 
-            if(entity == null) {
+            if (entity == null) {
                 throwNotFoundException(id, userId);
             }
 
+            SqlUpdate sql = ebean.createSqlUpdate("delete from recipe_book_recipe where recipe_book_id = :book_id");
+            sql.setParameter("book_id", id);
+            sql.execute();
+
             ebean.delete(entity);
         }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Void> addRecipes(Long id, Long userId, List<Long> recipeIds) {
+        return runAsync(() -> {
+            logger.info("addRecipes(): id = {}, userId = {}, recipeIds = {}", id, userId, recipeIds);
+
+            assertEntityExists(ebean, RecipeBook.class, id);
+            assertEntityExists(ebean, User.class, userId);
+            assertEntitiesExist(ebean, Recipe.class, "id", recipeIds);
+
+            RecipeBook entity = ebean.createQuery(RecipeBook.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .eq("id", id)
+                    .findOne();
+
+            if (entity == null) {
+                throwNotFoundException(id, userId);
+            }
+
+            Set<Long> futureRecipeIds = queryFutureRecipeIdsOf(entity, recipeIds);
+            List<Recipe> recipes = findRecipes(futureRecipeIds);
+
+            entity.setRecipes(recipes);
+            entity.setLastAccessed(Instant.now());
+            ebean.update(entity);
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<Integer> futureCountOf(Long id, Long userId, List<Long> recipeIdsToAdd) {
+        return single(id, userId)
+                .thenApplyAsync(e -> countFutureRecipeIds(e, recipeIdsToAdd));
     }
 
     private void throwNotFoundException(Long id, Long userId) {
         String message = String.format("Not found recipe book with id = %d, userId = %d",
                 id, userId);
         throw new NotFoundException(message);
+    }
+
+    private List<Recipe> findRecipes(Collection<Long> recipeIds) {
+        return ebean.createQuery(Recipe.class)
+                .where()
+                .in("id", recipeIds)
+                .findList();
+    }
+
+    private Integer countFutureRecipeIds(RecipeBook entity, List<Long> candidates) {
+        Set<Long> futureRecipeIds = new HashSet<>(candidates);
+
+        List<Long> recipeIdsOfBook = entity.getRecipes().stream()
+                .map(Recipe::getId)
+                .collect(Collectors.toList());
+        futureRecipeIds.addAll(recipeIdsOfBook);
+
+        return futureRecipeIds.size();
+    }
+
+    private Set<Long> queryFutureRecipeIdsOf(RecipeBook entity, List<Long> byCandidatesToAdd){
+        Set<Long> futureIds = new HashSet<>(byCandidatesToAdd);
+
+        List<Long> recipeIdsOfBook = entity.getRecipes().stream()
+                .map(Recipe::getId)
+                .collect(Collectors.toList());
+        futureIds.addAll(recipeIdsOfBook);
+
+        return futureIds;
     }
 }

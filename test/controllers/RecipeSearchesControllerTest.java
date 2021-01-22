@@ -1,10 +1,7 @@
 package controllers;
 
 import clients.RecipeSearchesTestClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.database.rider.core.api.dataset.DataSet;
-import controllers.v1.routes;
 import data.entities.*;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.imp.EbeanRecipeSearchRepository;
@@ -14,11 +11,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import play.Application;
-import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
 import rules.RuleChainForTests;
-import utils.JwtTestUtils;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
@@ -29,21 +23,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static extractors.DataFromResult.statusOf;
 import static extractors.RecipeSearchesFromResult.*;
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
 import static matchers.ResultHasNullForField.hasNullForField;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static play.mvc.Http.HeaderNames.LOCATION;
-import static play.mvc.Http.HttpVerbs.GET;
-import static play.mvc.Http.HttpVerbs.POST;
 import static play.mvc.Http.Status.*;
 import static play.test.Helpers.contentAsString;
-import static play.test.Helpers.route;
 
 public class RecipeSearchesControllerTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();

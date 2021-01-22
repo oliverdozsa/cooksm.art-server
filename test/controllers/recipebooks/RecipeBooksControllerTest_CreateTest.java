@@ -42,10 +42,8 @@ public class RecipeBooksControllerTest_CreateTest {
     public void testCreate() {
         // When
         Instant beforeCreate = Instant.now();
-        RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-        dto.name = "someRecipeBook";
 
-        Result result = client.create(dto, 1L);
+        Result result = client.create("someRecipeBook", 1L);
 
         // Then
         assertThat(statusOf(result), equalTo(CREATED));
@@ -64,10 +62,7 @@ public class RecipeBooksControllerTest_CreateTest {
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testCreateWithInvalidName() {
         // When
-        RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-        dto.name = "s";
-
-        Result result = client.create(dto, 1L);
+        Result result = client.create("s", 1L);
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
@@ -78,10 +73,7 @@ public class RecipeBooksControllerTest_CreateTest {
     @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
     public void testCreateWithAlreadyExistingName() {
         // When
-        RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-        dto.name = "recipe-book-1-user-1";
-
-        Result result = client.create(dto, 1L);
+        Result result = client.create("recipe-book-1-user-1", 1L);
 
         // Then
         assertThat(statusOf(result), equalTo(FORBIDDEN));
@@ -93,10 +85,8 @@ public class RecipeBooksControllerTest_CreateTest {
     public void testCreateWithAlreadyExistingNameButForOtherUser() {
         // When
         Instant beforeCreate = Instant.now();
-        RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-        dto.name = "recipe-book-1-user-1";
 
-        Result result = client.create(dto, 2L);
+        Result result = client.create("recipe-book-1-user-1", 2L);
 
         // Then
         assertThat(statusOf(result), equalTo(CREATED));
@@ -117,10 +107,7 @@ public class RecipeBooksControllerTest_CreateTest {
         createMaxRecipeBooks(3L);
 
         // When
-        RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-        dto.name = "some-recipe-book";
-
-        Result result = client.create(dto, 3L);
+        Result result = client.create("some-recipe-book", 3L);
 
         // Then
         assertThat(statusOf(result), equalTo(FORBIDDEN));
@@ -131,10 +118,9 @@ public class RecipeBooksControllerTest_CreateTest {
         int maxPerUser = config.getInt("receptnekem.recipebooks.maxperuser");
 
         for (int i = 0; i < maxPerUser; i++) {
-            RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
-            dto.name = "recipe-book-" + (i + 1) + "-user-" + userId;
+            String name = "recipe-book-" + (i + 1) + "-user-" + userId;
 
-            Result result = client.create(dto, userId);
+            Result result = client.create(name, userId);
             assertThat(statusOf(result), equalTo(CREATED));
         }
     }

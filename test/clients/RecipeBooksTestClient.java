@@ -3,11 +3,14 @@ package clients;
 import com.typesafe.config.Config;
 import controllers.v1.routes;
 import dto.RecipeBookCreateUpdateDto;
+import dto.RecipeBookRecipesCreateUpdateDto;
 import play.Application;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import utils.JwtTestUtils;
+
+import java.util.Arrays;
 
 import static play.mvc.Http.HttpVerbs.*;
 import static play.test.Helpers.GET;
@@ -22,7 +25,10 @@ public class RecipeBooksTestClient {
         config = application.config();
     }
 
-    public Result create(RecipeBookCreateUpdateDto dto, Long userId) {
+    public Result create(String name, Long userId) {
+        RecipeBookCreateUpdateDto dto = new RecipeBookCreateUpdateDto();
+        dto.name = name;
+
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(POST)
                 .bodyJson(Json.toJson(dto))
@@ -88,23 +94,28 @@ public class RecipeBooksTestClient {
         return route(application, request);
     }
 
+    public Result addRecipes(Long id, Long userId, Long[] recipeIds) {
+        RecipeBookRecipesCreateUpdateDto dto = new RecipeBookRecipesCreateUpdateDto();
+        dto.recipeIds = Arrays.asList(recipeIds);
 
-    public Result addRecipes(Long id, Long[] recipeIds) {
         Http.RequestBuilder request = new Http.RequestBuilder()
-                .method(GET)
+                .method(POST)
+                .bodyJson(Json.toJson(dto))
                 .uri(routes.RecipeBooksController.addRecipes(id).url());
 
-        // TODO
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
 
         return route(application, request);
     }
 
-    public Result recipesOf(Long id) {
+    public Result recipesOf(Long id, Long userId) {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
                 .uri(routes.RecipeBooksController.recipesOf(id).url());
 
-        // TODO
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
 
         return route(application, request);
     }

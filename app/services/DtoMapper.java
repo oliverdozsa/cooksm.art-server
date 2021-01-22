@@ -93,4 +93,12 @@ public class DtoMapper {
     public static RecipeBookDto toDto(RecipeBook entity) {
         return new RecipeBookDto(entity.getName(), entity.getLastAccessed());
     }
+
+    public static RecipeBookWithRecipesDto toRecipeBookWithRecipesDto(RecipeBook entity) {
+        List<Long> recipeIds = entity.getRecipes().stream()
+                .map(Recipe::getId)
+                .collect(Collectors.toList());
+
+        return new RecipeBookWithRecipesDto(entity.getName(), entity.getLastAccessed(), recipeIds);
+    }
 }

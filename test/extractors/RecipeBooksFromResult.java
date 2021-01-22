@@ -25,4 +25,12 @@ public class RecipeBooksFromResult {
 
         return values.of(result);
     }
+
+    public static List<Long> recipeIdsOfRecipeBookOf(Result result) {
+        ListOfValuesFromResult<Long> values = new ListOfValuesFromResult<Long>()
+                .select("$.recipeIds")
+                .converting(JsonNode::asLong);
+
+        return values.of(result);
+    }
 }

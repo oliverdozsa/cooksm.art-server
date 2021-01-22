@@ -22,7 +22,7 @@ public class RecipeBook {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany
     @JoinTable(name = "recipe_book_recipe",
             joinColumns = {
                     @JoinColumn(name = "recipe_book_id", referencedColumnName = "id")

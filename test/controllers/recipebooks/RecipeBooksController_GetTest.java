@@ -64,11 +64,12 @@ public class RecipeBooksController_GetTest {
 
         // Then
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(recipeBookNamesOf(result), hasSize(3));
+        assertThat(recipeBookNamesOf(result), hasSize(4));
         assertThat(recipeBookNamesOf(result), containsInAnyOrder(
                 "recipe-book-2-user-2",
                 "recipe-book-3-user-2",
-                "recipe-book-4-user-2"));
+                "recipe-book-4-user-2",
+                "recipe-book-5-user-2"));
     }
 
     @Test

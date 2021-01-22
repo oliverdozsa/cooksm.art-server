@@ -14,4 +14,6 @@ public interface RecipeBookRepository {
     CompletionStage<List<RecipeBook>> allOf(Long userId);
     CompletionStage<Void> update(Long id, String name, Long userId);
     CompletionStage<Void> delete(Long id, Long userId);
+    CompletionStage<Void> addRecipes(Long id, Long userId, List<Long> recipeIds);
+    CompletionStage<Integer> futureCountOf(Long id, Long userId, List<Long> recipeIdsToAdd);
 }
