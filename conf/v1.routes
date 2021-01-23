@@ -71,3 +71,5 @@ DELETE  /recipebooks/:id            controllers.v1.RecipeBooksController.delete(
 POST    /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.addRecipes(id: Long, request: Request)
 + jwtFilter
 GET     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.recipesOf(id: Long, request: Request)
++ jwtFilter
+PUT     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.updateRecipes(id: Long, request: Request)

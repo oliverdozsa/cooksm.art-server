@@ -127,6 +127,22 @@ public class RecipeBooksController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
+    public CompletionStage<Result> updateRecipes(Long id, Http.Request request) {
+        logger.info("updateRecipes(): id = {}", id);
+
+        Form<RecipeBookRecipesCreateUpdateDto> form = formFactory.form(RecipeBookRecipesCreateUpdateDto.class)
+                .bindFromRequest(request);
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.updateRecipes(jwt.getUserId(), id, form.get())
+                .thenApplyAsync(v -> (Result)noContent())
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
     private Result toResult(List<RecipeBookDto> dtoList) {
         return ok(Json.toJson(dtoList));
     }

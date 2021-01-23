@@ -39,8 +39,6 @@ public class RecipeBooksControllerTest_AddRecipesTest {
         client = new RecipeBooksTestClient(ruleChainForTests.getApplication());
     }
 
-    // TODO: Also check last updated after each test
-
     @Test
     // Given
     @DataSet(value = {"datasets/yml/recipes.yml", "datasets/yml/recipebooks.yml"}, disableConstraints = true, cleanBefore = true)

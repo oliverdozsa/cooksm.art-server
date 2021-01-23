@@ -32,7 +32,7 @@ class EbeanRepoUtils {
     public static <E> void assertEntitiesExist(
             EbeanServer ebean, Class<E> entityClass, String idField, Collection<?> ids) {
         if(ids == null || ids.size() <= 0) {
-            throw new IllegalArgumentException("ids is invalid!");
+            return;
         }
 
         int count = ebean.createQuery(entityClass)

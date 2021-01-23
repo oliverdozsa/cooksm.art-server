@@ -63,17 +63,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
             assertEntityExists(ebean, User.class, userId);
             assertEntityExists(ebean, RecipeBook.class, id);
 
-            RecipeBook entity = ebean.createQuery(RecipeBook.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .eq("id", id)
-                    .findOne();
-
-            if (entity == null) {
-                throwNotFoundException(id, userId);
-            }
-
-            return entity;
+            return findBookOfUser(userId, id);
         }, executionContext);
     }
 
@@ -116,15 +106,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
             assertEntityExists(ebean, RecipeBook.class, id);
             assertEntityExists(ebean, User.class, userId);
 
-            RecipeBook entity = ebean.createQuery(RecipeBook.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .eq("id", id)
-                    .findOne();
-
-            if (entity == null) {
-                throwNotFoundException(id, userId);
-            }
+            RecipeBook entity = findBookOfUser(userId, id);
 
             entity.setName(name);
             entity.setLastAccessed(Instant.now());
@@ -141,15 +123,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
             assertEntityExists(ebean, RecipeBook.class, id);
             assertEntityExists(ebean, User.class, id);
 
-            RecipeBook entity = ebean.createQuery(RecipeBook.class)
-                    .where()
-                    .eq("id", id)
-                    .eq("user.id", userId)
-                    .findOne();
-
-            if (entity == null) {
-                throwNotFoundException(id, userId);
-            }
+            RecipeBook entity = findBookOfUser(userId, id);
 
             SqlUpdate sql = ebean.createSqlUpdate("delete from recipe_book_recipe where recipe_book_id = :book_id");
             sql.setParameter("book_id", id);
@@ -168,15 +142,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
             assertEntityExists(ebean, User.class, userId);
             assertEntitiesExist(ebean, Recipe.class, "id", recipeIds);
 
-            RecipeBook entity = ebean.createQuery(RecipeBook.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .eq("id", id)
-                    .findOne();
-
-            if (entity == null) {
-                throwNotFoundException(id, userId);
-            }
+            RecipeBook entity = findBookOfUser(userId, id);
 
             Set<Long> futureRecipeIds = queryFutureRecipeIdsOf(entity, recipeIds);
             List<Recipe> recipes = findRecipes(futureRecipeIds);
@@ -193,6 +159,38 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
                 .thenApplyAsync(e -> countFutureRecipeIds(e, recipeIdsToAdd));
     }
 
+    @Override
+    public CompletionStage<Void> updateRecipes(Long id, Long userId, List<Long> recipeIds) {
+        return runAsync(() -> {
+            logger.info("updateRecipes(): id = {}, userId = {}, recipeIds = {}", id, userId, recipeIds);
+
+            assertEntityExists(ebean, RecipeBook.class, id);
+            assertEntityExists(ebean, User.class, userId);
+            assertEntitiesExist(ebean, Recipe.class, "id", recipeIds);
+
+            RecipeBook entity = findBookOfUser(userId, id);
+
+            List<Recipe> recipes = findRecipes(recipeIds);
+            entity.setRecipes(recipes);
+            entity.setLastAccessed(Instant.now());
+            ebean.update(entity);
+        });
+    }
+
+    private RecipeBook findBookOfUser(Long userId, Long bookId) {
+        RecipeBook entity = ebean.createQuery(RecipeBook.class)
+                .where()
+                .eq("user.id", userId)
+                .eq("id", bookId)
+                .findOne();
+
+        if (entity == null) {
+            throwNotFoundException(bookId, userId);
+        }
+
+        return entity;
+    }
+
     private void throwNotFoundException(Long id, Long userId) {
         String message = String.format("Not found recipe book with id = %d, userId = %d",
                 id, userId);
@@ -200,6 +198,10 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     }
 
     private List<Recipe> findRecipes(Collection<Long> recipeIds) {
+        if(recipeIds == null || recipeIds.size() <= 0) {
+            return new ArrayList<>();
+        }
+
         return ebean.createQuery(Recipe.class)
                 .where()
                 .in("id", recipeIds)

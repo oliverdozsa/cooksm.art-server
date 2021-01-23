@@ -119,4 +119,19 @@ public class RecipeBooksTestClient {
 
         return route(application, request);
     }
+
+    public Result updateRecipes(Long id, Long userId, Long[] recipeIds) {
+        RecipeBookRecipesCreateUpdateDto dto = new RecipeBookRecipesCreateUpdateDto();
+        dto.recipeIds = Arrays.asList(recipeIds);
+
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(PUT)
+                .bodyJson(Json.toJson(dto))
+                .uri(routes.RecipeBooksController.updateRecipes(id).url());
+
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
 }

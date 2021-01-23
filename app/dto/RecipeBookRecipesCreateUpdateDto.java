@@ -2,11 +2,15 @@ package dto;
 
 import play.data.validation.Constraints;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeBookRecipesCreateUpdateDto {
-    @Constraints.Required
     public List<Long> recipeIds;
+
+    public RecipeBookRecipesCreateUpdateDto() {
+        recipeIds = new ArrayList<>();
+    }
 
     @Override
     public String toString() {

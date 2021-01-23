@@ -83,6 +83,11 @@ public class RecipeBooksService {
                 .thenApplyAsync(DtoMapper::toRecipeBookWithRecipesDto);
     }
 
+    public CompletionStage<Void> updateRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateDto dto) {
+        logger.info("updateRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
+        return repository.updateRecipes(id, userId, dto.recipeIds);
+    }
+
     private void checkCount(int count, Long user) {
         if (count >= maxPerUser) {
             throw new ForbiddenExeption("User reached max limit! user = " + user);
