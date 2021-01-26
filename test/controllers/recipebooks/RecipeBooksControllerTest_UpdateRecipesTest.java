@@ -54,6 +54,25 @@ public class RecipeBooksControllerTest_UpdateRecipesTest {
     @Test
     // Given
     @DataSet(value = {"datasets/yml/recipebooks.yml", "datasets/yml/recipes.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testDeleteRecipesFromBookRecipeIdsNotSet() {
+        // When
+        Result result = client.recipesOf(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(recipeIdsOfRecipeBookOf(result), hasSize(3));
+        Instant lastAccessedBeforeUpdate = lastAccessedDateOfRecipeBookOf(result);
+        result = client.updateRecipes(1L, 1L, null);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        result = client.recipesOf(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(recipeIdsOfRecipeBookOf(result), hasSize(0));
+        assertThat(lastAccessedDateOfRecipeBookOf(result), greaterThan(lastAccessedBeforeUpdate));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/recipebooks.yml", "datasets/yml/recipes.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUpdateRecipesOfBook() {
         // When
         Result result = client.recipesOf(1L, 1L);

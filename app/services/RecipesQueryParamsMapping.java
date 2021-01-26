@@ -30,6 +30,7 @@ class RecipesQueryParamsMapping {
         Common.Builder builder = params.toBuilder();
         builder.userId(userId);
         builder.useFavoritesOnly(queryParams.useFavoritesOnly);
+        builder.usedRecipeBooks(queryParams.recipeBooks);
         return builder.build();
     }
 

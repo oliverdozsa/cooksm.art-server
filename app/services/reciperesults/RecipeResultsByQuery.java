@@ -23,15 +23,6 @@ public abstract class RecipeResultsByQuery {
     private static final Logger.ALogger logger = Logger.of(RecipeResultsByQuery.class);
 
     protected RecipesService service;
-    private Function<Throwable, Result> mapException = t -> {
-        logger.error("Internal Error!", t.getCause());
-
-        if (t.getCause() instanceof IllegalArgumentException) {
-            return badRequest(Json.toJson(new ValidationError("", t.getMessage()).messages()));
-        }
-
-        return internalServerError();
-    };
 
     public RecipeResultsByQuery(RecipesService service) {
         this.service = service;
@@ -55,7 +46,6 @@ public abstract class RecipeResultsByQuery {
     }
 
     protected CompletionStage<Result> getResultFor(CompletionStage<PageDto<RecipeDto>> pageOfRecipesStage) {
-        return pageOfRecipesStage.thenApplyAsync(this::toResult)
-                .exceptionally(mapException);
+        return pageOfRecipesStage.thenApplyAsync(this::toResult);
     }
 }

@@ -122,7 +122,9 @@ public class RecipeBooksTestClient {
 
     public Result updateRecipes(Long id, Long userId, Long[] recipeIds) {
         RecipeBookRecipesCreateUpdateDto dto = new RecipeBookRecipesCreateUpdateDto();
-        dto.recipeIds = Arrays.asList(recipeIds);
+        if (recipeIds != null) {
+            dto.recipeIds = Arrays.asList(recipeIds);
+        }
 
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(PUT)

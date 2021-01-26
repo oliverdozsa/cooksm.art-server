@@ -9,6 +9,7 @@ import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -76,6 +77,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
                     useExclude(params),
                     RecipeQuerySql.QueryType.NONE);
             setUseFavoritesOnly(config, params);
+            setUseRecipeBooks(config, params);
 
             String sqlString = RecipeQuerySql.create(config);
             Query<Recipe> query = prepare(sqlString, params);
@@ -137,7 +139,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
         setNameLikeCondition(query, params);
         setPagingCondition(query, params);
         setExcludedIngredientsCondition(query, params);
-        setUseFavoritesOnlyCondition(query, params);
+        setUserIdCondition(query, params);
+        setUsedRecipeBooksConditions(query, params);
     }
 
     private void setNumberOfIngredientsCondition(Query<Recipe> query, Common params) {
@@ -212,8 +215,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
         conditionSetter.set(query, "additionalIngredientIds");
     }
 
-    private void setUseFavoritesOnlyCondition(Query<Recipe> query, Common params){
+    private void setUserIdCondition(Query<Recipe> query, Common params){
         query.setParameter("userId", params.getUserId());
+    }
+
+    private void setUsedRecipeBooksConditions(Query<Recipe> query, Common params) {
+        query.setParameter("usedRecipeBooks", params.getUsedRecipeBooks());
     }
 
     private static boolean useExclude(Common params) {
@@ -256,6 +263,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
                 queryType
         );
         setUseFavoritesOnly(configuration, params);
+        setUseRecipeBooks(configuration, params);
 
         return configuration;
     }
@@ -263,6 +271,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private static void setUseFavoritesOnly(RecipeQuerySql.Configuration config, Common params) {
         if (params.getUserId() != null && Boolean.TRUE.equals(params.getUseFavoritesOnly())) {
             config.useFavoritesOnly = true;
+        }
+    }
+
+    private static void setUseRecipeBooks(RecipeQuerySql.Configuration config, Common params) {
+        if(params.getUsedRecipeBooks() != null && params.getUsedRecipeBooks().size() > 0) {
+            config.useRecipeBooks = true;
         }
     }
 

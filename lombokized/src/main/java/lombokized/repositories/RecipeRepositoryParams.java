@@ -76,6 +76,7 @@ public class RecipeRepositoryParams {
         List<Integer> times;
         Long userId;
         Boolean useFavoritesOnly;
+        List<Long> usedRecipeBooks;
     }
 
     @Value

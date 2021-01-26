@@ -177,6 +177,21 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
         });
     }
 
+    @Override
+    public CompletionStage<Void> checkRecipeBooksOfUser(List<Long> recipeBookIds, Long userId) {
+        return runAsync(() -> {
+            List<RecipeBook> selectedBooksOfUser = ebean.createQuery(RecipeBook.class)
+                    .where()
+                    .eq("user.id", userId)
+                    .in("id", recipeBookIds)
+                    .findList();
+
+            if (selectedBooksOfUser.size() != recipeBookIds.size()) {
+                throw new NotFoundException("Not found found recipe book among user's recipe book!");
+            }
+        }, executionContext);
+    }
+
     private RecipeBook findBookOfUser(Long userId, Long bookId) {
         RecipeBook entity = ebean.createQuery(RecipeBook.class)
                 .where()
@@ -198,7 +213,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     }
 
     private List<Recipe> findRecipes(Collection<Long> recipeIds) {
-        if(recipeIds == null || recipeIds.size() <= 0) {
+        if (recipeIds == null || recipeIds.size() <= 0) {
             return new ArrayList<>();
         }
 
@@ -219,7 +234,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
         return futureRecipeIds.size();
     }
 
-    private Set<Long> queryFutureRecipeIdsOf(RecipeBook entity, List<Long> byCandidatesToAdd){
+    private Set<Long> queryFutureRecipeIdsOf(RecipeBook entity, List<Long> byCandidatesToAdd) {
         Set<Long> futureIds = new HashSet<>(byCandidatesToAdd);
 
         List<Long> recipeIdsOfBook = entity.getRecipes().stream()

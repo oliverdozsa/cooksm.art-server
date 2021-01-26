@@ -86,6 +86,8 @@ public class RecipesQueryParams {
 
         public Boolean useFavoritesOnly;
 
+        public List<Long> recipeBooks;
+
         @Override
         public ValidationError validate() {
             SearchMode searchModeEnum;

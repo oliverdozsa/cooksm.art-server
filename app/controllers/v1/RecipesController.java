@@ -31,15 +31,8 @@ public class RecipesController extends Controller {
     @Inject
     private RecipesService service;
 
-    private Function<Throwable, Result> mapException = t -> {
-        logger.error("Internal Error!", t.getCause());
-
-        if (t.getCause() instanceof IllegalArgumentException) {
-            return badRequest(Json.toJson(new ValidationError("", t.getMessage()).messages()));
-        }
-
-        return internalServerError();
-    };
+    private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
+    private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
     private static final Logger.ALogger logger = Logger.of(RecipesController.class);
 
@@ -86,6 +79,7 @@ public class RecipesController extends Controller {
             return completedFuture(badRequest(Json.toJson(ve.messages())));
         }
 
-        return resultsByQuery.page(form, request);
+        return resultsByQuery.page(form, request)
+                .exceptionally(mapExceptionWithUnpack);
     }
 }
