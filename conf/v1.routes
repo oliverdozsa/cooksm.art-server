@@ -58,7 +58,7 @@ DELETE /security/deregister       controllers.v1.SecurityController.deregister(r
 
 # Recipe books
 + jwtFilter
-GET     /recipebooks/all            controllers.v1.RecipeBooksController.all(request: Request)
+GET     /recipebooks                controllers.v1.RecipeBooksController.all(request: Request)
 + jwtFilter
 POST    /recipebooks                controllers.v1.RecipeBooksController.create(request: Request)
 + jwtFilter

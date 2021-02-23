@@ -96,7 +96,7 @@ public class RecipeBooksController extends Controller {
 
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
 
-        return service.delete(id, jwt.getUserId())
+        return service.delete(jwt.getUserId(), id)
                 .thenApplyAsync(v -> (Result) noContent())
                 .exceptionally(mapExceptionWithUnpack);
     }

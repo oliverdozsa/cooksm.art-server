@@ -121,7 +121,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
 
         return runAsync(() -> {
             assertEntityExists(ebean, RecipeBook.class, id);
-            assertEntityExists(ebean, User.class, id);
+            assertEntityExists(ebean, User.class, userId);
 
             RecipeBook entity = findBookOfUser(userId, id);
 
