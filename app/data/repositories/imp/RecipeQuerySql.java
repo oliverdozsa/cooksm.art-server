@@ -11,6 +11,7 @@ class RecipeQuerySql {
         String where = createWhereClause(config);
         String includedIngredientsCondition = createIncludedIngredientsCondition(config);
         String excludedCondition = createExcludedCondition(config);
+        String groupByCondition = createGroupByCondition(config);
         String havingCondition = createHavingCondition(config);
         String useFavoritesCondition = createUseFavoritesCondition(config);
         String useRecipeBooksCondition = createRecipeBooksCondition(config);
@@ -31,6 +32,7 @@ class RecipeQuerySql {
                 excludedCondition + " " +
                 useFavoritesCondition + " " +
                 useRecipeBooksCondition + " " +
+                groupByCondition + " " +
                 havingCondition;
     }
 
@@ -91,10 +93,16 @@ class RecipeQuerySql {
         return condition;
     }
 
+    private static String createGroupByCondition(Configuration config) {
+        if (config.useRecipeBooks || !QueryType.NONE.equals(config.queryType)) {
+            return "GROUP BY recipe.id ";
+        }
+
+        return "";
+    }
+
     private static String createHavingCondition(Configuration config) {
         String prefix = "" +
-                "GROUP BY " +
-                "  recipe.id " +
                 "HAVING ";
 
         if (QueryType.NUMBER.equals(config.queryType)) {
@@ -211,7 +219,7 @@ class RecipeQuerySql {
     }
 
     private static String createRecipeBooksCondition(Configuration config) {
-        if(!config.useRecipeBooks) {
+        if (!config.useRecipeBooks) {
             return "";
         }
 

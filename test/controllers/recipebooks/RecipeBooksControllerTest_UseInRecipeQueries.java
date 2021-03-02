@@ -110,4 +110,17 @@ public class RecipeBooksControllerTest_UseInRecipeQueries {
         // Then
         assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks-multiple.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetAllOfUser_OneRecipeInMultipleBooks() {
+        // When
+        Result result = client.page("recipeBooks[0]=1&recipeBooks[1]=2", 1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(recipeIdsOf(result), hasSize(4));
+        assertThat(recipeIdsOf(result), containsInAnyOrder(1L, 2L, 3L, 4L));
+    }
 }
