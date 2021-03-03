@@ -113,10 +113,10 @@ public class RecipeBooksControllerTest_UseInRecipeQueries {
 
     @Test
     // Given
-    @DataSet(value = "datasets/yml/recipebooks-multiple.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = "datasets/yml/recipebooks-query.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAllOfUser_OneRecipeInMultipleBooks() {
         // When
-        Result result = client.page("recipeBooks[0]=1&recipeBooks[1]=2", 1L);
+        Result result = client.page("recipeBooks[0]=6&recipeBooks[1]=7", 3L);
 
         // Then
         assertThat(statusOf(result), equalTo(OK));

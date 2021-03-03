@@ -52,6 +52,7 @@ public class RecipeSearchService {
 
     public CompletionStage<String> createShared(RecipesQueryParams.Params query) {
         logger.info("create(): isPermanent = {}", query);
+        // TODO: check if contains recipe book
         return containsUserDefinedIngredientTag(query)
                 .thenComposeAsync(doesContain -> {
                     if (doesContain) {

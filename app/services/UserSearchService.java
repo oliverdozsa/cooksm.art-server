@@ -42,6 +42,7 @@ public class UserSearchService {
             if (c >= maxPerUser) {
                 throw new ForbiddenExeption("User reached max limit! userId = " + userId);
             }
+            // TODO: Check recipe books here. Use: data.repositories.imp.EbeanRecipeBookRepository.checkRecipeBooksOfUser
         }).thenComposeAsync(v -> recipeSearchService.createWithLongId(dto.query, true))
                 .thenComposeAsync(searchId -> userSearchRepository.create(dto.name, userId, searchId))
                 .thenApply(UserSearch::getId);
