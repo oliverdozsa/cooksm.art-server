@@ -14,11 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
+import static java.util.concurrent.CompletableFuture.*;
+
 public class RecipeSearchService {
     private RecipeSearchRepository recipeSearchRepository;
     private IngredientNameRepository ingredientNameRepository;
     private IngredientTagRepository ingredientTagRepository;
     private SourcePageRepository sourcePageRepository;
+    private RecipeBookRepository recipeBookRepository;
     private LanguageService languageService;
     private Config config;
     private RecipeRepositoryQueryCheck queryCheck;
@@ -31,11 +34,12 @@ public class RecipeSearchService {
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
 
     @Inject
-    public RecipeSearchService(RecipeSearchRepository recipeSearchRepository, IngredientNameRepository ingredientNameRepository, IngredientTagRepository ingredientTagRepository, SourcePageRepository sourcePageRepository, LanguageService languageService, Config config, RecipeRepositoryQueryCheck queryCheck) {
+    public RecipeSearchService(RecipeSearchRepository recipeSearchRepository, IngredientNameRepository ingredientNameRepository, IngredientTagRepository ingredientTagRepository, SourcePageRepository sourcePageRepository, RecipeBookRepository recipeBookRepository, LanguageService languageService, Config config, RecipeRepositoryQueryCheck queryCheck) {
         this.recipeSearchRepository = recipeSearchRepository;
         this.ingredientNameRepository = ingredientNameRepository;
         this.ingredientTagRepository = ingredientTagRepository;
         this.sourcePageRepository = sourcePageRepository;
+        this.recipeBookRepository = recipeBookRepository;
         this.languageService = languageService;
         this.config = config;
         this.queryCheck = queryCheck;
@@ -52,7 +56,13 @@ public class RecipeSearchService {
 
     public CompletionStage<String> createShared(RecipesQueryParams.Params query) {
         logger.info("create(): isPermanent = {}", query);
-        // TODO: check if contains recipe book
+
+        if (query.recipeBooks != null && query.recipeBooks.size() > 0) {
+            return runAsync(() -> {
+                throw new BusinessLogicViolationException("Recipe query to share contains recipe books!");
+            }).thenApplyAsync(v -> "");
+        }
+
         return containsUserDefinedIngredientTag(query)
                 .thenComposeAsync(doesContain -> {
                     if (doesContain) {
@@ -88,6 +98,7 @@ public class RecipeSearchService {
         getHelper.ingredientTagRepository = ingredientTagRepository;
         getHelper.languageService = languageService;
         getHelper.sourcePageRepository = sourcePageRepository;
+        getHelper.recipeBookRepository = recipeBookRepository;
     }
 
     private void initCreateHelper() {

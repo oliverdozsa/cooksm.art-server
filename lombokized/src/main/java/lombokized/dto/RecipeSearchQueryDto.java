@@ -31,6 +31,7 @@ public class RecipeSearchQueryDto {
     List<IngredientTagDto> addIngTags;
     List<SourcePageDto> sourcePages;
     List<Integer> times;
+    List<RecipeBookDto> recipeBooks;
 
     Long languageId;
 }

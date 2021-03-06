@@ -76,6 +76,12 @@ public class DtoMapper {
         return dtoList;
     }
 
+    public static List<RecipeBookDto> toRecipeBookDtoList(List<RecipeBook> recipeBooks) {
+        List<RecipeBookDto> dtoList = new ArrayList<>();
+        recipeBooks.forEach(e -> dtoList.add(toDto(e)));
+        return dtoList;
+    }
+
     public static UserSearchDto toDto(UserSearch entity) {
         String encodedSearchId = Base62Conversions.encode(entity.getSearch().getId());
         return new UserSearchDto(entity.getId(), encodedSearchId, entity.getName());

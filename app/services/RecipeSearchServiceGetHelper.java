@@ -1,10 +1,7 @@
 package services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import data.repositories.IngredientNameRepository;
-import data.repositories.IngredientTagRepository;
-import data.repositories.RecipeSearchRepository;
-import data.repositories.SourcePageRepository;
+import data.repositories.*;
 import data.repositories.exceptions.NotFoundException;
 import io.seruco.encoding.base62.Base62;
 import lombokized.dto.RecipeSearchDto;
@@ -19,6 +16,7 @@ class RecipeSearchServiceGetHelper {
     IngredientNameRepository ingredientNameRepository;
     IngredientTagRepository ingredientTagRepository;
     SourcePageRepository sourcePageRepository;
+    RecipeBookRepository recipeBookRepository;
     LanguageService languageService;
 
     public CompletionStage<RecipeSearchDto> single(String id) {
@@ -27,6 +25,7 @@ class RecipeSearchServiceGetHelper {
         resolver.setIngredientNameRepository(ingredientNameRepository);
         resolver.setIngredientTagRepository(ingredientTagRepository);
         resolver.setSourcePageRepository(sourcePageRepository);
+        resolver.setRecipeBookRepository(recipeBookRepository);
 
         return recipeSearchRepository.single(decodedId)
                 .thenComposeAsync(entity -> {

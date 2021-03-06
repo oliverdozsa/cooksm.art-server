@@ -56,6 +56,10 @@ public class RecipeSearchesFromResult {
         return convertToNames("$.query.sourcePages", result);
     }
 
+    public static List<String> recipeBooksOfSingleRecipeSearchOf(Result result) {
+        return convertToNames("$.query.recipeBooks", result);
+    }
+
     private static List<String> convertToNames(String field, Result result) {
         ListOfValuesFromResult<String> values = new ListOfValuesFromResult<String>()
                 .select(field)

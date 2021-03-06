@@ -2,8 +2,11 @@ package services;
 
 import com.typesafe.config.Config;
 import data.entities.UserSearch;
+import data.repositories.RecipeBookRepository;
 import data.repositories.UserSearchRepository;
+import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.ForbiddenExeption;
+import data.repositories.exceptions.NotFoundException;
 import dto.UserSearchCreateUpdateDto;
 import lombokized.dto.UserSearchDto;
 import play.Logger;
@@ -19,13 +22,16 @@ public class UserSearchService {
     private UserSearchRepository userSearchRepository;
     private RecipeSearchService recipeSearchService;
     private Integer maxPerUser;
+    private RecipeBookRepository recipeBookRepository;
 
     private static final Logger.ALogger logger = Logger.of(UserSearchService.class);
 
     @Inject
-    public UserSearchService(UserSearchRepository userSearchRepository, RecipeSearchService recipeSearchService, Config config) {
+    public UserSearchService(UserSearchRepository userSearchRepository, RecipeSearchService recipeSearchService, Config config,
+                             RecipeBookRepository recipeBookRepository) {
         this.userSearchRepository = userSearchRepository;
         this.recipeSearchService = recipeSearchService;
+        this.recipeBookRepository = recipeBookRepository;
         maxPerUser = config.getInt("receptnekem.usersearches.maxperuser");
     }
 
@@ -43,7 +49,8 @@ public class UserSearchService {
                 throw new ForbiddenExeption("User reached max limit! userId = " + userId);
             }
             // TODO: Check recipe books here. Use: data.repositories.imp.EbeanRecipeBookRepository.checkRecipeBooksOfUser
-        }).thenComposeAsync(v -> recipeSearchService.createWithLongId(dto.query, true))
+        }).thenComposeAsync(v -> checkRecipeBooks(dto, userId))
+                .thenComposeAsync(v -> recipeSearchService.createWithLongId(dto.query, true))
                 .thenComposeAsync(searchId -> userSearchRepository.create(dto.name, userId, searchId))
                 .thenApply(UserSearch::getId);
 
@@ -74,7 +81,26 @@ public class UserSearchService {
                     if (dto.query != null) {
                         return recipeSearchService.update(dto.query, true, searchId);
                     }
-                    return runAsync(() -> {});
+                    return runAsync(() -> {
+                    });
                 });
+    }
+
+    private CompletionStage<Void> checkRecipeBooks(UserSearchCreateUpdateDto dto, Long userId) {
+        if (dto.query.recipeBooks != null && dto.query.recipeBooks.size() > 0) {
+            return recipeBookRepository.checkRecipeBooksOfUser(dto.query.recipeBooks, userId)
+                    .exceptionally(this::handleRecipeBookNotFoundException);
+        } else {
+            return runAsync(() -> {
+            });
+        }
+    }
+
+    private Void handleRecipeBookNotFoundException(Throwable e) {
+        if (e.getCause() instanceof NotFoundException) {
+            throw new BusinessLogicViolationException(e.getMessage());
+        }
+
+        return null;
     }
 }

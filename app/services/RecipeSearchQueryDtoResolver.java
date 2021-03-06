@@ -3,11 +3,9 @@ package services;
 import data.entities.SourcePage;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
+import data.repositories.RecipeBookRepository;
 import data.repositories.SourcePageRepository;
-import lombokized.dto.IngredientNameDto;
-import lombokized.dto.IngredientTagDto;
-import lombokized.dto.RecipeSearchQueryDto;
-import lombokized.dto.SourcePageDto;
+import lombokized.dto.*;
 import queryparams.RecipesQueryParams;
 
 import java.util.List;
@@ -21,6 +19,7 @@ class RecipeSearchQueryDtoResolver {
     private IngredientNameRepository ingredientNameRepository;
     private IngredientTagRepository ingredientTagRepository;
     private SourcePageRepository sourcePageRepository;
+    private RecipeBookRepository recipeBookRepository;
 
     private RecipesQueryParams.Params queryParams;
 
@@ -31,6 +30,7 @@ class RecipeSearchQueryDtoResolver {
     private List<IngredientTagDto> excludedIngredientTags;
     private List<IngredientTagDto> additionalIngredientTags;
     private List<SourcePageDto> sourcePages;
+    private List<RecipeBookDto> recipeBooks;
 
     private RecipeSearchQueryDto dto;
 
@@ -50,6 +50,10 @@ class RecipeSearchQueryDtoResolver {
         this.sourcePageRepository = sourcePageRepository;
     }
 
+    public void setRecipeBookRepository(RecipeBookRepository recipeBookRepository) {
+        this.recipeBookRepository = recipeBookRepository;
+    }
+
     public void setUsedLanguageId(Long usedLanguageId) {
         this.usedLanguageId = usedLanguageId;
     }
@@ -67,6 +71,7 @@ class RecipeSearchQueryDtoResolver {
                 .thenComposeAsync(v -> collectExcludedIngredientTags())
                 .thenComposeAsync(v -> collectAdditionalIngredientTags())
                 .thenComposeAsync(v -> collectSourcePages())
+                .thenComposeAsync(v -> collectRecipeBooks())
                 .thenApplyAsync(v -> {
                     dto = toDto();
                     return dto;
@@ -146,6 +151,15 @@ class RecipeSearchQueryDtoResolver {
                 });
     }
 
+    private CompletionStage<Void> collectRecipeBooks() {
+        if (queryParams.recipeBooks == null || queryParams.recipeBooks.size() == 0) {
+            return noopStage;
+        }
+
+        return recipeBookRepository.byIds(queryParams.recipeBooks)
+                .thenAcceptAsync(l -> recipeBooks = toRecipeBookDtoList(l));
+    }
+
     private RecipeSearchQueryDto toDto() {
         return RecipeSearchQueryDto.builder()
                 .searchMode(queryParams.searchMode)
@@ -171,6 +185,7 @@ class RecipeSearchQueryDtoResolver {
                 .exIngTags(excludedIngredientTags)
                 .sourcePages(sourcePages)
                 .times(queryParams.times)
+                .recipeBooks(recipeBooks)
                 .build();
     }
 }

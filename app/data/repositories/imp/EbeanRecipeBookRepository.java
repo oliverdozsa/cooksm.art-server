@@ -180,6 +180,8 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     @Override
     public CompletionStage<Void> checkRecipeBooksOfUser(List<Long> recipeBookIds, Long userId) {
         return runAsync(() -> {
+            logger.info("checkRecipeBooksOfUser(): userId = {}, recipeBookIds = {}", userId, recipeBookIds);
+
             List<RecipeBook> selectedBooksOfUser = ebean.createQuery(RecipeBook.class)
                     .where()
                     .eq("user.id", userId)
@@ -189,6 +191,17 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
             if (selectedBooksOfUser.size() != recipeBookIds.size()) {
                 throw new NotFoundException("Not found found recipe book among user's recipe book!");
             }
+        }, executionContext);
+    }
+
+    @Override
+    public CompletionStage<List<RecipeBook>> byIds(List<Long> ids) {
+        return supplyAsync(() -> {
+            logger.info("byIds(): ids = {}", ids);
+
+            return ebean.createQuery(RecipeBook.class).where()
+                    .in("id", ids)
+                    .findList();
         }, executionContext);
     }
 

@@ -18,4 +18,5 @@ public interface RecipeBookRepository {
     CompletionStage<Integer> futureCountOf(Long id, Long userId, List<Long> recipeIdsToAdd);
     CompletionStage<Void> updateRecipes(Long id, Long userId, List<Long> recipeIds);
     CompletionStage<Void> checkRecipeBooksOfUser(List<Long> recipeBookIds, Long userId);
+    CompletionStage<List<RecipeBook>> byIds(List<Long> ids);
 }
