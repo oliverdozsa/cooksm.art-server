@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static play.mvc.Http.Status.*;
 
-public class RecipeBookControllerTest_InShareAndSaveSearch {
+public class RecipeBooksControllerTest_InShareAndSaveSearch {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
 
     @Rule
@@ -175,5 +175,36 @@ public class RecipeBookControllerTest_InShareAndSaveSearch {
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks-query.yml", disableConstraints = true, cleanBefore = true)
+    public void testSaveSearchWithRecipeBooksOnly() {
+        // When
+        Result result = userSearchesTestClient.create(
+                "{" +
+                        "  \"name\": \"someName\"," +
+                        "  \"query\": {" +
+                        "    \"recipeBooks\": [1, 2]" +
+                        "  }" +
+                        "}", 1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(CREATED));
+        assertThat(result, hasLocationHeader());
+
+        String url = result.header("Location").get();
+        result = userSearchesTestClient.byLocation(url, 1L);
+
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(nameOfSingleUserSearchOf(result), equalTo("someName"));
+        assertNotNull(idOfSingleUserSearchOf(result));
+
+        String recipeSearchId = recipeSearchIdOfSingleUserSearchOf(result);
+        result = recipeSearchesTestClient.single(recipeSearchId);
+        assertThat(statusOf(result), equalTo(OK));
+
+        assertThat(recipeBooksOfSingleRecipeSearchOf(result), containsInAnyOrder("recipe-book-1-user-1", "recipe-book-2-user-1"));
     }
 }
