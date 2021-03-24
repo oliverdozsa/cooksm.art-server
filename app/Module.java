@@ -5,6 +5,7 @@ import data.repositories.imp.*;
 import security.JwtCenter;
 import security.SocialTokenVerifier;
 import security.imp.JwtCenterImp;
+import security.imp.SocialTokenVerifierDevModeImp;
 import security.imp.SocialTokenVerifierFacebookImp;
 import security.imp.SocialTokenVerifierGoogleImp;
 import services.*;
@@ -24,6 +25,7 @@ public class Module extends AbstractModule {
         bind(UserRepository.class).to(EbeanUserRepository.class).asEagerSingleton();
         bind(SocialTokenVerifier.class).annotatedWith(Names.named("Google")).to(SocialTokenVerifierGoogleImp.class).asEagerSingleton();
         bind(SocialTokenVerifier.class).annotatedWith(Names.named("Facebook")).to(SocialTokenVerifierFacebookImp.class).asEagerSingleton();
+        bind(SocialTokenVerifier.class).annotatedWith(Names.named("Dev")).to(SocialTokenVerifierDevModeImp.class).asEagerSingleton();
         bind(IngredientTagRepository.class).to(EbeanIngredientTagRepository.class).asEagerSingleton();
         bind(RecipesService.class).asEagerSingleton();
         bind(RecipeSearchRepository.class).to(EbeanRecipeSearchRepository.class).asEagerSingleton();

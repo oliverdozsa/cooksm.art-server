@@ -37,6 +37,10 @@ public class SecurityController extends Controller {
     private SocialTokenVerifier facebookVerifier;
 
     @Inject
+    @Named("Dev")
+    private SocialTokenVerifier devVerifier;
+
+    @Inject
     private FormFactory formFactory;
 
     @Inject
@@ -66,6 +70,11 @@ public class SecurityController extends Controller {
     public CompletionStage<Result> loginThroughFacebook(Http.Request request) {
         logger.info("loginThroughGoogle()");
         return loginThroughSocial(facebookVerifier, request);
+    }
+
+    public CompletionStage<Result> loginThroughDev(Http.Request request) {
+        logger.info("loginThroughDev()");
+        return loginThroughSocial(devVerifier, request);
     }
 
     public CompletionStage<Result> renew(Http.Request request) {

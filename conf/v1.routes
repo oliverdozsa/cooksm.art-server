@@ -51,6 +51,7 @@ GET  /usersearches/:id            controllers.v1.UserSearchesController.single(i
 # Security
 POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
 POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)
+POST  /security/logindev          controllers.v1.SecurityController.loginThroughDev(request: Request)
 + jwtFilter
 POST  /security/renew             controllers.v1.SecurityController.renew(request: Request)
 + jwtFilter
