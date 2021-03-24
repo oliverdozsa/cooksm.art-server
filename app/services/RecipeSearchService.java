@@ -55,7 +55,7 @@ public class RecipeSearchService {
     }
 
     public CompletionStage<String> createShared(RecipesQueryParams.Params query) {
-        logger.info("create(): isPermanent = {}", query);
+        logger.info("create(): query = {}", query);
 
         if (query.recipeBooks != null && query.recipeBooks.size() > 0) {
             return runAsync(() -> {
