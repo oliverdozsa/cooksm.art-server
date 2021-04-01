@@ -59,6 +59,8 @@ public class SocialTokenVerifierDevModeImp implements SocialTokenVerifier {
         if (user != null) {
             logger.info("deleteDevUserIfPresent(): dev user present, deleting.");
             ebean.delete(user);
+        } else {
+            logger.info("deleteDevUserIfPresent(): dev user not present.");
         }
     }
 }
