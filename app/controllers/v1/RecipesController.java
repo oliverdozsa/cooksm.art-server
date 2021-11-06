@@ -1,6 +1,5 @@
 package controllers.v1;
 
-import com.typesafe.config.Config;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;

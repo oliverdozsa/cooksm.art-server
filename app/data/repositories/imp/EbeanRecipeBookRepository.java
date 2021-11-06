@@ -178,19 +178,24 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     }
 
     @Override
-    public CompletionStage<Void> checkRecipeBooksOfUser(List<Long> recipeBookIds, Long userId) {
+    public void checkRecipeBooksOfUser(List<Long> recipeBookIds, Long userId) {
+        logger.info("checkRecipeBooksOfUser(): userId = {}, recipeBookIds = {}", userId, recipeBookIds);
+
+        List<RecipeBook> selectedBooksOfUser = ebean.createQuery(RecipeBook.class)
+                .where()
+                .eq("user.id", userId)
+                .in("id", recipeBookIds)
+                .findList();
+
+        if (selectedBooksOfUser.size() != recipeBookIds.size()) {
+            throw new NotFoundException("Not found found recipe book among user's recipe book!");
+        }
+    }
+
+    @Override
+    public CompletionStage<Void> checkRecipeBooksOfUserStageTemp(List<Long> recipeBookIds, Long userId) {
         return runAsync(() -> {
-            logger.info("checkRecipeBooksOfUser(): userId = {}, recipeBookIds = {}", userId, recipeBookIds);
-
-            List<RecipeBook> selectedBooksOfUser = ebean.createQuery(RecipeBook.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .in("id", recipeBookIds)
-                    .findList();
-
-            if (selectedBooksOfUser.size() != recipeBookIds.size()) {
-                throw new NotFoundException("Not found found recipe book among user's recipe book!");
-            }
+            checkRecipeBooksOfUser(recipeBookIds, userId);
         }, executionContext);
     }
 

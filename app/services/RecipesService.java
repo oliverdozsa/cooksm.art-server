@@ -1,27 +1,26 @@
 package services;
 
 import com.typesafe.config.Config;
-import data.repositories.RecipeBookRepository;
-import lombokized.repositories.RecipeRepositoryParams;
-import play.Logger;
-import queryparams.RecipesQueryParams;
+import data.DatabaseExecutionContext;
 import data.entities.Recipe;
+import data.repositories.RecipeBookRepository;
 import data.repositories.RecipeRepository;
 import lombokized.dto.PageDto;
 import lombokized.dto.RecipeDto;
 import lombokized.repositories.Page;
+import lombokized.repositories.RecipeRepositoryParams;
+import play.Logger;
+import queryparams.RecipesQueryParams;
 
 import javax.inject.Inject;
-
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static services.RecipesQueryParamsMapping.*;
 import static lombokized.repositories.RecipeRepositoryParams.*;
+import static services.RecipesQueryParamsMapping.*;
 
 public class RecipesService {
     @Inject
@@ -39,67 +38,59 @@ public class RecipesService {
     @Inject
     private RecipeRepositoryQueryCheck queryCheck;
 
+    @Inject
+    private DatabaseExecutionContext dbExecContext;
+
     private static final Logger.ALogger logger = Logger.of(RecipesService.class);
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams) {
         logger.info("pageOfQueryTypeNumber(): queryParams = {}", queryParams);
-        Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams);
-        return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
+        QueryTypeNumber queryTypeNumber = toQueryTypeNumber(queryParams);
+        return queryRecipesByQueryTypeNumber(queryTypeNumber, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(RecipesQueryParams.Params queryParams, Long userId) {
         logger.info("pageOfQueryTypeNumber(): userId = {}, queryParams = {}", userId, queryParams);
-        Supplier<QueryTypeNumber> repositoryParamsSupplier = () -> toQueryTypeNumber(queryParams, userId);
-        return pageOfQueryTypeNumber(repositoryParamsSupplier, queryParams.languageId);
+        QueryTypeNumber queryTypeNumber = toQueryTypeNumber(queryParams, userId);
+        return queryRecipesByQueryTypeNumber(queryTypeNumber, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params queryParams) {
         logger.info("pageOfQueryTypeRatio(): queryParams = {}", queryParams);
-        Supplier<QueryTypeRatio> repositoryParamsSupplier = () -> toQueryTypeRatio(queryParams);
-        return pageOfQueryTypeRatio(repositoryParamsSupplier, queryParams.languageId);
+        QueryTypeRatio queryTypeRatio = toQueryTypeRatio(queryParams);
+        return queryRecipesByQueryTypeRatio(queryTypeRatio, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(RecipesQueryParams.Params queryParams, Long userId) {
         logger.info("pageOfQueryTypeRatio(): userId = {}. queryParams = {}", userId, queryParams);
-        Supplier<QueryTypeRatio> repositoryParamsSupplier = () -> toQueryTypeRatio(queryParams, userId);
-        return pageOfQueryTypeRatio(repositoryParamsSupplier, queryParams.languageId);
+        QueryTypeRatio queryTypeRatio = toQueryTypeRatio(queryParams, userId);
+        return queryRecipesByQueryTypeRatio(queryTypeRatio, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params queryParams) {
         logger.info("pageOfQueryTypeNone(): queryParams = {}", queryParams);
-        CompletionStage<RecipeRepositoryParams.Common> repositoryParams = supplyAsync(() -> toCommon(queryParams));
-        return queryRecipesByCommonParams(repositoryParams, queryParams.languageId);
+        RecipeRepositoryParams.Common commonQueryParams = toCommon(queryParams);
+        return queryRecipesByCommonParams(commonQueryParams, queryParams.languageId);
     }
 
     public CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNone(RecipesQueryParams.Params queryParams, Long userId) {
         logger.info("pageOfQueryTypeNone(): userId = {}, queryParams = {}", userId, queryParams);
-        CompletionStage<RecipeRepositoryParams.Common> repositoryParams = supplyAsync(() -> toCommon(queryParams, userId));
-        return queryRecipesByCommonParams(repositoryParams, queryParams.languageId);
+        RecipeRepositoryParams.Common commonQueryParams = toCommon(queryParams, userId);
+        return queryRecipesByCommonParams(commonQueryParams, queryParams.languageId);
     }
 
     public CompletionStage<RecipeDto> single(Long id, Long languageId) {
         logger.info("single(): id = {}, languageId = {}", id, languageId);
-        return repository.single(id)
-                .thenApplyAsync(e -> {
-                    if (e != null) {
-                        Long usedLanguageId = languageService.getLanguageIdOrDefault(languageId);
-                        return DtoMapper.toDto(e, usedLanguageId);
-                    } else {
-                        return null;
-                    }
-                });
-    }
+        return supplyAsync(() -> {
+            Recipe recipe = repository.single(id);
+            if(recipe!= null){
+                Long usedLanguageId = languageService.getLanguageIdOrDefault(languageId);
+                return DtoMapper.toDto(recipe, usedLanguageId);
+            } else {
+                return null;
+            }
 
-    private CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeRatio(Supplier<QueryTypeRatio> querySupplier, Long languageId) {
-        Supplier<QueryTypeRatio> checkedSupplier = decorateQueryTypeRatioSupplierWithCheck(querySupplier);
-        CompletionStage<QueryTypeRatio> repositoryParams = supplyAsync(checkedSupplier);
-        return queryRecipesByQueryTypeRatio(repositoryParams, languageId);
-    }
-
-    private CompletionStage<PageDto<RecipeDto>> pageOfQueryTypeNumber(Supplier<QueryTypeNumber> querySupplier, Long languageId) {
-        Supplier<QueryTypeNumber> checkedSupplier = decorateQueryTypeNumberSupplierWithCheck(querySupplier);
-        CompletionStage<QueryTypeNumber> repositoryParams = supplyAsync(checkedSupplier);
-        return queryRecipesByQueryTypeNumber(repositoryParams, languageId);
+        }, dbExecContext);
     }
 
     private PageDto<RecipeDto> toPageDto(Page<Recipe> page, Long languageId) {
@@ -111,51 +102,37 @@ public class RecipesService {
         return new PageDto<>(dtos, page.getTotalCount());
     }
 
-    private Supplier<QueryTypeNumber> decorateQueryTypeNumberSupplierWithCheck(Supplier<QueryTypeNumber> querySupplier) {
-        return () -> {
-            QueryTypeNumber query = querySupplier.get();
-            queryCheck.check(query);
-            return query;
-        };
+    private CompletionStage<PageDto<RecipeDto>> queryRecipesByCommonParams(Common params, Long languageId) {
+        return supplyAsync(() -> {
+            checkRecipeBookOfUserIfNeeded(params.getUsedRecipeBooks(), params.getUserId());
+            Page<Recipe> recipesPage = repository.pageOfQueryTypeNone(params);
+            return toPageDto(recipesPage, languageId);
+        }, dbExecContext);
     }
 
-    private Supplier<QueryTypeRatio> decorateQueryTypeRatioSupplierWithCheck(Supplier<QueryTypeRatio> querySupplier) {
-        return () -> {
-            QueryTypeRatio query = querySupplier.get();
-            queryCheck.check(query);
-            return query;
-        };
+    private CompletionStage<PageDto<RecipeDto>> queryRecipesByQueryTypeRatio(QueryTypeRatio params, Long languageId) {
+        return supplyAsync(() -> {
+            queryCheck.check(params);
+            checkRecipeBookOfUserIfNeeded(params.getCommon().getUsedRecipeBooks(), params.getCommon().getUserId());
+            Page<Recipe> recipePage = repository.pageOfQueryTypeRatio(params);
+            return toPageDto(recipePage, languageId);
+        }, dbExecContext);
     }
 
-    private CompletionStage<PageDto<RecipeDto>> queryRecipesByCommonParams(CompletionStage<Common> paramsStage, Long languageId) {
-        return paramsStage
-                .thenCompose(p -> checkRecipeBookOfUserIfNeeded(p.getUsedRecipeBooks(), p.getUserId()))
-                .thenCompose(v -> paramsStage)
-                .thenCompose(p -> repository.pageOfQueryTypeNone(p))
-                .thenApplyAsync(p -> toPageDto(p, languageId));
+    private CompletionStage<PageDto<RecipeDto>> queryRecipesByQueryTypeNumber(QueryTypeNumber params, Long languageId) {
+        return supplyAsync(() -> {
+            queryCheck.check(params);
+            checkRecipeBookOfUserIfNeeded(params.getCommon().getUsedRecipeBooks(), params.getCommon().getUserId());
+            Page<Recipe> recipePage = repository.pageOfQueryTypeNumber(params);
+            return toPageDto(recipePage, languageId);
+        }, dbExecContext);
     }
 
-    private CompletionStage<PageDto<RecipeDto>> queryRecipesByQueryTypeRatio(CompletionStage<QueryTypeRatio> paramsStage, Long languageId) {
-        return paramsStage
-                .thenCompose(p -> checkRecipeBookOfUserIfNeeded(p.getCommon().getUsedRecipeBooks(), p.getCommon().getUserId()))
-                .thenCompose(v -> paramsStage)
-                .thenCompose(q -> repository.pageOfQueryTypeRatio(q))
-                .thenApplyAsync(p -> toPageDto(p, languageId));
-    }
-
-    private CompletionStage<PageDto<RecipeDto>> queryRecipesByQueryTypeNumber(CompletionStage<QueryTypeNumber> paramsStage, Long languageId) {
-        return paramsStage
-                .thenCompose(p -> checkRecipeBookOfUserIfNeeded(p.getCommon().getUsedRecipeBooks(), p.getCommon().getUserId()))
-                .thenCompose(v -> paramsStage)
-                .thenCompose(q -> repository.pageOfQueryTypeNumber(q))
-                .thenApplyAsync(p -> toPageDto(p, languageId));
-    }
-
-    private CompletionStage<Void> checkRecipeBookOfUserIfNeeded(List<Long> recipeBookIds, Long userId){
+    private void checkRecipeBookOfUserIfNeeded(List<Long> recipeBookIds, Long userId){
         if(recipeBookIds == null || recipeBookIds.size() == 0 || userId == 0) {
-            return runAsync(() -> {});
+            return;
         }
 
-        return recipeBookRepository.checkRecipeBooksOfUser(recipeBookIds, userId);
+        recipeBookRepository.checkRecipeBooksOfUser(recipeBookIds, userId);
     }
 }

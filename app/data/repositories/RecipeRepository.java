@@ -7,8 +7,8 @@ import data.entities.Recipe;
 import java.util.concurrent.CompletionStage;
 
 public interface RecipeRepository {
-    CompletionStage<Page<Recipe>> pageOfQueryTypeNumber(QueryTypeNumber params);
-    CompletionStage<Page<Recipe>> pageOfQueryTypeRatio(QueryTypeRatio params);
-    CompletionStage<Page<Recipe>> pageOfQueryTypeNone(Common params);
-    CompletionStage<Recipe> single(Long id);
+    Page<Recipe> pageOfQueryTypeNumber(QueryTypeNumber params);
+    Page<Recipe> pageOfQueryTypeRatio(QueryTypeRatio params);
+    Page<Recipe> pageOfQueryTypeNone(Common params);
+    Recipe single(Long id);
 }

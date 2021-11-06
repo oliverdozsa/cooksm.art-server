@@ -88,7 +88,7 @@ public class UserSearchService {
 
     private CompletionStage<Void> checkRecipeBooks(UserSearchCreateUpdateDto dto, Long userId) {
         if (dto.query.recipeBooks != null && dto.query.recipeBooks.size() > 0) {
-            return recipeBookRepository.checkRecipeBooksOfUser(dto.query.recipeBooks, userId)
+            return recipeBookRepository.checkRecipeBooksOfUserStageTemp(dto.query.recipeBooks, userId)
                     .exceptionally(this::handleRecipeBookNotFoundException);
         } else {
             return runAsync(() -> {

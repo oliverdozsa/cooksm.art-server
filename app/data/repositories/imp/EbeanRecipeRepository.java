@@ -1,98 +1,86 @@
 package data.repositories.imp;
 
-import data.DatabaseExecutionContext;
 import data.entities.Recipe;
 import data.repositories.RecipeRepository;
-import io.ebean.*;
+import io.ebean.Ebean;
+import io.ebean.EbeanServer;
+import io.ebean.Query;
+import io.ebean.RawSql;
+import io.ebean.RawSqlBuilder;
 import lombokized.repositories.Page;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
-import java.util.List;
-import java.util.concurrent.CompletionStage;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static lombokized.repositories.RecipeRepositoryParams.*;
 
 public class EbeanRecipeRepository implements RecipeRepository {
     private EbeanServer ebean;
-    private DatabaseExecutionContext executionContext;
     private static final int DEFAULT_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 50;
 
     private static final Logger.ALogger logger = Logger.of(EbeanRecipeRepository.class);
 
     @Inject
-    public EbeanRecipeRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext) {
+    public EbeanRecipeRepository(EbeanConfig dbConfig) {
         this.ebean = Ebean.getServer(dbConfig.defaultServer());
-        this.executionContext = executionContext;
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfQueryTypeNumber(QueryTypeNumber params) {
-        return supplyAsync(() -> {
-            logger.info("pageOfQueryTypeNumber()");
-            RecipeQuerySql.Configuration configuration = createConfig(params);
-            String sqlString = RecipeQuerySql.create(configuration);
+    public Page<Recipe> pageOfQueryTypeNumber(QueryTypeNumber params) {
+        logger.info("pageOfQueryTypeNumber()");
+        RecipeQuerySql.Configuration configuration = createConfig(params);
+        String sqlString = RecipeQuerySql.create(configuration);
 
-            sqlString = replaceByQueryTypeNumberParameters(sqlString, params);
-            Query<Recipe> query = prepare(sqlString, params.getCommon());
-            setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
+        sqlString = replaceByQueryTypeNumberParameters(sqlString, params);
+        Query<Recipe> query = prepare(sqlString, params.getCommon());
+        setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
 
-            if(params.getAdditionalIngredients().isPresent()) {
-                setAdditionalIngredientsConditions(query, params.getAdditionalIngredients().get(), params.getCommon().getUserId());
-            }
+        if(params.getAdditionalIngredients().isPresent()) {
+            setAdditionalIngredientsConditions(query, params.getAdditionalIngredients().get(), params.getCommon().getUserId());
+        }
 
-            return new Page<>(query.findList(), query.findCount());
-        }, executionContext);
+        return new Page<>(query.findList(), query.findCount());
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfQueryTypeRatio(QueryTypeRatio params) {
-        return supplyAsync(() -> {
-            logger.info("pageOfQueryTypeRatio()");
-            RecipeQuerySql.Configuration configuration = createConfig(params);
-            String sqlString = RecipeQuerySql.create(configuration);
+    public Page<Recipe> pageOfQueryTypeRatio(QueryTypeRatio params) {
+        logger.info("pageOfQueryTypeRatio()");
+        RecipeQuerySql.Configuration configuration = createConfig(params);
+        String sqlString = RecipeQuerySql.create(configuration);
 
-            sqlString = replaceQueryTypeRatioParams(sqlString, params);
+        sqlString = replaceQueryTypeRatioParams(sqlString, params);
 
-            Query<Recipe> query = prepare(sqlString, params.getCommon());
-            setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
-            if(params.getAdditionalIngredients().isPresent()) {
-                setAdditionalIngredientsConditions(query, params.getAdditionalIngredients().get(), params.getCommon().getUserId());
-            }
+        Query<Recipe> query = prepare(sqlString, params.getCommon());
+        setIncludedIngredientsConditions(query, params.getIncludedIngredients(), params.getCommon().getUserId());
+        if(params.getAdditionalIngredients().isPresent()) {
+            setAdditionalIngredientsConditions(query, params.getAdditionalIngredients().get(), params.getCommon().getUserId());
+        }
 
-            return new Page<>(query.findList(), query.findCount());
-
-        }, executionContext);
+        return new Page<>(query.findList(), query.findCount());
     }
 
     @Override
-    public CompletionStage<Page<Recipe>> pageOfQueryTypeNone(Common params) {
-        return supplyAsync(() -> {
-            logger.info("pageOfQueryTypeNone()");
-            RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
-                    true,
-                    useExclude(params),
-                    RecipeQuerySql.QueryType.NONE);
-            setUseFavoritesOnly(config, params);
-            setUseRecipeBooks(config, params);
+    public Page<Recipe> pageOfQueryTypeNone(Common params) {
+        logger.info("pageOfQueryTypeNone()");
+        RecipeQuerySql.Configuration config = new RecipeQuerySql.Configuration(
+                true,
+                useExclude(params),
+                RecipeQuerySql.QueryType.NONE);
+        setUseFavoritesOnly(config, params);
+        setUseRecipeBooks(config, params);
 
-            String sqlString = RecipeQuerySql.create(config);
-            Query<Recipe> query = prepare(sqlString, params);
+        String sqlString = RecipeQuerySql.create(config);
+        Query<Recipe> query = prepare(sqlString, params);
 
-            return new Page<>(query.findList(), query.findCount());
-
-        }, executionContext);
+        return new Page<>(query.findList(), query.findCount());
     }
 
     @Override
-    public CompletionStage<Recipe> single(Long id) {
-        return supplyAsync(() -> {
-            logger.info("single(): id = {}", id);
-            return ebean.find(Recipe.class, id);
-        }, executionContext);
+    public Recipe single(Long id) {
+        logger.info("single(): id = {}", id);
+        return ebean.find(Recipe.class, id);
     }
 
     private String replaceByQueryTypeNumberParameters(String sql, QueryTypeNumber params) {
