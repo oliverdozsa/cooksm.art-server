@@ -1,8 +1,11 @@
 package data.repositories.imp;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import data.DatabaseExecutionContext;
-import data.entities.*;
+import data.entities.Ingredient;
+import data.entities.IngredientTag;
+import data.entities.Language;
+import data.entities.User;
+import data.entities.UserSearch;
 import data.repositories.IngredientTagRepository;
 import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
@@ -18,218 +21,190 @@ import queryparams.RecipesQueryParams;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-
-import static java.util.concurrent.CompletableFuture.runAsync;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanIngredientTagRepository implements IngredientTagRepository {
     private EbeanServer ebean;
-    private DatabaseExecutionContext executionContext;
 
     private static final Logger.ALogger logger = Logger.of(EbeanIngredientTagRepository.class);
 
     @Inject
-    public EbeanIngredientTagRepository(EbeanConfig config, DatabaseExecutionContext executionContext) {
+    public EbeanIngredientTagRepository(EbeanConfig config) {
         this.ebean = Ebean.getServer(config.defaultServer());
-        this.executionContext = executionContext;
     }
 
     @Override
-    public CompletionStage<Page<IngredientTag>> page(IngredientTagRepositoryParams.Page params) {
-        return supplyAsync(() -> {
-            logger.info("page(): params = {}", params);
-            Query<IngredientTag> query = ebean.createQuery(IngredientTag.class);
-            query.where().ilike("name", "%" + params.getNameLike() + "%");
-            query.where().eq("language.id", params.getLanguageId());
-            query.setFirstRow(params.getOffset());
-            query.setMaxRows(params.getLimit());
+    public Page<IngredientTag> page(IngredientTagRepositoryParams.Page params) {
+        logger.info("page(): params = {}", params);
+        Query<IngredientTag> query = ebean.createQuery(IngredientTag.class);
+        query.where().ilike("name", "%" + params.getNameLike() + "%");
+        query.where().eq("language.id", params.getLanguageId());
+        query.setFirstRow(params.getOffset());
+        query.setMaxRows(params.getLimit());
 
-            if (params.getUserId() != null) {
-                query.where().or()
-                        .isNull("user.id")
-                        .eq("user.id", params.getUserId());
-            } else {
-                query.where()
-                        .isNull("user.id");
-            }
+        if (params.getUserId() != null) {
+            query.where().or()
+                    .isNull("user.id")
+                    .eq("user.id", params.getUserId());
+        } else {
+            query.where()
+                    .isNull("user.id");
+        }
 
-            return new Page<>(query.findList(), query.findCount());
-        }, executionContext);
+        return new Page<>(query.findList(), query.findCount());
     }
 
     @Override
-    public CompletionStage<List<IngredientTag>> byIds(List<Long> ids) {
-        return supplyAsync(() -> {
-            logger.info("byIds(): ids = {}", ids);
-            return ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .in("id", ids)
-                    .findList();
-        }, executionContext);
+    public List<IngredientTag> byIds(List<Long> ids) {
+        logger.info("byIds(): ids = {}", ids);
+        return ebean.createQuery(IngredientTag.class)
+                .where()
+                .in("id", ids)
+                .findList();
     }
 
     @Override
-    public CompletionStage<IngredientTag> byNameOfUser(Long userId, String name) {
-        return supplyAsync(() -> {
-            logger.info("byNameOfUser(): userId = {}, name = {}", userId, name);
-            return ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .eq("name", name)
-                    .eq("user.id", userId)
-                    .findOne();
-        }, executionContext);
+    public IngredientTag byNameOfUser(Long userId, String name) {
+        logger.info("byNameOfUser(): userId = {}, name = {}", userId, name);
+        return ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("name", name)
+                .eq("user.id", userId)
+                .findOne();
     }
 
     @Override
-    public CompletionStage<Integer> count(Long userId) {
-        return supplyAsync(() -> {
-            logger.info("count(): userId = {}", userId);
-            return ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .findCount();
-        }, executionContext);
+    public Integer count(Long userId) {
+        logger.info("count(): userId = {}", userId);
+        return ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("user.id", userId)
+                .findCount();
     }
 
     @Override
-    public CompletionStage<IngredientTag> create(Long userId, String name, List<Long> ingredientIds, Long languageId) {
-        return supplyAsync(() -> {
-            logger.info("create(): userId = {}, name = {}, languageId = {}, ingredientIds = {}",
-                    userId, name, languageId, ingredientIds);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
+    public IngredientTag create(Long userId, String name, List<Long> ingredientIds, Long languageId) {
+        logger.info("create(): userId = {}, name = {}, languageId = {}, ingredientIds = {}",
+                userId, name, languageId, ingredientIds);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+        EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
 
-            User user = Ebean.find(User.class, userId);
-            Language language = Ebean.find(Language.class, languageId);
-            List<Ingredient> ingredients = ingredientByIds(ingredientIds);
+        User user = Ebean.find(User.class, userId);
+        Language language = Ebean.find(Language.class, languageId);
+        List<Ingredient> ingredients = ingredientByIds(ingredientIds);
 
-            IngredientTag entity = new IngredientTag();
-            entity.setUser(user);
-            entity.setIngredients(ingredients);
-            entity.setLanguage(language);
-            entity.setName(name);
+        IngredientTag entity = new IngredientTag();
+        entity.setUser(user);
+        entity.setIngredients(ingredients);
+        entity.setLanguage(language);
+        entity.setName(name);
 
-            ebean.save(entity);
-            return entity;
-        }, executionContext);
+        ebean.save(entity);
+        return entity;
     }
 
     @Override
-    public CompletionStage<IngredientTag> byId(Long id, Long userId) {
-        return supplyAsync(() -> {
-            logger.info("byId(): id = {}, userId = {}", id, userId);
-            IngredientTag entity = ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .eq("id", id)
-                    .eq("user.id", userId)
-                    .findOne();
+    public IngredientTag byId(Long id, Long userId) {
+        logger.info("byId(): id = {}, userId = {}", id, userId);
+        IngredientTag entity = ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("id", id)
+                .eq("user.id", userId)
+                .findOne();
 
-            if (entity == null) {
-                throwNotFoundException(id, userId);
-            }
+        if (entity == null) {
+            throwNotFoundException(id, userId);
+        }
 
-            return entity;
-        }, executionContext);
+        return entity;
     }
 
     @Override
-    public CompletionStage<Void> update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId) {
-        return runAsync(() -> {
-            logger.info("update(): id = {}, userId = {}, name = {}, language = {}, ingredientIds = {}",
-                    id, userId, name, ingredientIds, languageId);
+    public void update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId) {
+        logger.info("update(): id = {}, userId = {}, name = {}, language = {}, ingredientIds = {}",
+                id, userId, name, ingredientIds, languageId);
 
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+        EbeanRepoUtils.assertEntityExists(ebean, Language.class, languageId);
 
-            IngredientTag entity = Ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .eq("id", id)
-                    .eq("user.id", userId)
-                    .findOne();
+        IngredientTag entity = Ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("id", id)
+                .eq("user.id", userId)
+                .findOne();
 
-            if (entity == null) {
-                logger.warn("update(): not found user defined tag with id = {}, userId = {}", id, userId);
-                throwNotFoundException(id, userId);
-            }
+        if (entity == null) {
+            logger.warn("update(): not found user defined tag with id = {}, userId = {}", id, userId);
+            throwNotFoundException(id, userId);
+        }
 
-            List<Ingredient> ingredients = ingredientByIds(ingredientIds);
-            Language language = ebean.find(Language.class, languageId);
+        List<Ingredient> ingredients = ingredientByIds(ingredientIds);
+        Language language = ebean.find(Language.class, languageId);
 
-            entity.setName(name);
-            entity.setIngredients(ingredients);
-            entity.setLanguage(language);
+        entity.setName(name);
+        entity.setIngredients(ingredients);
+        entity.setLanguage(language);
 
-            ebean.update(entity);
-        }, executionContext);
+        ebean.update(entity);
     }
 
     @Override
-    public CompletionStage<Void> delete(Long id, Long userId) {
-        return runAsync(() -> {
-            logger.info("delete(): id = {}, userId = {}", id, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+    public void delete(Long id, Long userId) {
+        logger.info("delete(): id = {}, userId = {}", id, userId);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
-            IngredientTag entity = ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .eq("id", id)
-                    .eq("user.id", userId)
-                    .findOne();
+        IngredientTag entity = ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("id", id)
+                .eq("user.id", userId)
+                .findOne();
 
-            if (entity == null) {
-                throwNotFoundException(id, userId);
-            }
+        if (entity == null) {
+            throwNotFoundException(id, userId);
+        }
 
-            ebean.delete(entity);
-
-        }, executionContext);
+        ebean.delete(entity);
     }
 
     @Override
-    public CompletionStage<List<UserSearch>> userSearchesOf(Long id, Long userId) {
+    public List<UserSearch> userSearchesOf(Long id, Long userId) {
         logger.info("userSearchesOf(): id = {}, userId = {}", id, userId);
-        return byId(id, userId)
-                .thenApplyAsync(e -> {
-                    List<UserSearch> userSearches = ebean.createQuery(UserSearch.class)
-                            .where()
-                            .eq("user.id", userId)
-                            .findList();
+        byId(id, userId);
 
-                    List<UserSearch> userSearchesContainingTag = userSearches.stream()
-                            .filter(userSearch -> containsTag(userSearch, id))
-                            .collect(Collectors.toList());
+        List<UserSearch> userSearches = ebean.createQuery(UserSearch.class)
+                .where()
+                .eq("user.id", userId)
+                .findList();
 
-                    logger.info("userSearchesOf(): found {} user searches containing tag {}",
-                            userSearchesContainingTag.size(), id);
+        List<UserSearch> userSearchesContainingTag = userSearches.stream()
+                .filter(userSearch -> containsTag(userSearch, id))
+                .collect(Collectors.toList());
 
-                    return userSearchesContainingTag;
-                });
+        logger.info("userSearchesOf(): found {} user searches containing tag {}",
+                userSearchesContainingTag.size(), id);
+
+        return userSearchesContainingTag;
     }
 
     @Override
-    public CompletionStage<Boolean> containsUserDefined(List<Long> ids) {
-        return supplyAsync(() -> {
-            logger.info("containsUserDefined(): tags = {}", ids);
+    public Boolean containsUserDefined(List<Long> ids) {
+        logger.info("containsUserDefined(): tags = {}", ids);
 
-            return ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .in("id", ids)
-                    .isNotNull("user.id")
-                    .exists();
-        }, executionContext);
+        return ebean.createQuery(IngredientTag.class)
+                .where()
+                .in("id", ids)
+                .isNotNull("user.id")
+                .exists();
     }
 
     @Override
-    public CompletionStage<List<IngredientTag>> userDefinedOnly(Long userId) {
-        return supplyAsync(() -> {
-            logger.info("userDefinedOnly(): userId = {}", userId);
+    public List<IngredientTag> userDefinedOnly(Long userId) {
+        logger.info("userDefinedOnly(): userId = {}", userId);
 
-            return ebean.createQuery(IngredientTag.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .findList();
-        }, executionContext);
+        return ebean.createQuery(IngredientTag.class)
+                .where()
+                .eq("user.id", userId)
+                .findList();
     }
 
     private List<Ingredient> ingredientByIds(List<Long> ingredientIds) {

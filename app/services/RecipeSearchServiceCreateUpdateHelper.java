@@ -8,18 +8,15 @@ import data.repositories.RecipeSearchRepository;
 import data.repositories.SourcePageRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.ForbiddenExeption;
+import lombokized.repositories.Page;
 import lombokized.repositories.RecipeRepositoryParams;
 import play.Logger;
 import play.libs.Json;
 import queryparams.RecipesQueryParams;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-
-import static java.util.concurrent.CompletableFuture.runAsync;
 
 class RecipeSearchServiceCreateUpdateHelper {
     RecipeSearchRepository recipeSearchRepository;
@@ -31,41 +28,36 @@ class RecipeSearchServiceCreateUpdateHelper {
     Integer maxQueryCount;
     RecipeRepositoryQueryCheck queryCheck;
 
-    private CompletionStage<Void> noop = runAsync(() -> {
-    });
-
     private static final Logger.ALogger logger = Logger.of(RecipeSearchServiceCreateUpdateHelper.class);
 
-    public CompletionStage<String> create(RecipesQueryParams.Params query, boolean isPermanent) {
-        return createWithLongId(query, isPermanent)
-                .thenApplyAsync(Base62Conversions::encode);
+    public String create(RecipesQueryParams.Params query, boolean isPermanent) {
+        Long id = createWithLongId(query, isPermanent);
+        return Base62Conversions.encode(id);
     }
 
-    public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
+    public Long createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
         prepareQuery(query);
         logger.info("createWithLongId(): query = {}, isPermanent = {}", query, isPermanent);
 
-        return runAsync(this::checkQueryCount)
-                .thenComposeAsync(v -> checkQueryParams(query))
-                .thenComposeAsync(dto -> {
-                    String queryStr = Json.toJson(query).toString();
-                    checkQueryLength(queryStr);
-                    return recipeSearchRepository.create(queryStr, isPermanent);
-                })
-                .thenApplyAsync(RecipeSearch::getId);
+        checkQueryCount();
+        checkQueryParams(query);
+
+        String queryStr = Json.toJson(query).toString();
+        checkQueryLength(queryStr);
+
+        RecipeSearch recipeSearch = recipeSearchRepository.create(queryStr, isPermanent);
+        return recipeSearch.getId();
     }
 
-    public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id) {
+    public void update(RecipesQueryParams.Params query, boolean isPermanent, Long id) {
         prepareQuery(query);
         logger.info("update(): query = {}, isPermanent = {}, id = {}", query, isPermanent, id);
-        return checkQueryParams(query)
-                .thenComposeAsync(dto -> {
-                    String queryStr = Json.toJson(query).toString();
-                    checkQueryLength(queryStr);
-                    return recipeSearchRepository.update(queryStr, isPermanent, id);
-                })
-                .thenAccept(e -> {
-                });
+
+        checkQueryParams(query);
+
+        String queryStr = Json.toJson(query).toString();
+        checkQueryLength(queryStr);
+        recipeSearchRepository.update(queryStr, isPermanent, id);
     }
 
     private void prepareQuery(RecipesQueryParams.Params query) {
@@ -97,22 +89,20 @@ class RecipeSearchServiceCreateUpdateHelper {
         }
     }
 
-    private CompletionStage<Void> checkQueryParams(RecipesQueryParams.Params query) {
-        return runAsync(() -> {
-            RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(query.searchMode);
-            if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
-                RecipeRepositoryParams.QueryTypeNumber queryTypeNumber = RecipesQueryParamsMapping.toQueryTypeNumber(query);
-                queryCheck.check(queryTypeNumber);
-            } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
-                RecipeRepositoryParams.QueryTypeRatio queryTypeRatio = RecipesQueryParamsMapping.toQueryTypeRatio(query);
-                queryCheck.check(queryTypeRatio);
-            }
-        }).thenComposeAsync(v -> checkEntitiesExist(query));
+    private void checkQueryParams(RecipesQueryParams.Params query) {
+        RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(query.searchMode);
+        if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_NUMBER) {
+            RecipeRepositoryParams.QueryTypeNumber queryTypeNumber = RecipesQueryParamsMapping.toQueryTypeNumber(query);
+            queryCheck.check(queryTypeNumber);
+        } else if (searchMode == RecipesQueryParams.SearchMode.COMPOSED_OF_RATIO) {
+            RecipeRepositoryParams.QueryTypeRatio queryTypeRatio = RecipesQueryParamsMapping.toQueryTypeRatio(query);
+            queryCheck.check(queryTypeRatio);
+        }
+
+        checkEntitiesExist(query);
     }
 
-    private CompletionStage<Void> checkEntitiesExist(RecipesQueryParams.Params query) {
-        CompletionStage<Void> checkStage = runAsync(() -> {
-        });
+    private void checkEntitiesExist(RecipesQueryParams.Params query) {
         Long usedLanguageId = languageService.getLanguageIdOrDefault(query.languageId);
 
         List<List<Long>> ingredientIdsToCheck = new ArrayList<>();
@@ -120,8 +110,7 @@ class RecipeSearchServiceCreateUpdateHelper {
         addIfNotEmpty(query.exIngs, ingredientIdsToCheck);
         addIfNotEmpty(query.addIngs, ingredientIdsToCheck);
         for (List<Long> ids : ingredientIdsToCheck) {
-            checkStage = checkStage.thenComposeAsync(v -> ingredientNameRepository.byIngredientIds(ids, usedLanguageId))
-                    .thenComposeAsync(l -> noop);
+            ingredientNameRepository.byIngredientIds(ids, usedLanguageId);
         }
 
         List<List<Long>> ingredientTagIdsToCheck = new ArrayList<>();
@@ -129,23 +118,19 @@ class RecipeSearchServiceCreateUpdateHelper {
         addIfNotEmpty(query.exIngTags, ingredientTagIdsToCheck);
         addIfNotEmpty(query.addIngTags, ingredientTagIdsToCheck);
         for (List<Long> ids : ingredientTagIdsToCheck) {
-            checkStage = checkStage.thenComposeAsync(v -> ingredientTagRepository.byIds(ids))
-                    .thenComposeAsync(l -> noop);
+            ingredientTagRepository.byIds(ids);
         }
 
         if (query.sourcePages != null) {
-            sourcePageRepository.allSourcePages().thenAcceptAsync(p -> {
-                List<Long> ids = p.getItems()
-                        .stream()
-                        .map(SourcePage::getId)
-                        .collect(Collectors.toList());
-                if (!ids.containsAll(query.sourcePages)) {
-                    throw new IllegalArgumentException("Some source pages are not present in DB!");
-                }
-            });
+            Page<SourcePage> sourcePagesPage = sourcePageRepository.allSourcePages();
+            List<Long> ids = sourcePagesPage.getItems()
+                    .stream()
+                    .map(SourcePage::getId)
+                    .collect(Collectors.toList());
+            if (!ids.containsAll(query.sourcePages)) {
+                throw new IllegalArgumentException("Some source pages are not present in DB!");
+            }
         }
-
-        return checkStage;
     }
 
     private void addIfNotEmpty(List<Long> list, List<List<Long>> result) {

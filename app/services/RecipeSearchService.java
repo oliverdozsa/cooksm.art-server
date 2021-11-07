@@ -1,6 +1,7 @@
 package services;
 
 import com.typesafe.config.Config;
+import data.DatabaseExecutionContext;
 import data.repositories.*;
 import data.repositories.exceptions.BusinessLogicViolationException;
 import lombokized.dto.RecipeSearchDto;
@@ -22,6 +23,7 @@ public class RecipeSearchService {
     private IngredientTagRepository ingredientTagRepository;
     private SourcePageRepository sourcePageRepository;
     private RecipeBookRepository recipeBookRepository;
+    private DatabaseExecutionContext dbExecContext;
     private LanguageService languageService;
     private Config config;
     private RecipeRepositoryQueryCheck queryCheck;
@@ -34,12 +36,13 @@ public class RecipeSearchService {
     private static final Logger.ALogger logger = Logger.of(RecipeSearchService.class);
 
     @Inject
-    public RecipeSearchService(RecipeSearchRepository recipeSearchRepository, IngredientNameRepository ingredientNameRepository, IngredientTagRepository ingredientTagRepository, SourcePageRepository sourcePageRepository, RecipeBookRepository recipeBookRepository, LanguageService languageService, Config config, RecipeRepositoryQueryCheck queryCheck) {
+    public RecipeSearchService(RecipeSearchRepository recipeSearchRepository, IngredientNameRepository ingredientNameRepository, IngredientTagRepository ingredientTagRepository, SourcePageRepository sourcePageRepository, RecipeBookRepository recipeBookRepository, LanguageService languageService, Config config, RecipeRepositoryQueryCheck queryCheck, DatabaseExecutionContext dbExecContext) {
         this.recipeSearchRepository = recipeSearchRepository;
         this.ingredientNameRepository = ingredientNameRepository;
         this.ingredientTagRepository = ingredientTagRepository;
         this.sourcePageRepository = sourcePageRepository;
         this.recipeBookRepository = recipeBookRepository;
+        this.dbExecContext = dbExecContext;
         this.languageService = languageService;
         this.config = config;
         this.queryCheck = queryCheck;
@@ -51,31 +54,27 @@ public class RecipeSearchService {
 
     public CompletionStage<RecipeSearchDto> single(String id) {
         logger.info("get(): id = ", id);
-        return getHelper.single(id);
+        return supplyAsync(() -> getHelper.single(id), dbExecContext);
     }
 
     public CompletionStage<String> createShared(RecipesQueryParams.Params query) {
         logger.info("create(): query = {}", query);
-
-        if (query.recipeBooks != null && query.recipeBooks.size() > 0) {
-            return runAsync(() -> {
+        return supplyAsync(() -> {
+            if (query.recipeBooks != null && query.recipeBooks.size() > 0) {
                 throw new BusinessLogicViolationException("Recipe query to share contains recipe books!");
-            }).thenApplyAsync(v -> "");
-        }
+            }
 
-        return containsUserDefinedIngredientTag(query)
-                .thenComposeAsync(doesContain -> {
-                    if (doesContain) {
-                        throw new BusinessLogicViolationException("Recipe query to share contains user defined tags!");
-                    }
+            if(containsUserDefinedIngredientTag(query)) {
+                throw new BusinessLogicViolationException("Recipe query to share contains user defined tags!");
+            }
 
-                    return createHelper.create(query, false);
-                });
+            return createHelper.create(query, false);
+        }, dbExecContext);
     }
 
     public CompletionStage<Long> createWithLongId(RecipesQueryParams.Params query, boolean isPermanent) {
         logger.info("createWithLongId(): isPermanent = {}, query = {}", isPermanent, query);
-        return createHelper.createWithLongId(query, isPermanent);
+        return supplyAsync(() -> createHelper.createWithLongId(query, isPermanent), dbExecContext);
     }
 
     public void deleteExpired() {
@@ -88,7 +87,7 @@ public class RecipeSearchService {
 
     public CompletionStage<Void> update(RecipesQueryParams.Params query, boolean isPermanent, Long id) {
         logger.info("update(): isPermanent = {}, id = {}, query = {}", isPermanent, id, query);
-        return createHelper.update(query, isPermanent, id);
+        return runAsync(() -> createHelper.update(query, isPermanent, id), dbExecContext);
     }
 
     private void initGetHelper() {
@@ -113,7 +112,7 @@ public class RecipeSearchService {
         createHelper.queryCheck = queryCheck;
     }
 
-    private CompletionStage<Boolean> containsUserDefinedIngredientTag(RecipesQueryParams.Params queryParams) {
+    private Boolean containsUserDefinedIngredientTag(RecipesQueryParams.Params queryParams) {
         List<Long> ingredientTagIds = new ArrayList<>();
         addAllOf(queryParams.inIngTags, ingredientTagIds);
         addAllOf(queryParams.exIngTags, ingredientTagIds);

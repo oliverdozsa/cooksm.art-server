@@ -1,5 +1,6 @@
 package controllers.v1;
 
+import data.DatabaseExecutionContext;
 import lombokized.dto.IngredientNameDto;
 import lombokized.dto.PageDto;
 import lombokized.queryparams.IngredientNameQueryParams;
@@ -21,11 +22,15 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static play.libs.Json.toJson;
 
 public class IngredientNamesController extends Controller {
     @Inject
     private IngredientNameRepository repository;
+
+    @Inject
+    private DatabaseExecutionContext dbExecContext;
 
     @Inject
     private FormFactory formFactory;
@@ -46,8 +51,10 @@ public class IngredientNamesController extends Controller {
 
             logger.info("pageNames(): params = {}", params);
 
-            return repository.page(params.getNameLike(), params.getLanguageId(), params.getLimit(), params.getOffset())
-                    .thenApplyAsync(this::toResult);
+            return supplyAsync(() -> {
+                Page<IngredientName> ingredientNamePage =  repository.page(params.getNameLike(), params.getLanguageId(), params.getLimit(), params.getOffset());
+                return toResult(ingredientNamePage);
+            }, dbExecContext);
         }
     }
 

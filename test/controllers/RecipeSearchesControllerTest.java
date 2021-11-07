@@ -349,9 +349,7 @@ public class RecipeSearchesControllerTest {
         int maxSearches = application.config().getInt("receptnekem.recipesearches.maxquerycount");
         createdIds = new ArrayList<>();
         for (int i = 0; i < maxSearches; i++) {
-            Long id = repository.create("someQuery", true)
-                    .toCompletableFuture()
-                    .get().getId();
+            Long id = repository.create("someQuery", true).getId();
             createdIds.add(id);
         }
     }
@@ -360,7 +358,7 @@ public class RecipeSearchesControllerTest {
         Application application = ruleChainForTests.getApplication();
         EbeanRecipeSearchRepository repository = (EbeanRecipeSearchRepository) (application.injector().instanceOf(RecipeSearchRepository.class));
         for (Long id : createdIds) {
-            repository.delete(id).toCompletableFuture().get();
+            repository.delete(id);
         }
     }
 
@@ -368,6 +366,18 @@ public class RecipeSearchesControllerTest {
         Language language = new Language();
         language.setIsoName("hu");
         Ebean.save(language);
+
+        SourcePage sourcePage1 = new SourcePage();
+        sourcePage1.setId(1L);
+        sourcePage1.setName("source-1");
+        sourcePage1.setLanguage(language);
+        Ebean.save(sourcePage1);
+
+        SourcePage sourcePage2 = new SourcePage();
+        sourcePage2.setId(2L);
+        sourcePage2.setName("source-2");
+        sourcePage2.setLanguage(language);
+        Ebean.save(sourcePage2);
 
         for (int i = 0; i < 60; i++) {
             Ingredient ingredient = new Ingredient();

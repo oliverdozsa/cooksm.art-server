@@ -1,9 +1,9 @@
 package services;
 
 import com.typesafe.config.Config;
+import data.DatabaseExecutionContext;
 import data.entities.RecipeBook;
 import data.repositories.RecipeBookRepository;
-import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.ForbiddenExeption;
 import dto.RecipeBookCreateUpdateDto;
 import dto.RecipeBookRecipesCreateUpdateDto;
@@ -17,9 +17,15 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+
 public class RecipeBooksService {
     @Inject
     private RecipeBookRepository repository;
+
+    @Inject
+    private DatabaseExecutionContext dbExecContext;
 
     private int maxPerUser;
     private int maxRecipesPerBook;
@@ -34,58 +40,74 @@ public class RecipeBooksService {
 
     public CompletionStage<Long> create(RecipeBookCreateUpdateDto dto, Long userId) {
         logger.info("create(): user = {}, dto = {}", userId, dto);
-        return repository
-                .byNameOfUser(userId, dto.name)
-                .thenAcceptAsync(o -> checkNameExists(o.isPresent(), dto.name, userId))
-                .thenComposeAsync(v -> repository.countOf(userId))
-                .thenAcceptAsync(c -> checkCount(c, userId))
-                .thenComposeAsync(v -> repository.create(dto.name, userId))
-                .thenApplyAsync(RecipeBook::getId);
+        return supplyAsync(() -> {
+            Optional<RecipeBook> recipeBookOptional = repository.byNameOfUser(userId, dto.name);
+            checkNameExists(recipeBookOptional.isPresent(), dto.name, userId);
+
+            Integer numOfRecipeBooksOfUser = repository.countOf(userId);
+            checkCount(numOfRecipeBooksOfUser, userId);
+
+            RecipeBook createdRecipeBook = repository.create(dto.name, userId);
+            return createdRecipeBook.getId();
+        }, dbExecContext);
     }
 
     public CompletionStage<List<RecipeBookDto>> all(Long user) {
         logger.info("all(): user = {}", user);
-
-        return repository.allOf(user)
-                .thenApplyAsync(this::toDtoList);
+        return supplyAsync(() -> {
+            List<RecipeBook> recipeBooks = repository.allOf(user);
+            return toDtoList(recipeBooks);
+        }, dbExecContext);
     }
 
     public CompletionStage<RecipeBookDto> single(Long user, Long id) {
         logger.info("single(): user = {}, id = {}", user, id);
-        return repository.single(id, user)
-                .thenApplyAsync(DtoMapper::toDto);
+        return supplyAsync(() -> {
+            RecipeBook recipeBook = repository.single(id, user);
+            return DtoMapper.toDto(recipeBook);
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> update(Long userId, Long id, RecipeBookCreateUpdateDto dto) {
         logger.info("update(): userId = {}, id = {}, dto = {}", userId, id, dto);
-        return repository
-                .byNameOfUser(userId, dto.name)
-                .thenAcceptAsync(o -> checkNameToUpdate(o, dto.name, userId, id))
-                .thenComposeAsync(v -> repository.update(id, dto.name, userId));
+        return runAsync(() -> {
+            Optional<RecipeBook> recipeBookOptional = repository.byNameOfUser(userId, dto.name);
+            checkNameToUpdate(recipeBookOptional, dto.name, userId, id);
+
+            repository.update(id, dto.name, userId);
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> delete(Long userId, Long id) {
         logger.info("delete(): userId = {}, id = {}", userId, id);
-        return repository.delete(id, userId);
+        return runAsync(() -> {
+            repository.delete(id, userId);
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> addRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateDto dto) {
         logger.info("addRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
-        return repository
-                .futureCountOf(id, userId, dto.recipeIds)
-                .thenAcceptAsync(this::checkFutureRecipeCount)
-                .thenComposeAsync(v -> repository.addRecipes(id, userId, dto.recipeIds));
+        return runAsync(() -> {
+            Integer futureCountOfRecipeBooks = repository.futureCountOf(id, userId, dto.recipeIds);
+            checkFutureRecipeCount(futureCountOfRecipeBooks);
+
+            repository.addRecipes(id, userId, dto.recipeIds);
+        }, dbExecContext);
     }
 
     public CompletionStage<RecipeBookWithRecipesDto> recipesOf(Long userId, Long id) {
         logger.info("recipesOf(): userId = {}, id = {}", userId, id);
-        return repository.single(id, userId)
-                .thenApplyAsync(DtoMapper::toRecipeBookWithRecipesDto);
+        return supplyAsync(() -> {
+            RecipeBook recipeBook = repository.single(id, userId);
+            return DtoMapper.toRecipeBookWithRecipesDto(recipeBook);
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> updateRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateDto dto) {
         logger.info("updateRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
-        return repository.updateRecipes(id, userId, dto.recipeIds);
+        return runAsync(() -> {
+            repository.updateRecipes(id, userId, dto.recipeIds);
+        }, dbExecContext);
     }
 
     private void checkCount(int count, Long user) {

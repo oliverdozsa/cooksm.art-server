@@ -1,18 +1,24 @@
 package services;
 
+import data.entities.IngredientName;
+import data.entities.IngredientTag;
+import data.entities.RecipeBook;
 import data.entities.SourcePage;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
 import data.repositories.RecipeBookRepository;
 import data.repositories.SourcePageRepository;
-import lombokized.dto.*;
+import lombokized.dto.IngredientNameDto;
+import lombokized.dto.IngredientTagDto;
+import lombokized.dto.RecipeBookDto;
+import lombokized.dto.RecipeSearchQueryDto;
+import lombokized.dto.SourcePageDto;
+import lombokized.repositories.Page;
 import queryparams.RecipesQueryParams;
 
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static services.DtoMapper.*;
 
 class RecipeSearchQueryDtoResolver {
@@ -33,8 +39,6 @@ class RecipeSearchQueryDtoResolver {
     private List<RecipeBookDto> recipeBooks;
 
     private RecipeSearchQueryDto dto;
-
-    private CompletionStage<Void> noopStage = completedFuture(null);
 
     private Long usedLanguageId;
 
@@ -62,102 +66,82 @@ class RecipeSearchQueryDtoResolver {
         this.queryParams = queryParams;
     }
 
-    public CompletionStage<RecipeSearchQueryDto> resolve() {
-        return collectIncludedIngredients()
-                .thenComposeAsync(v -> collectIncludedIngredients())
-                .thenComposeAsync(v -> collectExcludedIngredients())
-                .thenComposeAsync(v -> collectAdditionalIngredients())
-                .thenComposeAsync(v -> collectIncludedIngredientTags())
-                .thenComposeAsync(v -> collectExcludedIngredientTags())
-                .thenComposeAsync(v -> collectAdditionalIngredientTags())
-                .thenComposeAsync(v -> collectSourcePages())
-                .thenComposeAsync(v -> collectRecipeBooks())
-                .thenApplyAsync(v -> {
-                    dto = toDto();
-                    return dto;
-                });
+    public RecipeSearchQueryDto resolve() {
+        collectIncludedIngredients();
+        collectExcludedIngredients();
+        collectAdditionalIngredients();
+        collectIncludedIngredientTags();
+        collectExcludedIngredientTags();
+        collectAdditionalIngredientTags();
+        collectSourcePages();
+        collectRecipeBooks();
+
+        dto = toDto();
+        return dto;
     }
 
     public RecipeSearchQueryDto getDto() {
         return dto;
     }
 
-    private CompletionStage<Void> collectIncludedIngredients() {
-        if (queryParams.inIngs == null) {
-            return noopStage;
+    private void collectIncludedIngredients() {
+        if (queryParams.inIngs != null) {
+            List<IngredientName> ingredientNames = ingredientNameRepository.byIngredientIds(queryParams.inIngs, usedLanguageId);
+            includedIngredients = toIngredientNameDtoList(ingredientNames);
         }
-
-        return ingredientNameRepository.byIngredientIds(queryParams.inIngs, usedLanguageId)
-                .thenAcceptAsync(l -> includedIngredients = toIngredientNameDtoList(l));
     }
 
-    private CompletionStage<Void> collectExcludedIngredients() {
-        if (queryParams.exIngs == null) {
-            return noopStage;
+    private void collectExcludedIngredients() {
+        if (queryParams.exIngs != null) {
+            List<IngredientName> ingredientNames = ingredientNameRepository.byIngredientIds(queryParams.exIngs, usedLanguageId);
+            excludedIngredients = toIngredientNameDtoList(ingredientNames);
         }
-
-        return ingredientNameRepository.byIngredientIds(queryParams.exIngs, usedLanguageId)
-                .thenAcceptAsync(l -> excludedIngredients = toIngredientNameDtoList(l));
     }
 
-    private CompletionStage<Void> collectAdditionalIngredients() {
-        if (queryParams.addIngs == null) {
-            return noopStage;
+    private void collectAdditionalIngredients() {
+        if (queryParams.addIngs != null) {
+            List<IngredientName> ingredientNames = ingredientNameRepository.byIngredientIds(queryParams.addIngs, usedLanguageId);
+            additionalIngredients = toIngredientNameDtoList(ingredientNames);
         }
-
-        return ingredientNameRepository.byIngredientIds(queryParams.addIngs, usedLanguageId)
-                .thenAcceptAsync(l -> additionalIngredients = toIngredientNameDtoList(l));
     }
 
-    private CompletionStage<Void> collectIncludedIngredientTags() {
-        if (queryParams.inIngTags == null) {
-            return noopStage;
+    private void collectIncludedIngredientTags() {
+        if (queryParams.inIngTags != null) {
+            List<IngredientTag> ingredientTags = ingredientTagRepository.byIds(queryParams.inIngTags);
+            includedIngredientTags = toIngredientTagDtoList(ingredientTags);
         }
-
-        return ingredientTagRepository.byIds(queryParams.inIngTags)
-                .thenAcceptAsync(l -> includedIngredientTags = toIngredientTagDtoList(l));
     }
 
-    private CompletionStage<Void> collectExcludedIngredientTags() {
-        if (queryParams.exIngTags == null) {
-            return noopStage;
+    private void collectExcludedIngredientTags() {
+        if (queryParams.exIngTags != null) {
+            List<IngredientTag> ingredientTags = ingredientTagRepository.byIds(queryParams.exIngTags);
+            excludedIngredientTags = toIngredientTagDtoList(ingredientTags);
         }
-
-        return ingredientTagRepository.byIds(queryParams.exIngTags)
-                .thenAcceptAsync(l -> excludedIngredientTags = toIngredientTagDtoList(l));
     }
 
-    private CompletionStage<Void> collectAdditionalIngredientTags() {
-        if (queryParams.addIngTags == null) {
-            return noopStage;
+    private void collectAdditionalIngredientTags() {
+        if (queryParams.addIngTags != null) {
+            List<IngredientTag> ingredientTags = ingredientTagRepository.byIds(queryParams.addIngTags);
+            additionalIngredientTags = toIngredientTagDtoList(ingredientTags);
         }
-
-        return ingredientTagRepository.byIds(queryParams.addIngTags)
-                .thenAcceptAsync(l -> additionalIngredientTags = toIngredientTagDtoList(l));
     }
 
-    private CompletionStage<Void> collectSourcePages() {
-        if (queryParams.sourcePages == null) {
-            return noopStage;
+    private void collectSourcePages() {
+        if (queryParams.sourcePages != null) {
+            Page<SourcePage> sourcePagesPage = sourcePageRepository.allSourcePages();
+            RecipesQueryParams.Params query = queryParams;
+            List<SourcePage> filtered = sourcePagesPage.getItems().stream()
+                    .filter(s -> query.sourcePages.contains(s.getId()))
+                    .collect(Collectors.toList());
+            sourcePages = toSourcePageDtoList(filtered);
         }
-
-        return sourcePageRepository.allSourcePages()
-                .thenAcceptAsync(l -> {
-                    RecipesQueryParams.Params query = queryParams;
-                    List<SourcePage> filtered = l.getItems().stream()
-                            .filter(s -> query.sourcePages.contains(s.getId()))
-                            .collect(Collectors.toList());
-                    sourcePages = toSourcePageDtoList(filtered);
-                });
     }
 
-    private CompletionStage<Void> collectRecipeBooks() {
-        if (queryParams.recipeBooks == null || queryParams.recipeBooks.size() == 0) {
-            return noopStage;
+    private void collectRecipeBooks() {
+        if (queryParams.recipeBooks != null && queryParams.recipeBooks.size() != 0) {
+            List<RecipeBook> recipeBooksEntities =  recipeBookRepository.byIds(queryParams.recipeBooks);
+            recipeBooks = toRecipeBookDtoList(recipeBooksEntities);
         }
-
-        return recipeBookRepository.byIds(queryParams.recipeBooks)
-                .thenAcceptAsync(l -> recipeBooks = toRecipeBookDtoList(l));
     }
 
     private RecipeSearchQueryDto toDto() {

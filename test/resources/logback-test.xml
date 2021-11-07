@@ -8,7 +8,6 @@
     <encoder>
       <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
     </encoder>
-    <param name="Append" value="false" />
   </appender>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

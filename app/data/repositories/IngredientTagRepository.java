@@ -6,18 +6,17 @@ import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
 
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 public interface IngredientTagRepository {
-    CompletionStage<Page<IngredientTag>> page(IngredientTagRepositoryParams.Page params);
-    CompletionStage<List<IngredientTag>> byIds(List<Long> ids);
-    CompletionStage<IngredientTag> byNameOfUser(Long userId, String name);
-    CompletionStage<Integer> count(Long userId);
-    CompletionStage<IngredientTag> create(Long userId, String name, List<Long> ingredientIds, Long languageId);
-    CompletionStage<IngredientTag> byId(Long id, Long userId);
-    CompletionStage<Void> update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId);
-    CompletionStage<Void> delete(Long id, Long userId);
-    CompletionStage<List<UserSearch>> userSearchesOf(Long id, Long userId);
-    CompletionStage<Boolean> containsUserDefined(List<Long> tags);
-    CompletionStage<List<IngredientTag>> userDefinedOnly(Long userId);
+    Page<IngredientTag> page(IngredientTagRepositoryParams.Page params);
+    List<IngredientTag> byIds(List<Long> ids);
+    IngredientTag byNameOfUser(Long userId, String name);
+    Integer count(Long userId);
+    IngredientTag create(Long userId, String name, List<Long> ingredientIds, Long languageId);
+    IngredientTag byId(Long id, Long userId);
+    void update(Long id, Long userId, String name, List<Long> ingredientIds, Long languageId);
+    void delete(Long id, Long userId);
+    List<UserSearch> userSearchesOf(Long id, Long userId);
+    Boolean containsUserDefined(List<Long> tags);
+    List<IngredientTag> userDefinedOnly(Long userId);
 }

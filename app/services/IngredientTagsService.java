@@ -2,6 +2,7 @@ package services;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
+import data.DatabaseExecutionContext;
 import data.entities.Ingredient;
 import data.entities.IngredientName;
 import data.entities.IngredientTag;
@@ -29,18 +30,23 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+
 public class IngredientTagsService {
     private IngredientTagRepository repository;
     private IngredientNameRepository ingredientNameRepository;
     private LanguageService languageService;
+    private DatabaseExecutionContext dbExecContext;
     private int maxPerUser;
 
     private static final Logger.ALogger logger = Logger.of(IngredientTagsService.class);
 
     @Inject
-    public IngredientTagsService(IngredientTagRepository repository, IngredientNameRepository ingredientNameRepository, LanguageService languageService, Config config) {
+    public IngredientTagsService(IngredientTagRepository repository, IngredientNameRepository ingredientNameRepository, LanguageService languageService, Config config, DatabaseExecutionContext dbExecContext) {
         this.repository = repository;
         this.ingredientNameRepository = ingredientNameRepository;
+        this.dbExecContext = dbExecContext;
         this.languageService = languageService;
         this.maxPerUser = config.getInt("receptnekem.userdefinedtags.maxperuser");
     }
@@ -48,64 +54,77 @@ public class IngredientTagsService {
     public CompletionStage<Page<IngredientTagDto>> page(IngredientTagQueryParams queryParams) {
         logger.info("page(): queryParams = {}", queryParams);
         IngredientTagRepositoryParams.Page repositoryParams = toPageParams(queryParams);
-        return repository.page(repositoryParams)
-                .thenApplyAsync(this::toPageDto);
+
+        return supplyAsync(() -> {
+            Page<IngredientTag> ingredientTagPage = repository.page(repositoryParams);
+            return toPageDto(ingredientTagPage);
+        }, dbExecContext);
     }
 
     public CompletionStage<Page<IngredientTagDto>> page(IngredientTagQueryParams queryParams, Long userId) {
         logger.info("page(): queryParams = {}, userId = {}", queryParams, userId);
-        IngredientTagRepositoryParams.Page repositoryParams = toPageParams(queryParams, userId);
-        return repository.page(repositoryParams)
-                .thenApplyAsync(this::toPageDto);
+        return supplyAsync(() -> {
+            IngredientTagRepositoryParams.Page repositoryParams = toPageParams(queryParams, userId);
+            Page<IngredientTag> ingredientTagPage = repository.page(repositoryParams);
+            return toPageDto(ingredientTagPage);
+        }, dbExecContext);
     }
 
     public CompletionStage<Long> create(IngredientTagCreateUpdateDto dto, Long userId) {
         logger.info("create(): userId = {}, dto = {}", userId, dto);
-        List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
+        return supplyAsync(() -> {
+            Integer numOfTagsOfUser = repository.count(userId);
 
-        return repository.count(userId)
-                .thenAcceptAsync(this::checkTagCountLimitReached)
-                .thenComposeAsync(v -> checkTagWithNameExists(userId, dto.name))
-                .thenComposeAsync(v -> checkAllIngredientIdsExist(uniqueIngredientIds))
-                .thenComposeAsync(v -> repository.create(userId, dto.name, uniqueIngredientIds, languageService.getDefault()))
-                .thenApplyAsync(IngredientTag::getId);
+            checkTagCountLimitReached(numOfTagsOfUser);
+            checkTagWithNameExists(userId, dto.name);
+
+            List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
+            checkAllIngredientIdsExist(uniqueIngredientIds);
+
+            IngredientTag createdIngredientTag = repository.create(userId, dto.name, uniqueIngredientIds, languageService.getDefault());
+            return createdIngredientTag.getId();
+
+        }, dbExecContext);
     }
 
     public CompletionStage<IngredientTagResolvedDto> single(Long id, Long languageId, Long userId) {
         logger.info("single(): id = {}, languageId = {}, userId = {}", id, languageId, userId);
-        CompletionStage<IngredientTag> tagCompletionStage = repository.byId(id, userId);
-        CompletionStage<List<IngredientName>> ingredientNamesDtoCompletionStage =
-                tagCompletionStage.thenComposeAsync(tag -> namesOfTag(tag, languageId));
-
-        return tagCompletionStage
-                .thenCombineAsync(ingredientNamesDtoCompletionStage, this::createResolvedDto);
+        return supplyAsync(() -> {
+            IngredientTag ingredientTag = repository.byId(id, userId);
+            List<IngredientName> ingredientNames = namesOfTag(ingredientTag, languageId);
+            return createResolvedDto(ingredientTag, ingredientNames);
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> update(Long id, IngredientTagCreateUpdateDto dto, Long userId) {
         logger.info("update(): id = {}, userId = {}, dto = {}", id, userId, dto);
-        List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
+        return runAsync(() -> {
+            List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
+            checkAllIngredientIdsExist(dto.ingredientIds);
 
-        return checkAllIngredientIdsExist(dto.ingredientIds)
-                .thenComposeAsync(v -> repository.update(id, userId, dto.name, uniqueIngredientIds, languageService.getDefault()));
+            repository.update(id, userId, dto.name, uniqueIngredientIds, languageService.getDefault());
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> delete(Long id, Long userId) {
         logger.info("delete(): id = {}, userId = {}", id, userId);
-        return repository.userSearchesOf(id, userId)
-                .thenAcceptAsync(list -> {
-                    if (list != null && list.size() > 0) {
-                        logger.warn("delete(): user defined tag is referenced by user search(es)!");
-                        throw createConlictingUserSearchesException(id, list);
-                    }
-                })
-                .thenComposeAsync(v -> repository.delete(id, userId));
+        return runAsync(() -> {
+            List<UserSearch> userSearches = repository.userSearchesOf(id, userId);
+            if (userSearches != null && userSearches.size() > 0) {
+                logger.warn("delete(): user defined tag is referenced by user search(es)!");
+                throw createConlictingUserSearchesException(id, userSearches);
+            }
+
+            repository.delete(id, userId);
+        }, dbExecContext);
     }
 
     public CompletionStage<List<IngredientTagDto>> userDefined(Long userId) {
         logger.info("userDefined(): userId = {}", userId);
-
-        return repository.userDefinedOnly(userId)
-                .thenApplyAsync(this::toDtoList);
+        return supplyAsync(() -> {
+            List<IngredientTag> userDefinedIngredientTags = repository.userDefinedOnly(userId);
+            return toDtoList(userDefinedIngredientTags);
+        }, dbExecContext);
     }
 
     private IngredientTagRepositoryParams.Page toPageParams(IngredientTagQueryParams queryParams) {
@@ -141,19 +160,15 @@ public class IngredientTagsService {
         }
     }
 
-    private CompletionStage<Void> checkTagWithNameExists(Long userId, String name) {
-        return repository.byNameOfUser(userId, name)
-                .thenAcceptAsync(t -> {
-                    if (t != null) {
-                        throw new BusinessLogicViolationException("User has a tag with the same name! name = " + name);
-                    }
-                });
+    private void checkTagWithNameExists(Long userId, String name) {
+        IngredientTag ingredientTag = repository.byNameOfUser(userId, name);
+        if (ingredientTag != null) {
+            throw new BusinessLogicViolationException("User has a tag with the same name! name = " + name);
+        }
     }
 
-    private CompletionStage<Void> checkAllIngredientIdsExist(List<Long> ingredientIds) {
-        return ingredientNameRepository.byIngredientIds(ingredientIds, languageService.getDefault())
-                .thenRunAsync(() -> {
-                });
+    private void checkAllIngredientIdsExist(List<Long> ingredientIds) {
+        ingredientNameRepository.byIngredientIds(ingredientIds, languageService.getDefault());
     }
 
     private List<Long> toIds(List<Ingredient> ingredients) {
@@ -162,7 +177,7 @@ public class IngredientTagsService {
                 .collect(Collectors.toList());
     }
 
-    private CompletionStage<List<IngredientName>> namesOfTag(IngredientTag tag, Long languageId) {
+    private List<IngredientName> namesOfTag(IngredientTag tag, Long languageId) {
         if (tag != null) {
             List<Long> ingredientIds = toIds(tag.getIngredients());
             return ingredientNameRepository
