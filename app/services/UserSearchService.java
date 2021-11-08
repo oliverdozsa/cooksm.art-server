@@ -95,7 +95,7 @@ public class UserSearchService {
 
             Long searchId = userSearch.getSearch().getId();
             if (dto.query != null) {
-                recipeSearchService.update(dto.query, true, searchId);
+                recipeSearchService.updateNonStaged(dto.query, true, searchId);
             }
         }, dbExecContext);
     }

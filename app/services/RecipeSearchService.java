@@ -90,6 +90,11 @@ public class RecipeSearchService {
         return runAsync(() -> createHelper.update(query, isPermanent, id), dbExecContext);
     }
 
+    public void updateNonStaged(RecipesQueryParams.Params query, boolean isPermanent, Long id) {
+        logger.info("updateNonStaged(): isPermanent = {}, id = {}, query = {}", isPermanent, id, query);
+        createHelper.update(query, isPermanent, id);
+    }
+
     private void initGetHelper() {
         getHelper = new RecipeSearchServiceGetHelper();
         getHelper.recipeSearchRepository = recipeSearchRepository;
