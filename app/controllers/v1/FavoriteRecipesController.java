@@ -1,6 +1,7 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
+import data.DatabaseExecutionContext;
 import lombokized.dto.FavoriteRecipeCreateDto;
 import lombokized.dto.FavoriteRecipeDto;
 import data.entities.FavoriteRecipe;
@@ -36,6 +37,9 @@ public class FavoriteRecipesController extends Controller {
     @Inject
     private FormFactory formFactory;
 
+    @Inject
+    private DatabaseExecutionContext dbExecContext;
+
     private Function<Throwable, Result> mapException = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapExceptionWithUnpack = e -> mapException.apply(e.getCause());
 
@@ -44,23 +48,28 @@ public class FavoriteRecipesController extends Controller {
     public CompletionStage<Result> single(Long id, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("single(): id = {}, user id = ", id, jwt.getUserId());
-        return repository.single(id, jwt.getUserId())
-                .thenApplyAsync(f -> {
-                    if (f == null) {
-                        return notFound();
-                    }
 
-                    FavoriteRecipeDto dto = DtoMapper.toDto(f);
-                    return ok(Json.toJson(dto));
-                })
+        return supplyAsync(() -> {
+            FavoriteRecipe favoriteRecipe = repository.single(id, jwt.getUserId());
+
+            if (favoriteRecipe == null) {
+                return notFound();
+            }
+
+            FavoriteRecipeDto dto = DtoMapper.toDto(favoriteRecipe);
+            return ok(Json.toJson(dto));
+        }, dbExecContext)
                 .exceptionally(mapExceptionWithUnpack);
+
     }
 
     public CompletionStage<Result> all(Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("allOfUser(): user id = {}", jwt.getUserId());
-        return repository.all(jwt.getUserId())
-                .thenApplyAsync(FavoriteRecipesController::toResult)
+        return supplyAsync(() -> {
+            List<FavoriteRecipe> favoriteRecipes = repository.all(jwt.getUserId());
+            return toResult(favoriteRecipes);
+        }, dbExecContext)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -75,12 +84,13 @@ public class FavoriteRecipesController extends Controller {
             FavoriteRecipeCreateDto dto = form.get();
             VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
             logger.info("create(): user id = {}, dto = {}", jwt.getUserId(), dto);
-            return repository.create(jwt.getUserId(), dto.getRecipeId())
-                    .thenApplyAsync(e -> {
-                                String location = routes.FavoriteRecipesController
-                                        .single(e.getId()).absoluteURL(request);
-                                return created().withHeader(LOCATION, location);
-                            })
+
+            return supplyAsync(() -> {
+                FavoriteRecipe favoriteRecipe = repository.create(jwt.getUserId(), dto.getRecipeId());
+                String location = routes.FavoriteRecipesController
+                        .single(favoriteRecipe.getId()).absoluteURL(request);
+                return created().withHeader(LOCATION, location);
+            }, dbExecContext)
                     .exceptionally(mapExceptionWithUnpack);
         }
     }
@@ -88,16 +98,17 @@ public class FavoriteRecipesController extends Controller {
     public CompletionStage<Result> delete(Long id, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
         logger.info("delete(): id = {}, user id = {}", id, jwt.getUserId());
-        return repository.delete(id, jwt.getUserId())
-                .thenApplyAsync(r -> {
-                    if (r) {
-                        return (Result) noContent();
-                    } else {
-                        logger.warn("delete(): Failed to delete!");
-                        ValidationError ve = new ValidationError("", "Failed to delete!");
-                        return badRequest(Json.toJson(ve.messages()));
-                    }
-                })
+
+        return supplyAsync(() -> {
+            Boolean isDeleted = repository.delete(id, jwt.getUserId());
+            if (isDeleted) {
+                return (Result) noContent();
+            } else {
+                logger.warn("delete(): Failed to delete!");
+                ValidationError ve = new ValidationError("", "Failed to delete!");
+                return badRequest(Json.toJson(ve.messages()));
+            }
+        }, dbExecContext)
                 .exceptionally(mapExceptionWithUnpack);
     }
 

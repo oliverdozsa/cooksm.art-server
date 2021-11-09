@@ -77,6 +77,11 @@ public class RecipeSearchService {
         return supplyAsync(() -> createHelper.createWithLongId(query, isPermanent), dbExecContext);
     }
 
+    public Long createWithLongIdNonStaged(RecipesQueryParams.Params query, boolean isPermanent) {
+        logger.info("createWithLongIdNonStaged(): isPermanent = {}, query = {}", isPermanent, query);
+        return createHelper.createWithLongId(query, isPermanent);
+    }
+
     public void deleteExpired() {
         Instant thresholdDate = Instant.now().minus(validityDays, ChronoUnit.DAYS);
         List<Long> ids = recipeSearchRepository.queryNonPermanentOlderThan(thresholdDate);

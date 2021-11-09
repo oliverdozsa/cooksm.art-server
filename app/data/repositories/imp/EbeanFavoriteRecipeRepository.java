@@ -33,68 +33,59 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     }
 
     @Override
-    public CompletionStage<FavoriteRecipe> single(Long id, Long userId) {
-        return supplyAsync(() -> {
-                    logger.info("single(): id = {}, userId = {}", id, userId);
-                    EbeanRepoUtils.assertEntityExists(ebean, FavoriteRecipe.class, id);
-                    EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+    public FavoriteRecipe single(Long id, Long userId) {
+        logger.info("single(): id = {}, userId = {}", id, userId);
+        EbeanRepoUtils.assertEntityExists(ebean, FavoriteRecipe.class, id);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
-                    return ebean.createQuery(FavoriteRecipe.class)
-                            .where()
-                            .eq("user.id", userId)
-                            .eq("id", id)
-                            .findOne();
-                },
-                executionContext);
+        return ebean.createQuery(FavoriteRecipe.class)
+                .where()
+                .eq("user.id", userId)
+                .eq("id", id)
+                .findOne();
     }
 
     @Override
-    public CompletionStage<List<FavoriteRecipe>> all(Long userId) {
-        return supplyAsync(() -> {
-            logger.info("all(): userId = {}", userId);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+    public List<FavoriteRecipe> all(Long userId) {
+        logger.info("all(): userId = {}", userId);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
-            return ebean.createQuery(FavoriteRecipe.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .findList();
-        }, executionContext);
+        return ebean.createQuery(FavoriteRecipe.class)
+                .where()
+                .eq("user.id", userId)
+                .findList();
     }
 
     @Override
-    public CompletionStage<FavoriteRecipe> create(Long userId, Long recipeId) {
-        return supplyAsync(() -> {
-            logger.info("create(): userId = {}, recipeId = {}", userId, recipeId);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, Recipe.class, recipeId);
-            assertNotExists(userId, recipeId);
-            assertCount(userId);
+    public FavoriteRecipe create(Long userId, Long recipeId) {
+        logger.info("create(): userId = {}, recipeId = {}", userId, recipeId);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+        EbeanRepoUtils.assertEntityExists(ebean, Recipe.class, recipeId);
+        assertNotExists(userId, recipeId);
+        assertCount(userId);
 
-            FavoriteRecipe fr = new FavoriteRecipe();
-            fr.setUser(ebean.find(User.class, userId));
-            fr.setRecipe(ebean.find(Recipe.class, recipeId));
-            ebean.save(fr);
+        FavoriteRecipe fr = new FavoriteRecipe();
+        fr.setUser(ebean.find(User.class, userId));
+        fr.setRecipe(ebean.find(Recipe.class, recipeId));
+        ebean.save(fr);
 
-            return fr;
-        }, executionContext);
+        return fr;
     }
 
     @Override
-    public CompletionStage<Boolean> delete(Long id, Long userId) {
-        return supplyAsync(() -> {
-            logger.info("delete(): id = {}, userId = {}", id, userId);
-            EbeanRepoUtils.assertEntityExists(ebean, FavoriteRecipe.class, id);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
+    public Boolean delete(Long id, Long userId) {
+        logger.info("delete(): id = {}, userId = {}", id, userId);
+        EbeanRepoUtils.assertEntityExists(ebean, FavoriteRecipe.class, id);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, userId);
 
-            // To prevent deleting other users' entities, userId is needed.
-            int deleteCount = ebean.createQuery(FavoriteRecipe.class)
-                    .where()
-                    .eq("user.id", userId)
-                    .eq("id", id)
-                    .delete();
+        // To prevent deleting other users' entities, userId is needed.
+        int deleteCount = ebean.createQuery(FavoriteRecipe.class)
+                .where()
+                .eq("user.id", userId)
+                .eq("id", id)
+                .delete();
 
-            return deleteCount == 1;
-        }, executionContext);
+        return deleteCount == 1;
     }
 
     private void assertCount(Long userId) {

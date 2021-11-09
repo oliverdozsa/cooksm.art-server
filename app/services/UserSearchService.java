@@ -52,19 +52,18 @@ public class UserSearchService {
 
     public CompletionStage<Long> create(UserSearchCreateUpdateDto dto, Long userId) {
         logger.info("create(): userId = {}, dto = {}", userId, dto);
-        return runAsync(() -> {
+        return supplyAsync(() -> {
             Integer userSearchCountOfUser = userSearchRepository.count(userId);
             if (userSearchCountOfUser >= maxPerUser) {
                 throw new ForbiddenExeption("User reached max limit! userId = " + userId);
             }
 
             checkRecipeBooks(dto, userId);
-        }, dbExecContext)
-                .thenCompose(v -> recipeSearchService.createWithLongId(dto.query, true))
-                .thenApplyAsync(searchId -> {
-                    UserSearch userSearch = userSearchRepository.create(dto.name, userId, searchId);
-                    return userSearch.getId();
-                }, dbExecContext);
+
+            Long recipeSearchId = recipeSearchService.createWithLongIdNonStaged(dto.query, true);
+            UserSearch userSearch = userSearchRepository.create(dto.name, userId, recipeSearchId);
+            return userSearch.getId();
+        }, dbExecContext);
 
     }
 
