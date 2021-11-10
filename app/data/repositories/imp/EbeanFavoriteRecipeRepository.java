@@ -20,15 +20,13 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     private EbeanServer ebean;
-    private DatabaseExecutionContext executionContext;
     private int maxPerUser;
 
     private static final Logger.ALogger logger = Logger.of(EbeanFavoriteRecipeRepository.class);
 
     @Inject
-    public EbeanFavoriteRecipeRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext, Config config) {
+    public EbeanFavoriteRecipeRepository(EbeanConfig dbConfig, Config config) {
         ebean = Ebean.getServer(dbConfig.defaultServer());
-        this.executionContext = executionContext;
         maxPerUser = config.getInt("receptnekem.favoriterecipes.maxperuser");
     }
 

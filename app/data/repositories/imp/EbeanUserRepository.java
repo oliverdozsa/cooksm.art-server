@@ -1,12 +1,11 @@
 package data.repositories.imp;
 
-import lombokized.dto.UserCreateUpdateDto;
-import io.ebean.Ebean;
-import io.ebean.EbeanServer;
-import data.DatabaseExecutionContext;
 import data.entities.User;
 import data.repositories.UserRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
+import io.ebean.Ebean;
+import io.ebean.EbeanServer;
+import lombokized.dto.UserCreateUpdateDto;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
 
@@ -16,57 +15,45 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.util.Set;
-import java.util.concurrent.CompletionStage;
-
-import static java.util.concurrent.CompletableFuture.runAsync;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanUserRepository implements UserRepository {
     private EbeanServer ebean;
-    private DatabaseExecutionContext executionContext;
     private Validator validator;
 
     private static final Logger.ALogger logger = Logger.of(EbeanUserRepository.class);
 
     @Inject
-    public EbeanUserRepository(EbeanConfig ebeanConfig, DatabaseExecutionContext executionContext, ValidatorFactory validatorFactory) {
+    public EbeanUserRepository(EbeanConfig ebeanConfig, ValidatorFactory validatorFactory) {
         this.ebean = Ebean.getServer(ebeanConfig.defaultServer());
-        this.executionContext = executionContext;
         this.validator = validatorFactory.getValidator();
     }
 
     @Override
-    public CompletionStage<User> createOrUpdate(UserCreateUpdateDto dto) {
-        return supplyAsync(() -> {
-            logger.debug("createOrUpdate(): dto = {}", dto.toString());
-            User existing = findByDto(dto);
-            if (existing == null) {
-                return create(dto);
-            } else {
-                return update(dto, existing.getId());
-            }
-        }, executionContext);
+    public User createOrUpdate(UserCreateUpdateDto dto) {
+        logger.debug("createOrUpdate(): dto = {}", dto.toString());
+        User existing = findByDto(dto);
+        if (existing == null) {
+            return create(dto);
+        } else {
+            return update(dto, existing.getId());
+        }
     }
 
     @Override
-    public CompletionStage<User> byId(Long id) {
-        return supplyAsync(() -> {
-            logger.info("byId(): id = {}", id);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
-            return ebean.find(User.class, id);
-        }, executionContext);
+    public User byId(Long id) {
+        logger.info("byId(): id = {}", id);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
+        return ebean.find(User.class, id);
     }
 
     @Override
-    public CompletionStage<Void> delete(Long id) {
-        return runAsync(() -> {
-            logger.info("delete(): id = {}", id);
-            EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
-            int count = ebean.delete(User.class, id);
-            if (count != 1) {
-                throw new BusinessLogicViolationException("Failed to delete user with id = " + id);
-            }
-        }, executionContext);
+    public void delete(Long id) {
+        logger.info("delete(): id = {}", id);
+        EbeanRepoUtils.assertEntityExists(ebean, User.class, id);
+        int count = ebean.delete(User.class, id);
+        if (count != 1) {
+            throw new BusinessLogicViolationException("Failed to delete user with id = " + id);
+        }
     }
 
     private User create(UserCreateUpdateDto dto) {

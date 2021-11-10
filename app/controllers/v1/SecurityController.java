@@ -1,6 +1,8 @@
 package controllers.v1;
 
 import com.typesafe.config.Config;
+import data.DatabaseExecutionContext;
+import data.entities.User;
 import data.repositories.UserRepository;
 import lombokized.dto.UserCreateUpdateDto;
 import lombokized.dto.UserInfoDto;
@@ -23,6 +25,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class SecurityController extends Controller {
     @Inject
@@ -48,6 +51,9 @@ public class SecurityController extends Controller {
 
     @Inject
     private Config config;
+
+    @Inject
+    private DatabaseExecutionContext dbExecContext;
 
     private Function<Throwable, Result> defaultExceptionMapper = new DefaultExceptionMapper(logger);
     private Function<Throwable, Result> mapException = t -> {
@@ -80,12 +86,13 @@ public class SecurityController extends Controller {
     public CompletionStage<Result> renew(Http.Request request) {
         VerifiedJwt verifiedJwt = SecurityUtils.getFromRequest(request);
         logger.info("renew(): user id = {}", verifiedJwt.getUserId());
-        return repository.byId(verifiedJwt.getUserId())
-                .thenApplyAsync(user -> {
-                    String token = jwtCenter.create(user.getId());
-                    UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName());
-                    return ok(Json.toJson(resultDto));
-                })
+        return supplyAsync(() -> {
+            User user = repository.byId(verifiedJwt.getUserId());
+
+            String token = jwtCenter.create(user.getId());
+            UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName());
+            return ok(Json.toJson(resultDto));
+        }, dbExecContext)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -94,8 +101,10 @@ public class SecurityController extends Controller {
         Long userId = verifiedJwt.getUserId();
         logger.info("deregister(): user id = {}", userId);
 
-        return repository.delete(userId)
-                .thenApplyAsync(v -> (Result)noContent())
+        return supplyAsync(() -> {
+            repository.delete(userId);
+            return (Result) noContent();
+        }, dbExecContext)
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -115,12 +124,13 @@ public class SecurityController extends Controller {
     }
 
     private CompletionStage<Result> toResult(VerifiedUserInfo verifiedUserInfo) {
-        return repository.createOrUpdate(convertFrom(verifiedUserInfo))
-                .thenApplyAsync(e -> {
-                    String token = jwtCenter.create(e.getId());
-                    UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
-                    return ok(Json.toJson(result));
-                });
+        return supplyAsync(() -> {
+            User user = repository.createOrUpdate(convertFrom(verifiedUserInfo));
+
+            String token = jwtCenter.create(user.getId());
+            UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
+            return ok(Json.toJson(result));
+        }, dbExecContext);
     }
 
     private UserCreateUpdateDto convertFrom(VerifiedUserInfo info) {
