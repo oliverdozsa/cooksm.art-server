@@ -12,7 +12,9 @@ class Base62Conversions {
         longBytes.putLong(value);
 
         byte[] encodedBytes = base62.encode(longBytes.array());
-        return new String(encodedBytes);
+        String encodedBytesString = new String(encodedBytes);
+
+        return encodedBytesString.replaceAll("^0+", "");
     }
 
     public static Long decode(String value) {
@@ -20,6 +22,12 @@ class Base62Conversions {
         byte[] decodedBytes = base62.decode(encodedBytes);
 
         ByteBuffer longBytes = ByteBuffer.allocate(Long.BYTES);
+
+        if (decodedBytes.length < Long.BYTES) {
+            byte[] paddingBytes = new byte[Long.BYTES - decodedBytes.length];
+            longBytes.put(paddingBytes);
+        }
+
         longBytes.put(decodedBytes);
         longBytes.flip();
 
