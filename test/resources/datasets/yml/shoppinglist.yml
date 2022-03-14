@@ -1,0 +1,46 @@
+users:
+  - id: 1
+    email: user1@example.com
+    full_name: John Doe
+
+  - id: 2
+    email: user2@example.com
+    full_name: Jane Doe
+
+  - id: 3
+    email: user3@example.com
+    full_name: Jack Doe
+
+shopping_list:
+  - id: 1
+    user_id: 1
+    name: User 1's 1st List
+
+  - id: 2
+    user_id: 2
+    name: User 2's 1st List (empty)
+
+  - id: 3
+    user_id: 1
+    name: User 1's 2nd List
+
+shopping_list_item:
+  - id: 1
+    shopping_list_id: 1
+    item: list_1_item_1
+    is_done: false
+
+  - id: 2
+    shopping_list_id: 1
+    item: list_1_item_2
+    is_done: true
+
+  - id: 3
+    shopping_list_id: 1
+    item: list_1_item_3
+    is_done: false
+
+  - id: 4
+    shopping_list_id: 3
+    item: list_3_item_1
+    is_done: false

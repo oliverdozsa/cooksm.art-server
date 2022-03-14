@@ -25,12 +25,12 @@ public class ShoppingListTestClient {
         return null;
     }
 
-    public Result testGetSingle(Long userId, Long shoppingListId) {
+    public Result getSingle(Long userId, Long shoppingListId) {
         // TODO
         return null;
     }
 
-    public Result testDelete(Long userId, Long shoppingListId) {
+    public Result delete(Long userId, Long shoppingListId) {
         // TODO
         return null;
     }
@@ -56,6 +56,11 @@ public class ShoppingListTestClient {
     }
 
     public Result undoAnItem(Long userId, Long shoppingListId, String item) {
+        // TODO
+        return null;
+    }
+
+    public Result byLocation(String url, Long userId) {
         // TODO
         return null;
     }
