@@ -434,6 +434,17 @@ public class ShoppingListControllerTest {
     @Test
     // Given
     @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testCompleteInvalidItem() {
+        // When
+        Result result = client.completeAnItem(1L, 1L, "l");
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testCompleteANotExistingItem() {
         // When
         Result result = client.completeAnItem(1L, 1L, "list_1_item_42");
@@ -454,6 +465,17 @@ public class ShoppingListControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
         assertThatItemIsNotCompleted(1L, 1L, "list_1_item_2");
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testUndoInvalidItem() {
+        // When
+        Result result = client.undoAnItem(1L, 1L, "l");
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -509,5 +531,4 @@ public class ShoppingListControllerTest {
     private boolean isItemCompleted(String item, Map<String, Boolean> itemStates) {
         return itemStates.get(item);
     }
-
 }
