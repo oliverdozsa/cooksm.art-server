@@ -48,4 +48,9 @@ public class ShoppingListFromResult {
 
         return itemStates;
     }
+
+    public static String shoppingListNameOf(Result result) {
+        JsonNode shoppingListJson = toJson(result);
+        return shoppingListJson.get("name").asText();
+    }
 }

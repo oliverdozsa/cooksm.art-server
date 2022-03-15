@@ -13,6 +13,7 @@ import rules.RuleChainForTests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +21,7 @@ import static extractors.DataFromResult.sizeAsJsonOf;
 import static extractors.DataFromResult.statusOf;
 import static extractors.ShoppingListFromResult.*;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -141,12 +141,7 @@ public class ShoppingListControllerTest {
         int itemsLimit = ruleChainForTests.getApplication().config()
                 .getInt("receptnekem.shoppinglist.maxitems");
 
-        List<String> items = new ArrayList<>();
-        for (int i = 0; i < itemsLimit + 1; i++) {
-            items.add("item_" + (i + 1));
-        }
-
-        createRequest.setItems(items);
+        createRequest.setItems(createNewItems(itemsLimit + 1));
 
         // When
         Result result = client.create(1L, createRequest);
@@ -183,10 +178,9 @@ public class ShoppingListControllerTest {
                 "list_1_item_3"
         ));
 
-        Map<String, Boolean> itemStates = itemStatesOf(result);
-        assertFalse(itemStates.get("list_1_item_1"));
-        assertTrue(itemStates.get("list_1_item_2"));
-        assertFalse(itemStates.get("list_1_item_3"));
+        assertThatItemIsNotCompleted(1L, 1L, "list_1_item_1");
+        assertThatItemIsCompleted(1L, 1L, "list_1_item_2");
+        assertThatItemIsNotCompleted(1L, 1L, "list_1_item_3");
     }
 
     @Test
@@ -238,7 +232,7 @@ public class ShoppingListControllerTest {
 
         // When
         ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
-        addItemsRequest.setItems(Arrays.asList("list_1_new_item"));
+        addItemsRequest.setItems(Collections.singletonList("list_1_new_item"));
 
         result = client.addItems(1L, 1L, addItemsRequest);
 
@@ -252,128 +246,268 @@ public class ShoppingListControllerTest {
     }
 
     @Test
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testAddItemsWithItemAlreadyPresent() {
         // Given
-        // When
-        // Then
+        Result result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(sizeAsJsonOf(result), equalTo(3));
 
-        // TODO
+        // When
+        ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
+        addItemsRequest.setItems(Collections.singletonList("list_1_item_2"));
+
+        result = client.addItems(1L, 1L, addItemsRequest);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+
+        result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(sizeAsJsonOf(result), equalTo(3));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testAddItemsWithInvalidItemPresent() {
-        // Given
         // When
-        // Then
+        ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
+        addItemsRequest.setItems(Arrays.asList("new_item_1", "l"));
 
-        // TODO
+        Result result = client.addItems(1L, 1L, addItemsRequest);
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
     public void testAddItemsToNotExistingList() {
-        // Given
         // When
-        // Then
+        ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
+        addItemsRequest.setItems(Arrays.asList("new_item_1", "new_item_2"));
 
-        // TODO
+        Result result = client.addItems(1L, 42L, addItemsRequest);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testAddItemsWouldExceedListSizeLimit() {
-        // Given
         // When
-        // Then
+        ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
 
-        // TODO
+        int itemsLimit = ruleChainForTests.getApplication().config()
+                .getInt("receptnekem.shoppinglist.maxitems");
+
+        addItemsRequest.setItems(createNewItems(itemsLimit + 1));
+        Result result = client.addItems(1L, 1L, addItemsRequest);
+
+        // Then
+        assertThat(statusOf(result), equalTo(FORBIDDEN));
     }
 
     @Test
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRemoveItems() {
         // Given
-        // When
-        // Then
+        Result result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(sizeAsJsonOf(result), equalTo(3));
 
-        // TODO
+        // When
+        ShoppingListAddRemoveItemsDto itemsToRemove = new ShoppingListAddRemoveItemsDto();
+        itemsToRemove.setItems(Arrays.asList("list_1_item_2"));
+
+        result = client.removeItems(1L, 1L, itemsToRemove);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+
+        result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(sizeAsJsonOf(result), equalTo(2));
+        assertThat(itemNamesOfShoppingListOf(result), not(hasItem("list_1_item_2")));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRemoveNotExistingItems() {
-        // Given
         // When
-        // Then
+        ShoppingListAddRemoveItemsDto itemsToRemove = new ShoppingListAddRemoveItemsDto();
+        itemsToRemove.setItems(Arrays.asList("list_1_item_2", "list_1_item_42"));
 
-        // TODO
+        Result result = client.removeItems(1L, 1L, itemsToRemove);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRemoveFromNotExistingList() {
-        // Given
         // When
-        // Then
+        ShoppingListAddRemoveItemsDto itemsToRemove = new ShoppingListAddRemoveItemsDto();
+        itemsToRemove.setItems(Arrays.asList("list_1_item_2", "list_1_item_42"));
 
-        // TODO
+        Result result = client.removeItems(1L, 42L, itemsToRemove);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRename() {
         // Given
-        // When
-        // Then
+        Result result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(shoppingListNameOf(result), equalTo("User 1's 1st List"));
 
-        // TODO
+        // When
+        result = client.rename(1L, 1L, "Renamed User 1's 1st List");
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+
+        result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(shoppingListNameOf(result), equalTo("Renamed User 1's 1st List"));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRenameWithInvalidName() {
-        // Given
         // When
-        // Then
+        Result result = client.rename(1L, 1L, "U");
 
-        // TODO
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testRenameNotExistingList() {
-        // Given
         // When
-        // Then
+        Result result = client.rename(1L, 42L, "New list name");
 
-        // TODO
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
-    public void testCompleteAnItem() {
-        // Given
-        // When
-        // Then
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testCompleteANotCompletedItem() {
+        assertThatItemIsNotCompleted(1L, 1L, "list_1_item_1");
 
-        // TODO
+        // When
+        Result result = client.completeAnItem(1L, 1L, "list_1_item_1");
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThatItemIsCompleted(1L, 1L, "list_1_item_1");
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testCompleteACompletedItem() {
+        assertThatItemIsCompleted(1L, 1L, "list_1_item_2");
+
+        // When
+        Result result = client.completeAnItem(1L, 1L, "list_1_item_2");
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThatItemIsCompleted(1L, 1L, "list_1_item_2");
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testCompleteANotExistingItem() {
-        // Given
         // When
-        // Then
+        Result result = client.completeAnItem(1L, 1L, "list_1_item_42");
 
-        // TODO
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
-    public void testUndoAnItem() {
-        // Given
-        // When
-        // Then
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testUndoACompletedItem() {
+        assertThatItemIsCompleted(1L, 1L, "list_1_item_2");
 
-        // TODO
+        // When
+        Result result = client.undoAnItem(1L, 1L, "list_1_item_2");
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThatItemIsNotCompleted(1L, 1L, "list_1_item_2");
     }
 
     @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testUndoANotCompletedItem() {
+        assertThatItemIsNotCompleted(1L, 1L, "list_1_item_1");
+
+        // When
+        Result result = client.undoAnItem(1L, 1L, "list_1_item_1");
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThatItemIsNotCompleted(1L, 1L, "list_1_item_1");
+    }
+
+    @Test
+    // Given
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUndoANotExistingItem() {
-        // Given
         // When
-        // Then
+        Result result = client.undoAnItem(1L, 1L, "list_1_item_42");
 
-        // TODO
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
+
+    private List<String> createNewItems(int size) {
+        List<String> items = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            items.add("new_item_" + (i + 1));
+        }
+
+        return items;
+    }
+
+    private void assertThatItemIsCompleted(Long userId, Long shoppingListId, String item) {
+        Map<String, Boolean> itemStates = getItemStatesOf(userId, shoppingListId);
+        assertTrue(item + " is not completed in list " + shoppingListId, isItemCompleted("list_1_item_1", itemStates));
+    }
+
+    private void assertThatItemIsNotCompleted(Long userId, Long shoppingListId, String item) {
+        Map<String, Boolean> itemStates = getItemStatesOf(userId, shoppingListId);
+        assertFalse(item + " is completed in list " + shoppingListId, isItemCompleted("list_1_item_1", itemStates));
+    }
+
+    private Map<String, Boolean> getItemStatesOf(Long userId, Long shoppingListId) {
+        Result result = client.getSingle(userId, shoppingListId);
+        assertThat(statusOf(result), equalTo(OK));
+        return itemStatesOf(result);
+    }
+
+    private boolean isItemCompleted(String item, Map<String, Boolean> itemStates) {
+        return itemStates.get(item);
+    }
+
 }

@@ -28,19 +28,19 @@ shopping_list_item:
   - id: 1
     shopping_list_id: 1
     item: list_1_item_1
-    is_done: false
+    is_completed: false
 
   - id: 2
     shopping_list_id: 1
     item: list_1_item_2
-    is_done: true
+    is_completed: true
 
   - id: 3
     shopping_list_id: 1
     item: list_1_item_3
-    is_done: false
+    is_completed: false
 
   - id: 4
     shopping_list_id: 3
     item: list_3_item_1
-    is_done: false
+    is_completed: false
