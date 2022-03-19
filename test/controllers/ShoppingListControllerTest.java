@@ -2,8 +2,11 @@ package controllers;
 
 import clients.ShoppingListTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
+import data.entities.User;
 import dto.ShoppingListAddRemoveItemsDto;
 import dto.ShoppingListCreateDto;
+import extractors.DataFromResult;
+import io.ebean.Ebean;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,8 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static extractors.DataFromResult.sizeAsJsonOf;
-import static extractors.DataFromResult.statusOf;
+import static extractors.DataFromResult.*;
 import static extractors.ShoppingListFromResult.*;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
 import static org.hamcrest.CoreMatchers.*;
@@ -45,12 +47,18 @@ public class ShoppingListControllerTest {
     @Test
     public void testCreate() {
         // Given
+        User user = new User();
+        user.setFullName("John Doe");
+        user.setEmail("john@doe.com");
+
+        Ebean.save(user);
+
         ShoppingListCreateDto createRequest = new ShoppingListCreateDto();
         createRequest.setName("A shopping list");
         createRequest.setItems(Arrays.asList("item_1", "item_2"));
 
         // When
-        Result result = client.create(1L, createRequest);
+        Result result = client.create(user.getId(), createRequest);
 
         // Then
         assertThat(statusOf(result), equalTo(CREATED));
@@ -66,11 +74,17 @@ public class ShoppingListControllerTest {
     @Test
     public void testCreateEmpty() {
         // Given
+        User user = new User();
+        user.setFullName("John Doe");
+        user.setEmail("john@doe.com");
+
+        Ebean.save(user);
+
         ShoppingListCreateDto createRequest = new ShoppingListCreateDto();
         createRequest.setName("A shopping list");
 
         // When
-        Result result = client.create(1L, createRequest);
+        Result result = client.create(user.getId(), createRequest);
 
         // Then
         assertThat(statusOf(result), equalTo(CREATED));
@@ -113,6 +127,12 @@ public class ShoppingListControllerTest {
     @Test
     public void testCreateWouldExceedPerUserLimit() {
         // Given
+        User user = new User();
+        user.setFullName("John Doe");
+        user.setEmail("john@doe.com");
+
+        Ebean.save(user);
+
         ShoppingListCreateDto createRequest = new ShoppingListCreateDto();
         createRequest.setName("A shopping list");
         createRequest.setItems(Arrays.asList("item_1", "item_2"));
@@ -123,12 +143,12 @@ public class ShoppingListControllerTest {
         // When
         Result result;
         for (int i = 0; i < perUserLimit; i++) {
-            result = client.create(1L, createRequest);
+            result = client.create(user.getId(), createRequest);
             assertThat(statusOf(result), equalTo(CREATED));
         }
 
         // Then
-        result = client.create(1L, createRequest);
+        result = client.create(user.getId(), createRequest);
         assertThat(statusOf(result), equalTo(FORBIDDEN));
     }
 
@@ -228,7 +248,7 @@ public class ShoppingListControllerTest {
         // Given
         Result result = client.getSingle(1L, 1L);
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(sizeAsJsonOf(result), equalTo(3));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(3));
 
         // When
         ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
@@ -241,8 +261,35 @@ public class ShoppingListControllerTest {
 
         result = client.getSingle(1L, 1L);
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(sizeAsJsonOf(result), equalTo(4));
-        assertThat(itemNamesOfShoppingListOf(result), containsInAnyOrder("list_1_new_item"));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(4));
+        assertThat(itemNamesOfShoppingListOf(result), hasItem("list_1_new_item"));
+    }
+
+    @Test
+    @DataSet(value = {"datasets/yml/shoppinglist.yml"}, disableConstraints = true, cleanBefore = true)
+    public void testAddItemsOrder() {
+        // Given
+        Result result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(3));
+
+        // When
+        ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
+        addItemsRequest.setItems(Arrays.asList("list_1_new_item", "list_2_new_item", "list_3_new_item"));
+
+        result = client.addItems(1L, 1L, addItemsRequest);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NO_CONTENT));
+
+        result = client.getSingle(1L, 1L);
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(6));
+        // LIFO order is expected
+        assertThat(itemNamesOfShoppingListOf(result),
+                equalTo(Arrays.asList("list_3_new_item", "list_2_new_item", "list_1_new_item",
+                        "list_1_item_3", "list_1_item_2", "list_1_item_1"))
+        );
     }
 
     @Test
@@ -251,7 +298,7 @@ public class ShoppingListControllerTest {
         // Given
         Result result = client.getSingle(1L, 1L);
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(sizeAsJsonOf(result), equalTo(3));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(3));
 
         // When
         ShoppingListAddRemoveItemsDto addItemsRequest = new ShoppingListAddRemoveItemsDto();
@@ -264,7 +311,7 @@ public class ShoppingListControllerTest {
 
         result = client.getSingle(1L, 1L);
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(sizeAsJsonOf(result), equalTo(3));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(3));
     }
 
     @Test
@@ -307,7 +354,7 @@ public class ShoppingListControllerTest {
         Result result = client.addItems(1L, 1L, addItemsRequest);
 
         // Then
-        assertThat(statusOf(result), equalTo(FORBIDDEN));
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -316,7 +363,7 @@ public class ShoppingListControllerTest {
         // Given
         Result result = client.getSingle(1L, 1L);
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(sizeAsJsonOf(result), equalTo(3));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(3));
 
         // When
         ShoppingListAddRemoveItemsDto itemsToRemove = new ShoppingListAddRemoveItemsDto();
@@ -329,7 +376,7 @@ public class ShoppingListControllerTest {
 
         result = client.getSingle(1L, 1L);
         assertThat(statusOf(result), equalTo(OK));
-        assertThat(sizeAsJsonOf(result), equalTo(2));
+        assertThat(itemNamesOfShoppingListOf(result).size(), equalTo(2));
         assertThat(itemNamesOfShoppingListOf(result), not(hasItem("list_1_item_2")));
     }
 
@@ -514,12 +561,12 @@ public class ShoppingListControllerTest {
 
     private void assertThatItemIsCompleted(Long userId, Long shoppingListId, String item) {
         Map<String, Boolean> itemStates = getItemStatesOf(userId, shoppingListId);
-        assertTrue(item + " is not completed in list " + shoppingListId, isItemCompleted("list_1_item_1", itemStates));
+        assertTrue(item + " is not completed in list " + shoppingListId, isItemCompleted(item, itemStates));
     }
 
     private void assertThatItemIsNotCompleted(Long userId, Long shoppingListId, String item) {
         Map<String, Boolean> itemStates = getItemStatesOf(userId, shoppingListId);
-        assertFalse(item + " is completed in list " + shoppingListId, isItemCompleted("list_1_item_1", itemStates));
+        assertFalse(item + " is completed in list " + shoppingListId, isItemCompleted(item, itemStates));
     }
 
     private Map<String, Boolean> getItemStatesOf(Long userId, Long shoppingListId) {

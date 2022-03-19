@@ -1,11 +1,15 @@
 package data.entities;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -20,8 +24,13 @@ public class ShoppingList {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "shoppingList")
+    @OneToMany(mappedBy = "shoppingList", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OrderBy("id desc")
     private List<ShoppingListItem> items;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public Long getId() {
         return id;
@@ -45,5 +54,13 @@ public class ShoppingList {
 
     public void setItems(List<ShoppingListItem> items) {
         this.items = items;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

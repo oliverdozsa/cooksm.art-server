@@ -30,7 +30,7 @@ public class DataFromResult {
         return json.get("jwtAuthToken").asText();
     }
 
-    static JsonNode toJson(Result result) {
+    public static JsonNode toJson(Result result) {
         String jsonStr = contentAsString(result);
         return Json.parse(jsonStr);
     }

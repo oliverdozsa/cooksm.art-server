@@ -74,3 +74,23 @@ POST    /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.addReci
 GET     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.recipesOf(id: Long, request: Request)
 + jwtFilter
 PUT     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.updateRecipes(id: Long, request: Request)
+
+# Shopping list
++ jwtFilter
+POST    /shoppinglist               controllers.v1.ShoppingListController.create(request: Request)
++ jwtFilter
+GET     /shoppinglist               controllers.v1.ShoppingListController.allOfUser(request: Request)
++ jwtFilter
+GET     /shoppinglist/:id           controllers.v1.ShoppingListController.single(id: Long, request: Request)
++ jwtFilter
+DELETE  /shoppinglist/:id           controllers.v1.ShoppingListController.delete(id: Long, request: Request)
++ jwtFilter
+PUT     /shoppinglist/:id           controllers.v1.ShoppingListController.rename(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/add       controllers.v1.ShoppingListController.addItems(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/remove    controllers.v1.ShoppingListController.removeItems(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/complete  controllers.v1.ShoppingListController.completeItem(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/undo      controllers.v1.ShoppingListController.undoItem(id: Long, request: Request)

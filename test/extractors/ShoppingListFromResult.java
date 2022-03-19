@@ -13,7 +13,7 @@ public class ShoppingListFromResult {
     public static List<String> itemNamesOfShoppingListOf(Result result) {
         ListOfValuesFromResult<String> itemNames = new ListOfValuesFromResult<String>()
                 .select("$.items")
-                .converting(n -> n.get("names").asText());
+                .converting(n -> n.get("name").asText());
 
         return itemNames.of(result);
     }
@@ -43,7 +43,7 @@ public class ShoppingListFromResult {
         Map<String, Boolean> itemStates = new HashMap<>();
 
         shoppingListJson.get("items").forEach(itemJson -> {
-            itemStates.put(itemJson.get("name").asText(), itemJson.get("isDone").asBoolean());
+            itemStates.put(itemJson.get("name").asText(), itemJson.get("isCompleted").asBoolean());
         });
 
         return itemStates;
