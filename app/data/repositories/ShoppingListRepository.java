@@ -7,7 +7,7 @@ import java.util.List;
 public interface ShoppingListRepository {
     Long create(Long userId, String name, List<String> items);
     List<ShoppingList> allOfUser(Long userId);
-    ShoppingList single(Long userId, Long shoppingListItem);
+    ShoppingList single(Long userId, Long shoppingListId);
     void delete(Long userId, Long shoppingListId);
     void rename(Long userId, Long shoppingListId, String newName);
     void addItems(Long userId, Long shoppingListId, List<String> newItems);

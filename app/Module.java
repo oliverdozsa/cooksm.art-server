@@ -38,5 +38,7 @@ public class Module extends AbstractModule {
         bind(RecipeRepositoryQueryCheck.class).asEagerSingleton();
         bind(IngredientTagsService.class).asEagerSingleton();
         bind(RecipeBooksService.class).asEagerSingleton();
+        bind(ShoppingListRepository.class).to(EbeanShoppingListRepository.class).asEagerSingleton();
+        bind(ShoppingListService.class).asEagerSingleton();
     }
 }

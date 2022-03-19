@@ -107,4 +107,20 @@ public class DtoMapper {
 
         return new RecipeBookWithRecipesDto(entity.getId(), entity.getName(), entity.getLastAccessed(), recipeIds);
     }
+
+    public static ShoppingListListElementDto toShoppingListListElementDto(ShoppingList entity) {
+        return new ShoppingListListElementDto(entity.getId(), entity.getName());
+    }
+
+    public static ShoppingListDto toDto(ShoppingList entity) {
+        List<ShoppingListItemDto> itemsDto = entity.getItems().stream()
+                .map(DtoMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new ShoppingListDto(entity.getId(), entity.getName(), itemsDto);
+    }
+
+    private static ShoppingListItemDto toDto(ShoppingListItem entity) {
+        return new ShoppingListItemDto(entity.getName(), entity.isCompleted());
+    }
 }
