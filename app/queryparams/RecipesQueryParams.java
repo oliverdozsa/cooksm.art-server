@@ -160,7 +160,7 @@ public class RecipesQueryParams {
         }
 
         private ValidationError checkGoodIngsRatio() {
-            if (goodIngsRatio < 0.0 || goodIngsRatio > 1.0) {
+            if (goodIngsRatio == null || goodIngsRatio < 0.0 || goodIngsRatio > 1.0) {
                 return new ValidationError("", "Invalid good ingredients ratio! Must be between 0.0 and 1.0!");
             }
 
