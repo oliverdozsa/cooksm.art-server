@@ -12,7 +12,6 @@ public class Recipe {
     @Column(name = "id")
     private Long id;
 
-    @Lob
     @Column(name = "name")
     private String name;
 

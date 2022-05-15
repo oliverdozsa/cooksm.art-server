@@ -38,9 +38,6 @@ public class SocialTokenVerifierFacebookImpTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
-    private String mockClientId = "mockClientId";
-    private String mockApiUrl = "mockApiUrl";
-    private String mockFacebookSecret = "mockFacebookSecret";
     private String mockUserInfoUrl = "mockUserInfoUrl";
 
     private SocialTokenVerifierFacebookImp verifier;
@@ -49,9 +46,6 @@ public class SocialTokenVerifierFacebookImpTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        when(mockConfig.getString("facebook.clientid")).thenReturn(mockClientId);
-        when(mockConfig.getString("facebook.apiurl")).thenReturn(mockApiUrl);
-        when(mockConfig.getString("facebook.secret")).thenReturn(mockFacebookSecret);
         when(mockConfig.getString("facebook.userinfourl")).thenReturn(mockUserInfoUrl);
         when(mockWsClient.url(anyString())).thenReturn(mockWsRequest);
         when(mockWsRequest.get()).thenReturn(completedFuture(mockWsResponse));
@@ -61,37 +55,40 @@ public class SocialTokenVerifierFacebookImpTest {
 
     @Test
     public void testVerificationSuccessful() throws ExecutionException, InterruptedException {
-        ObjectNode jsonResponseData = Json.newObject();
-        jsonResponseData.put("is_valid", true);
-        jsonResponseData.put("app_id", mockClientId);
-        jsonResponseData.put("user_id", "4221");
-
-        ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.set("data", jsonResponseData);
-
         ObjectNode userInfoJson = Json.newObject();
         userInfoJson.put("name", "Some One");
         userInfoJson.put("email", "some@one.com");
         userInfoJson.put("id", "4221");
 
         when(mockWsResponse.asJson())
-                .thenReturn(jsonRespone)
                 .thenReturn(userInfoJson);
 
         assertNotNull("Verification result should be not null!", verifier.verify("someToken").toCompletableFuture().get());
     }
 
     @Test
-    public void testErrorResponse() throws ExecutionException, InterruptedException {
-        ObjectNode jsonResponseData = Json.newObject();
-        jsonResponseData.put("is_valid", false);
+    public void testMissingEmail() throws ExecutionException, InterruptedException {
+        ObjectNode userInfoJson = Json.newObject();
+        userInfoJson.put("name", "Some One");
+        userInfoJson.put("id", "4221");
 
-        ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.set("data", jsonResponseData);
-        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
+        when(mockWsResponse.asJson()).thenReturn(userInfoJson);
 
         exceptionRule.expect(ExecutionException.class);
-        exceptionRule.expectMessage("token is invalid");
+        exceptionRule.expectMessage("doesn't have email");
+        verifier.verify("someToken").toCompletableFuture().get();
+    }
+
+    @Test
+    public void testMissingName() throws ExecutionException, InterruptedException {
+        ObjectNode userInfoJson = Json.newObject();
+        userInfoJson.put("email", "some@one.com");
+        userInfoJson.put("id", "4221");
+
+        when(mockWsResponse.asJson()).thenReturn(userInfoJson);
+
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("doesn't have name");
         verifier.verify("someToken").toCompletableFuture().get();
     }
 
@@ -101,31 +98,6 @@ public class SocialTokenVerifierFacebookImpTest {
 
         exceptionRule.expect(ExecutionException.class);
         exceptionRule.expectMessage("response is null");
-        verifier.verify("someToken").toCompletableFuture().get();
-    }
-
-    @Test
-    public void testClientIdMismatch() throws ExecutionException, InterruptedException {
-        ObjectNode jsonResponseData = Json.newObject();
-        jsonResponseData.put("is_valid", true);
-        jsonResponseData.put("app_id", mockClientId + "someStringToMismatch");
-
-        ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.set("data", jsonResponseData);
-        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
-
-        exceptionRule.expect(ExecutionException.class);
-        exceptionRule.expectMessage("client id mismatch");
-        verifier.verify("someToken").toCompletableFuture().get();
-    }
-
-    @Test
-    public void testNullData() throws ExecutionException, InterruptedException {
-        ObjectNode jsonRespone = Json.newObject();
-        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
-
-        exceptionRule.expect(ExecutionException.class);
-        exceptionRule.expectMessage("doesn't have 'data' field");
         verifier.verify("someToken").toCompletableFuture().get();
     }
 }

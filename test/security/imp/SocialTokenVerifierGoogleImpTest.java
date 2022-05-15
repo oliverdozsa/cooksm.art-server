@@ -37,7 +37,6 @@ public class SocialTokenVerifierGoogleImpTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
-    private String mockClientId = "mockClientId";
     private String mockApiUrl = "mockApiUrl";
 
     private SocialTokenVerifierGoogleImp verifier;
@@ -46,7 +45,6 @@ public class SocialTokenVerifierGoogleImpTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        when(mockConfig.getString("google.clientid")).thenReturn(mockClientId);
         when(mockConfig.getString("google.apiurl")).thenReturn(mockApiUrl);
         when(mockWsClient.url(mockApiUrl)).thenReturn(mockWsRequest);
         when(mockWsRequest.get()).thenReturn(completedFuture(mockWsResponse));
@@ -57,10 +55,9 @@ public class SocialTokenVerifierGoogleImpTest {
     @Test
     public void testVerificationSuccessful() throws ExecutionException, InterruptedException {
         ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.put("aud", mockClientId);
         jsonRespone.put("name", "someName");
         jsonRespone.put("email", "someEmail");
-        jsonRespone.put("sub", "4242");
+        jsonRespone.put("id", "4242");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
         assertNotNull("Verification result should be not null!", verifier.verify("someToken").toCompletableFuture().get());
@@ -73,7 +70,7 @@ public class SocialTokenVerifierGoogleImpTest {
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
         exceptionRule.expect(ExecutionException.class);
-        exceptionRule.expectMessage("doesn't have aud");
+        exceptionRule.expectMessage("doesn't have email");
         verifier.verify("someToken").toCompletableFuture().get();
     }
 
@@ -87,20 +84,8 @@ public class SocialTokenVerifierGoogleImpTest {
     }
 
     @Test
-    public void testClientIdMismatch() throws ExecutionException, InterruptedException {
-        ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.put("aud", mockClientId + "addingSomeContentToGetDifferentClientId");
-        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
-
-        exceptionRule.expect(ExecutionException.class);
-        exceptionRule.expectMessage("client id mismatch");
-        verifier.verify("someToken").toCompletableFuture().get();
-    }
-
-    @Test
     public void testMissingEmail() throws ExecutionException, InterruptedException {
         ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.put("aud", mockClientId);
         jsonRespone.put("name", "someName");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
@@ -112,7 +97,6 @@ public class SocialTokenVerifierGoogleImpTest {
     @Test
     public void testMissingName() throws ExecutionException, InterruptedException {
         ObjectNode jsonRespone = Json.newObject();
-        jsonRespone.put("aud", mockClientId);
         jsonRespone.put("email", "some@oneName");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 

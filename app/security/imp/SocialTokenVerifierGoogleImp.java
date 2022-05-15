@@ -16,7 +16,6 @@ import java.util.concurrent.CompletionStage;
 
 public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
     private WSClient wsClient;
-    private String clientId;
     private String apiUrl;
 
     private static Logger.ALogger logger = Logger.of(SocialTokenVerifierGoogleImp.class);
@@ -24,14 +23,13 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
     @Inject
     public SocialTokenVerifierGoogleImp(WSClient wsClient, Config config) {
         this.wsClient = wsClient;
-        clientId = config.getString("google.clientid");
         apiUrl = config.getString("google.apiurl");
     }
 
     @Override
     public CompletionStage<VerifiedUserInfo> verify(String token) {
         WSRequest wsRequest = wsClient.url(apiUrl);
-        wsRequest.addQueryParameter("id_token", token);
+        wsRequest.addHeader("Authorization", "Bearer " + token);
 
         return wsRequest.get()
                 .thenApply(WSResponse::asJson)
@@ -46,17 +44,6 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
             throw new GoogleVerifierException("Response json is null!");
         }
 
-        if (response.get("aud") == null) {
-            throw new GoogleVerifierException("Response json doesn't have aud field!");
-        }
-
-        String receivedClientId = response.get("aud").asText();
-        if (!receivedClientId.equals(clientId)) {
-            String message = String.format("checkResponseContent(): client id mismatch! receivedClientId = %s, clientId = %s",
-                    receivedClientId, clientId);
-            throw new GoogleVerifierException(message);
-        }
-
         if (response.get("email") == null) {
             throw new GoogleVerifierException("Response json doesn't have email field!");
         }
@@ -69,7 +56,7 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
     private VerifiedUserInfo toVerifiedUserInfo(JsonNode json) {
         String fullName = json.get("name").asText();
         String email = json.get("email").asText();
-        String userId = json.get("sub").asText();
+        String userId = json.get("id").asText();
         return new VerifiedGoogleUserInfo(fullName, email, userId);
     }
 
