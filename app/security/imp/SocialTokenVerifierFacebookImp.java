@@ -29,7 +29,7 @@ public class SocialTokenVerifierFacebookImp implements SocialTokenVerifier {
     @Override
     public CompletionStage<VerifiedUserInfo> verify(String token) {
         WSRequest request = wsClient.url(userInfoUrl);
-        request.addQueryParameter("fields", "name,email");
+        request.addQueryParameter("fields", "name,email,picture");
         request.addQueryParameter("access_token", token);
 
         return request.get()
@@ -52,14 +52,19 @@ public class SocialTokenVerifierFacebookImp implements SocialTokenVerifier {
         if (json.get("email") == null) {
             throw new FacebookVerifierException("Response json doesn't have email field!");
         }
+
+        if (json.get("picture") == null) {
+            throw new FacebookVerifierException("Response json doesn't have picture field!");
+        }
     }
 
     private VerifiedUserInfo toVerifiedUserInfo(JsonNode json){
         String fullName = json.get("name").asText();
         String email = json.get("email").asText();
         String userId = json.get("id").asText();
+        String picture = json.get("picture").get("data").get("url").asText();
 
-        return new VerifiedFacebookUserInfo(fullName, email, userId);
+        return new VerifiedFacebookUserInfo(fullName, email, userId, picture);
     }
 
     private static class FacebookVerifierException extends TokenVerificationException {

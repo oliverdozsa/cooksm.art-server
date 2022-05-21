@@ -65,6 +65,7 @@ public class EbeanUserRepository implements UserRepository {
         entity.setEmail(dto.getEmail());
         entity.setFullName(dto.getFullName());
         entity.setLastUpdate(Instant.now());
+        entity.setPicture(dto.getPicture());
         setSocialId(dto, entity);
 
         ebean.save(entity);
@@ -82,6 +83,7 @@ public class EbeanUserRepository implements UserRepository {
         entity.setEmail(dto.getEmail());
         entity.setFullName(dto.getFullName());
         entity.setLastUpdate(Instant.now());
+        entity.setPicture(dto.getPicture());
         setSocialId(dto, entity);
 
         ebean.update(entity);

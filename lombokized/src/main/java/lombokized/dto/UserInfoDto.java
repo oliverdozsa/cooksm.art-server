@@ -7,4 +7,5 @@ public class UserInfoDto {
     private final String jwtAuthToken;
     private final String email;
     private final String fullName;
+    private final String picture;
 }

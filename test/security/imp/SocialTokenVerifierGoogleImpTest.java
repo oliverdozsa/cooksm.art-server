@@ -16,8 +16,6 @@ import play.libs.ws.WSResponse;
 import java.util.concurrent.ExecutionException;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +56,7 @@ public class SocialTokenVerifierGoogleImpTest {
         jsonRespone.put("name", "someName");
         jsonRespone.put("email", "someEmail");
         jsonRespone.put("id", "4242");
+        jsonRespone.put("picture", "some-picture");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
         assertNotNull("Verification result should be not null!", verifier.verify("someToken").toCompletableFuture().get());
@@ -87,6 +86,7 @@ public class SocialTokenVerifierGoogleImpTest {
     public void testMissingEmail() throws ExecutionException, InterruptedException {
         ObjectNode jsonRespone = Json.newObject();
         jsonRespone.put("name", "someName");
+        jsonRespone.put("picture", "some-picture");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
         exceptionRule.expect(ExecutionException.class);
@@ -98,10 +98,23 @@ public class SocialTokenVerifierGoogleImpTest {
     public void testMissingName() throws ExecutionException, InterruptedException {
         ObjectNode jsonRespone = Json.newObject();
         jsonRespone.put("email", "some@oneName");
+        jsonRespone.put("picture", "some-picture");
         when(mockWsResponse.asJson()).thenReturn(jsonRespone);
 
         exceptionRule.expect(ExecutionException.class);
         exceptionRule.expectMessage("doesn't have name");
+        verifier.verify("someToken").toCompletableFuture().get();
+    }
+
+    @Test
+    public void testMissingPicture() throws ExecutionException, InterruptedException {
+        ObjectNode jsonRespone = Json.newObject();
+        jsonRespone.put("email", "some@oneName");
+        jsonRespone.put("name", "someName");
+        when(mockWsResponse.asJson()).thenReturn(jsonRespone);
+
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("doesn't have picture");
         verifier.verify("someToken").toCompletableFuture().get();
     }
 }

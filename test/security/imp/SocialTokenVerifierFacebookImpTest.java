@@ -60,6 +60,14 @@ public class SocialTokenVerifierFacebookImpTest {
         userInfoJson.put("email", "some@one.com");
         userInfoJson.put("id", "4221");
 
+        ObjectNode pictureDataJson = Json.newObject();
+        pictureDataJson.put("url", "some-url");
+
+        ObjectNode pictureJson = Json.newObject();
+        pictureJson.set("data", pictureDataJson);
+
+        userInfoJson.set("picture", pictureJson);
+
         when(mockWsResponse.asJson())
                 .thenReturn(userInfoJson);
 
@@ -72,6 +80,14 @@ public class SocialTokenVerifierFacebookImpTest {
         userInfoJson.put("name", "Some One");
         userInfoJson.put("id", "4221");
 
+        ObjectNode pictureDataJson = Json.newObject();
+        pictureDataJson.put("url", "some-url");
+
+        ObjectNode pictureJson = Json.newObject();
+        pictureJson.set("data", pictureDataJson);
+
+        userInfoJson.set("picture", pictureJson);
+
         when(mockWsResponse.asJson()).thenReturn(userInfoJson);
 
         exceptionRule.expect(ExecutionException.class);
@@ -80,10 +96,32 @@ public class SocialTokenVerifierFacebookImpTest {
     }
 
     @Test
+    public void testMissingPicture() throws ExecutionException, InterruptedException {
+        ObjectNode userInfoJson = Json.newObject();
+        userInfoJson.put("name", "Some One");
+        userInfoJson.put("email", "some@one.com");
+        userInfoJson.put("id", "4221");
+
+        when(mockWsResponse.asJson()).thenReturn(userInfoJson);
+
+        exceptionRule.expect(ExecutionException.class);
+        exceptionRule.expectMessage("doesn't have picture");
+        verifier.verify("someToken").toCompletableFuture().get();
+    }
+
+    @Test
     public void testMissingName() throws ExecutionException, InterruptedException {
         ObjectNode userInfoJson = Json.newObject();
         userInfoJson.put("email", "some@one.com");
         userInfoJson.put("id", "4221");
+
+        ObjectNode pictureDataJson = Json.newObject();
+        pictureDataJson.put("url", "some-url");
+
+        ObjectNode pictureJson = Json.newObject();
+        pictureJson.set("data", pictureDataJson);
+
+        userInfoJson.set("picture", pictureJson);
 
         when(mockWsResponse.asJson()).thenReturn(userInfoJson);
 

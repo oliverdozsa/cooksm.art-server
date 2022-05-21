@@ -51,13 +51,18 @@ public class SocialTokenVerifierGoogleImp implements SocialTokenVerifier {
         if (response.get("name") == null) {
             throw new GoogleVerifierException("Response json doesn't have name field!");
         }
+
+        if (response.get("picture") == null) {
+            throw new GoogleVerifierException("Response json doesn't have picture field!");
+        }
     }
 
     private VerifiedUserInfo toVerifiedUserInfo(JsonNode json) {
         String fullName = json.get("name").asText();
         String email = json.get("email").asText();
         String userId = json.get("id").asText();
-        return new VerifiedGoogleUserInfo(fullName, email, userId);
+        String picture = json.get("picture").asText();
+        return new VerifiedGoogleUserInfo(fullName, email, userId, picture);
     }
 
     private static class GoogleVerifierException extends TokenVerificationException {

@@ -16,4 +16,6 @@ public class UserCreateUpdateDto {
     private final String googleUserId;
 
     private final String facebookUserId;
+
+    private final String picture;
 }

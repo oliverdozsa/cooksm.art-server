@@ -174,13 +174,13 @@ public class SecurityControllerTest {
     }
 
     private void mockVerificationWillSucceedFor(String fullName, String email, String socialId) {
-        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo(fullName, email, socialId);
+        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo(fullName, email, socialId, "some-picture");
         MockSocialTokenVerifier.setMockResult(mockResult);
         MockSocialTokenVerifier.shouldThrowException(false);
     }
 
     private void mockVerificationWillFailFor(String fullName, String email, String socialId) {
-        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo(fullName, email, socialId);
+        VerifiedUserInfo mockResult = new VerifiedGoogleUserInfo(fullName, email, socialId, "some-picture");
         MockSocialTokenVerifier.setMockResult(mockResult);
         MockSocialTokenVerifier.shouldThrowException(true);
     }

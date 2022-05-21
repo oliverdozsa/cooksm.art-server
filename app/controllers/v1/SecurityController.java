@@ -74,7 +74,7 @@ public class SecurityController extends Controller {
     }
 
     public CompletionStage<Result> loginThroughFacebook(Http.Request request) {
-        logger.info("loginThroughGoogle()");
+        logger.info("loginThroughFacebook()");
         return loginThroughSocial(facebookVerifier, request);
     }
 
@@ -90,7 +90,7 @@ public class SecurityController extends Controller {
             User user = repository.byId(verifiedJwt.getUserId());
 
             String token = jwtCenter.create(user.getId());
-            UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName());
+            UserInfoDto resultDto = new UserInfoDto(token, user.getEmail(), user.getFullName(), user.getPicture());
             return ok(Json.toJson(resultDto));
         }, dbExecContext)
                 .exceptionally(mapExceptionWithUnpack);
@@ -128,7 +128,7 @@ public class SecurityController extends Controller {
             User user = repository.createOrUpdate(convertFrom(verifiedUserInfo));
 
             String token = jwtCenter.create(user.getId());
-            UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName());
+            UserInfoDto result = new UserInfoDto(token, verifiedUserInfo.getEmail(), verifiedUserInfo.getFullName(), verifiedUserInfo.getPicture());
             return ok(Json.toJson(result));
         }, dbExecContext);
     }
@@ -136,12 +136,12 @@ public class SecurityController extends Controller {
     private UserCreateUpdateDto convertFrom(VerifiedUserInfo info) {
         if (info instanceof VerifiedGoogleUserInfo) {
             String socialId = info.getSocialId();
-            return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), socialId, null);
+            return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), socialId, null, info.getPicture());
         }
 
         if (info instanceof VerifiedFacebookUserInfo) {
             String socialId = info.getSocialId();
-            return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), null, socialId);
+            return new UserCreateUpdateDto(info.getEmail(), info.getFullName(), null, socialId, info.getPicture());
         }
 
         return null;

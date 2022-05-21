@@ -41,7 +41,7 @@ public class SocialTokenVerifierDevModeImp implements SocialTokenVerifier {
     }
 
     private VerifiedUserInfo createDevUserInfo() {
-        return new VerifiedFacebookUserInfo("Recept Nekem", "dev@receptnekem.hu", "123456");
+        return new VerifiedFacebookUserInfo("Recept Nekem", "dev@receptnekem.hu", "123456", "some-pic");
     }
 
     private static class DevVerifierException extends TokenVerificationException {

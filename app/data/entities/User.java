@@ -30,6 +30,9 @@ public class User {
     @Column(name = "facebook_user_id")
     private String facebookUserId;
 
+    @Column(name = "picture")
+    private String picture;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<FavoriteRecipe> favoriteRecipes;
 
@@ -88,5 +91,13 @@ public class User {
 
     public void setFacebookUserId(String facebookUserId) {
         this.facebookUserId = facebookUserId;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }
