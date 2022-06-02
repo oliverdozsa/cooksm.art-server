@@ -26,7 +26,7 @@ public class IngredientTag {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     @JoinTable(name = "ingredient_tag_ingredient",
             joinColumns = {
                     @JoinColumn(name = "ingredient_tag_id", referencedColumnName = "id")

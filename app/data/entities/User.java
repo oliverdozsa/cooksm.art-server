@@ -45,6 +45,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<ShoppingList> shoppingLists;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private List<IngredientTag> ingredientTags;
+
     public String getEmail() {
         return email;
     }
