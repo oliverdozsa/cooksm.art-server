@@ -1,2 +1,96 @@
-# Routes
-->      /api/v1                         v1.Routes
+GET    /ingredientnames               controllers.v1.IngredientNamesController.pageNames(request: Request)
++ jwtOptionalFilter
+GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
+GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
+GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
+
+# Ingredient tags
++ jwtOptionalFilter
+GET    /ingredienttags                controllers.v1.IngredientTagsController.page(request: Request)
++ jwtFilter
+POST   /ingredienttags/create         controllers.v1.IngredientTagsController.create(request: Request)
++ jwtFilter
+GET    /ingredienttags/userdefined    controllers.v1.IngredientTagsController.userDefined(request: Request)
++ jwtFilter
+GET    /ingredienttags/:id            controllers.v1.IngredientTagsController.single(id: Long, language: Long ?= 0, request: Request)
++ jwtFilter
+PUT    /ingredienttags/:id            controllers.v1.IngredientTagsController.update(id: Long, request: Request)
++ jwtFilter
+DELETE /ingredienttags/:id            controllers.v1.IngredientTagsController.delete(id: Long, request: Request)
+
+# Favorite recipes
++ jwtFilter
+POST   /favoriterecipes           controllers.v1.FavoriteRecipesController.create(request: Request)
++ jwtFilter
+GET    /favoriterecipes           controllers.v1.FavoriteRecipesController.all(request: Request)
++ jwtFilter
+GET    /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.single(id: Long, request: Request)
++ jwtFilter
+DELETE /favoriterecipes/:id       controllers.v1.FavoriteRecipesController.delete(id: Long, request: Request)
+
+# Recipe searches
+GET   /recipesearches/:id         controllers.v1.RecipeSearchesController.single(id: String)
++ jwtOptionalFilter
+POST  /recipesearches             controllers.v1.RecipeSearchesController.create(request: Request)
+
+# Global searches
+GET   /globalsearches/all         controllers.v1.GlobalSearchesController.all()
+
+# User searches
++ jwtFilter
+POST /usersearches                controllers.v1.UserSearchesController.create(request: Request)
++ jwtFilter
+PATCH  /usersearches/:id          controllers.v1.UserSearchesController.patch(id: Long, request: Request)
++ jwtFilter
+GET  /usersearches                controllers.v1.UserSearchesController.all(request: Request)
++ jwtFilter
+DELETE  /usersearches/:id         controllers.v1.UserSearchesController.delete(id: Long, request: Request)
++ jwtFilter
+GET  /usersearches/:id            controllers.v1.UserSearchesController.single(id: Long, request: Request)
+
+# Security
+POST  /security/logingoogle       controllers.v1.SecurityController.loginThroughGoogle(request: Request)
+POST  /security/loginfacebook     controllers.v1.SecurityController.loginThroughFacebook(request: Request)
+POST  /security/logindev          controllers.v1.SecurityController.loginThroughDev(request: Request)
++ jwtFilter
+POST  /security/renew             controllers.v1.SecurityController.renew(request: Request)
++ jwtFilter
+DELETE /security/deregister       controllers.v1.SecurityController.deregister(request: Request)
+
+# Recipe books
++ jwtFilter
+GET     /recipebooks                controllers.v1.RecipeBooksController.all(request: Request)
++ jwtFilter
+POST    /recipebooks                controllers.v1.RecipeBooksController.create(request: Request)
++ jwtFilter
+GET     /recipebooks/:id            controllers.v1.RecipeBooksController.single(id: Long, request: Request)
++ jwtFilter
+PUT     /recipebooks/:id            controllers.v1.RecipeBooksController.update(id: Long, request: Request)
++ jwtFilter
+DELETE  /recipebooks/:id            controllers.v1.RecipeBooksController.delete(id: Long, request: Request)
++ jwtFilter
+POST    /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.addRecipes(id: Long, request: Request)
++ jwtFilter
+GET     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.recipesOf(id: Long, request: Request)
++ jwtFilter
+PUT     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.updateRecipes(id: Long, request: Request)
+
+# Shopping list
++ jwtFilter
+POST    /shoppinglist               controllers.v1.ShoppingListController.create(request: Request)
++ jwtFilter
+GET     /shoppinglist               controllers.v1.ShoppingListController.allOfUser(request: Request)
++ jwtFilter
+GET     /shoppinglist/:id           controllers.v1.ShoppingListController.single(id: Long, request: Request)
++ jwtFilter
+DELETE  /shoppinglist/:id           controllers.v1.ShoppingListController.delete(id: Long, request: Request)
++ jwtFilter
+PUT     /shoppinglist/:id           controllers.v1.ShoppingListController.rename(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/add       controllers.v1.ShoppingListController.addItems(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/remove    controllers.v1.ShoppingListController.removeItems(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/complete  controllers.v1.ShoppingListController.completeItem(id: Long, request: Request)
++ jwtFilter
+POST    /shoppinglist/:id/undo      controllers.v1.ShoppingListController.undoItem(id: Long, request: Request)
