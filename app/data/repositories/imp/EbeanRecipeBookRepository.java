@@ -86,6 +86,7 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
         return ebean.createQuery(RecipeBook.class)
                 .where()
                 .eq("user.id", userId)
+                .orderBy("lastAccessed desc")
                 .findList();
     }
 

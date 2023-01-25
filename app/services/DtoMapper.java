@@ -101,11 +101,11 @@ public class DtoMapper {
     }
 
     public static RecipeBookWithRecipesDto toRecipeBookWithRecipesDto(RecipeBook entity) {
-        List<Long> recipeIds = entity.getRecipes().stream()
-                .map(Recipe::getId)
+        List<RecipeInRecipeBookSummaryDto> recipeSummaries = entity.getRecipes().stream()
+                .map(DtoMapper::toSummaryDto)
                 .collect(Collectors.toList());
 
-        return new RecipeBookWithRecipesDto(entity.getId(), entity.getName(), entity.getLastAccessed(), recipeIds);
+        return new RecipeBookWithRecipesDto(entity.getId(), entity.getName(), entity.getLastAccessed(), recipeSummaries);
     }
 
     public static ShoppingListListElementDto toShoppingListListElementDto(ShoppingList entity) {
@@ -122,5 +122,11 @@ public class DtoMapper {
 
     private static ShoppingListItemDto toDto(ShoppingListItem entity) {
         return new ShoppingListItemDto(entity.getName(), entity.isCompleted());
+    }
+
+    private static RecipeInRecipeBookSummaryDto toSummaryDto(Recipe recipe) {
+        return new RecipeInRecipeBookSummaryDto(
+                recipe.getId(), recipe.getName(), recipe.getUrl()
+        );
     }
 }

@@ -1,6 +1,7 @@
 package extractors;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombokized.dto.RecipeInRecipeBookSummaryDto;
 import play.mvc.Result;
 
 import java.time.Instant;
@@ -28,8 +29,8 @@ public class RecipeBooksFromResult {
 
     public static List<Long> recipeIdsOfRecipeBookOf(Result result) {
         ListOfValuesFromResult<Long> values = new ListOfValuesFromResult<Long>()
-                .select("$.recipeIds")
-                .converting(JsonNode::asLong);
+                .select("$.recipeSummaries")
+                .converting(j -> j.get("id").asLong());
 
         return values.of(result);
     }
