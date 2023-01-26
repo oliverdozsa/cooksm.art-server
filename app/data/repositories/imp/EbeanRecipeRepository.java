@@ -1,6 +1,7 @@
 package data.repositories.imp;
 
 import data.entities.Recipe;
+import data.entities.RecipeBook;
 import data.repositories.RecipeRepository;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
@@ -13,6 +14,9 @@ import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 
+import java.util.List;
+
+import static data.repositories.imp.EbeanRepoUtils.assertEntityExists;
 import static lombokized.repositories.RecipeRepositoryParams.*;
 
 public class EbeanRecipeRepository implements RecipeRepository {
@@ -81,6 +85,18 @@ public class EbeanRecipeRepository implements RecipeRepository {
     public Recipe single(Long id) {
         logger.info("single(): id = {}", id);
         return ebean.find(Recipe.class, id);
+    }
+
+    @Override
+    public List<RecipeBook> recipeBooksOf(Long id, Long userId) {
+        logger.info("recipeBooksOf(): id = {}, userId = {}", id, userId);
+        assertEntityExists(ebean, Recipe.class, id);
+
+        return ebean.createQuery(RecipeBook.class)
+                .where()
+                .eq("recipes.id", id)
+                .eq("user.id", userId)
+                .findList();
     }
 
     private String replaceByQueryTypeNumberParameters(String sql, QueryTypeNumber params) {

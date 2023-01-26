@@ -2,6 +2,8 @@ GET    /ingredientnames               controllers.v1.IngredientNamesController.p
 + jwtOptionalFilter
 GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
 GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
++ jwtFilter
+GET    /recipes/:id/recipebooks       controllers.v1.RecipesController.recipeBooksOf(id: Long, request: Request)
 GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
 
 # Ingredient tags

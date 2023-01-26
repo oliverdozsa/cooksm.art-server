@@ -11,6 +11,14 @@ users:
     email: user3@example.com
     full_name: Jack Doe
 
+  - id: 4
+    email: user4@example.com
+    full_name: Jill Doe
+
+  - id: 5
+    email: user5@example.com
+    full_name: Joe Doe
+
 recipe_book:
   - id: 1
     name: recipe-book-1-user-1
@@ -37,6 +45,21 @@ recipe_book:
     last_accessed: 2021-01-01 04:21:21
     user_id: 2
 
+  - id: 6
+    name: recipe-book-6-user-4
+    last_accessed: 2021-01-01 04:21:21
+    user_id: 4
+
+  - id: 7
+    name: recipe-book-7-user-5
+    last_accessed: 2021-01-01 04:21:21
+    user_id: 5
+
+  - id: 8
+    name: recipe-book-8-user-4
+    last_accessed: 2021-01-01 04:21:21
+    user_id: 4
+
 recipe_book_recipe:
   - recipe_book_id: 1
     recipe_id: 1
@@ -49,3 +72,18 @@ recipe_book_recipe:
 
   - recipe_book_id: 2
     recipe_id: 4
+
+  - recipe_book_id: 2
+    recipe_id: 1
+
+  - recipe_book_id: 6
+    recipe_id: 21
+
+  - recipe_book_id: 8
+    recipe_id: 21
+
+  - recipe_book_id: 7
+    recipe_id: 21
+
+recipe:
+  - id: 21

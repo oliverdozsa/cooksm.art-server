@@ -1,7 +1,11 @@
 package controllers.recipebooks;
 
 import clients.RecipeBooksTestClient;
+import clients.RecipesTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
+import data.entities.Recipe;
+import io.ebean.Ebean;
+import io.ebean.SqlUpdate;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,8 +14,7 @@ import play.mvc.Result;
 import rules.RuleChainForTests;
 
 import static extractors.DataFromResult.statusOf;
-import static extractors.RecipeBooksFromResult.recipeBookNameOf;
-import static extractors.RecipeBooksFromResult.recipeBookNamesOf;
+import static extractors.RecipeBooksFromResult.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -26,10 +29,12 @@ public class RecipeBooksController_GetTest {
     public RuleChain chain = ruleChainForTests.getRuleChain();
 
     private RecipeBooksTestClient client;
+    private RecipesTestClient recipesTestClient;
 
     @Before
     public void setup() {
         client = new RecipeBooksTestClient(ruleChainForTests.getApplication());
+        recipesTestClient = new RecipesTestClient(ruleChainForTests.getApplication());
     }
 
     @Test
@@ -111,6 +116,30 @@ public class RecipeBooksController_GetTest {
     public void testSingleUserDoesNotExist() {
         // When
         Result result = client.single(1L, 42L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetRecipeBookOfARecipe() {
+        // When
+        Result result = recipesTestClient.recipeBooksOf(21L, 4L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+        assertThat(recipeBookIdsOf(result).size(), equalTo(2));
+        assertThat(recipeBookIdsOf(result), containsInAnyOrder(6L, 8L));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetRecipeBookOfARecipe_RecipeNotExisting() {
+        // When
+        Result result = recipesTestClient.recipeBooksOf(42L, 2L);
 
         // Then
         assertThat(statusOf(result), equalTo(NOT_FOUND));

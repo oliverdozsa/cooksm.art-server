@@ -120,6 +120,12 @@ public class DtoMapper {
         return new ShoppingListDto(entity.getId(), entity.getName(), itemsDto);
     }
 
+    public static RecipeBooksOfRecipeDto toDto(List<RecipeBook> recipeBooks) {
+        List<Long> ids = recipeBooks.stream().map(RecipeBook::getId)
+                .collect(Collectors.toList());
+        return new RecipeBooksOfRecipeDto(ids);
+    }
+
     private static ShoppingListItemDto toDto(ShoppingListItem entity) {
         return new ShoppingListItemDto(entity.getName(), entity.isCompleted());
     }

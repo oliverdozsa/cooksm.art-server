@@ -3,9 +3,11 @@ package services;
 import com.typesafe.config.Config;
 import data.DatabaseExecutionContext;
 import data.entities.Recipe;
+import data.entities.RecipeBook;
 import data.repositories.RecipeBookRepository;
 import data.repositories.RecipeRepository;
 import lombokized.dto.PageDto;
+import lombokized.dto.RecipeBooksOfRecipeDto;
 import lombokized.dto.RecipeDto;
 import lombokized.repositories.Page;
 import lombokized.repositories.RecipeRepositoryParams;
@@ -90,6 +92,14 @@ public class RecipesService {
                 return null;
             }
 
+        }, dbExecContext);
+    }
+
+    public CompletionStage<RecipeBooksOfRecipeDto> recipeBooksOf(Long id, Long userId) {
+        logger.info("recipeBooksOf(): id = {}, userId = {}", id, userId);
+        return supplyAsync(() -> {
+            List<RecipeBook> recipeBooks = repository.recipeBooksOf(id, userId);
+            return DtoMapper.toDto(recipeBooks);
         }, dbExecContext);
     }
 

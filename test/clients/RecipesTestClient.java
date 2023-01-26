@@ -45,6 +45,17 @@ public class RecipesTestClient {
         return route(application, request);
     }
 
+    public Result recipeBooksOf(Long id, Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(routes.RecipesController.recipeBooksOf(id).url());
+
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
     private Http.RequestBuilder createPageRequest(String queryParams) {
         String queryParamsToAppend = queryParams == null ? "" : queryParams;
         if(!queryParamsToAppend.equals("")){

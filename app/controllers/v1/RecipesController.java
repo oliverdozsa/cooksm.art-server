@@ -1,5 +1,6 @@
 package controllers.v1;
 
+import lombokized.dto.RecipeBooksOfRecipeDto;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -9,6 +10,8 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import queryparams.RecipesQueryParams;
+import security.SecurityUtils;
+import security.VerifiedJwt;
 import services.RecipesService;
 import services.reciperesults.RecipeResultsByQuery;
 import services.reciperesults.RecipeResultsByQueryTypeNone;
@@ -61,6 +64,16 @@ public class RecipesController extends Controller {
                 .exceptionally(mapException);
     }
 
+    public CompletionStage<Result> recipeBooksOf(Long id, Http.Request request) {
+        logger.info("recipeBooksOf(): id = {}", id);
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.recipeBooksOf(id, jwt.getUserId())
+                .thenApply(this::toResult)
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
     private CompletionStage<Result> refineRequest(Form<RecipesQueryParams.Params> form, Http.Request request) {
         String searchModeStr = form.get().searchMode;
         RecipesQueryParams.SearchMode searchMode = RecipesQueryParams.Params.toEnum(searchModeStr);
@@ -80,5 +93,9 @@ public class RecipesController extends Controller {
 
         return resultsByQuery.page(form, request)
                 .exceptionally(mapExceptionWithUnpack);
+    }
+
+    private Result toResult(RecipeBooksOfRecipeDto dto) {
+        return ok(toJson(dto));
     }
 }
