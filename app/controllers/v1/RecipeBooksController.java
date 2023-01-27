@@ -1,7 +1,7 @@
 package controllers.v1;
 
 import dto.RecipeBookCreateUpdateDto;
-import dto.RecipeBookRecipesCreateUpdateDto;
+import dto.RecipeBookRecipesCreateUpdateRemoveDto;
 import lombokized.dto.RecipeBookDto;
 import lombokized.dto.RecipeBookWithRecipesDto;
 import play.Logger;
@@ -104,7 +104,7 @@ public class RecipeBooksController extends Controller {
     public CompletionStage<Result> addRecipes(Long id, Http.Request request) {
         logger.info("addRecipes(): id = {}", id);
 
-        Form<RecipeBookRecipesCreateUpdateDto> form = formFactory.form(RecipeBookRecipesCreateUpdateDto.class)
+        Form<RecipeBookRecipesCreateUpdateRemoveDto> form = formFactory.form(RecipeBookRecipesCreateUpdateRemoveDto.class)
                 .bindFromRequest(request);
         if (form.hasErrors()) {
             return completedFuture(badRequest(form.errorsAsJson()));
@@ -114,6 +114,22 @@ public class RecipeBooksController extends Controller {
 
         return service.addRecipes(jwt.getUserId(), id, form.get())
                 .thenApplyAsync(v -> (Result) noContent())
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
+    public CompletionStage<Result> removeRecipes(Long id, Http.Request request) {
+        logger.info("removeRecipes(): id = {}", id);
+
+        Form<RecipeBookRecipesCreateUpdateRemoveDto> form = formFactory.form(RecipeBookRecipesCreateUpdateRemoveDto.class)
+                .bindFromRequest(request);
+        if (form.hasErrors()) {
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
+
+        return service.removeRecipes(jwt.getUserId(), id, form.get())
+                .thenApply(v -> (Result) noContent())
                 .exceptionally(mapExceptionWithUnpack);
     }
 
@@ -130,7 +146,7 @@ public class RecipeBooksController extends Controller {
     public CompletionStage<Result> updateRecipes(Long id, Http.Request request) {
         logger.info("updateRecipes(): id = {}", id);
 
-        Form<RecipeBookRecipesCreateUpdateDto> form = formFactory.form(RecipeBookRecipesCreateUpdateDto.class)
+        Form<RecipeBookRecipesCreateUpdateRemoveDto> form = formFactory.form(RecipeBookRecipesCreateUpdateRemoveDto.class)
                 .bindFromRequest(request);
         if (form.hasErrors()) {
             return completedFuture(badRequest(form.errorsAsJson()));
@@ -139,7 +155,7 @@ public class RecipeBooksController extends Controller {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
 
         return service.updateRecipes(jwt.getUserId(), id, form.get())
-                .thenApplyAsync(v -> (Result)noContent())
+                .thenApplyAsync(v -> (Result) noContent())
                 .exceptionally(mapExceptionWithUnpack);
     }
 

@@ -3,7 +3,7 @@ package clients;
 import com.typesafe.config.Config;
 import controllers.v1.routes;
 import dto.RecipeBookCreateUpdateDto;
-import dto.RecipeBookRecipesCreateUpdateDto;
+import dto.RecipeBookRecipesCreateUpdateRemoveDto;
 import play.Application;
 import play.libs.Json;
 import play.mvc.Http;
@@ -95,7 +95,7 @@ public class RecipeBooksTestClient {
     }
 
     public Result addRecipes(Long id, Long userId, Long[] recipeIds) {
-        RecipeBookRecipesCreateUpdateDto dto = new RecipeBookRecipesCreateUpdateDto();
+        RecipeBookRecipesCreateUpdateRemoveDto dto = new RecipeBookRecipesCreateUpdateRemoveDto();
         dto.recipeIds = Arrays.asList(recipeIds);
 
         Http.RequestBuilder request = new Http.RequestBuilder()
@@ -109,6 +109,23 @@ public class RecipeBooksTestClient {
         return route(application, request);
     }
 
+    public Result removeRecipes(Long id, Long userId, Long[] recipeIds) {
+        RecipeBookRecipesCreateUpdateRemoveDto dto = new RecipeBookRecipesCreateUpdateRemoveDto();
+        dto.recipeIds = Arrays.asList(recipeIds);
+
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(DELETE)
+                .bodyJson(Json.toJson(dto))
+                .uri(routes.RecipeBooksController.removeRecipes(id).url());
+
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
+
+
+
     public Result recipesOf(Long id, Long userId) {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
@@ -121,7 +138,7 @@ public class RecipeBooksTestClient {
     }
 
     public Result updateRecipes(Long id, Long userId, Long[] recipeIds) {
-        RecipeBookRecipesCreateUpdateDto dto = new RecipeBookRecipesCreateUpdateDto();
+        RecipeBookRecipesCreateUpdateRemoveDto dto = new RecipeBookRecipesCreateUpdateRemoveDto();
         if (recipeIds != null) {
             dto.recipeIds = Arrays.asList(recipeIds);
         }

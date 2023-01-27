@@ -138,6 +138,27 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     }
 
     @Override
+    public void removeRecipes(Long id, Long userId, List<Long> recipeIds) {
+        logger.info("removeRecipes(): id = {}, userId = {}, recipeIds = {}", id, userId, recipeIds);
+
+        Optional<RecipeBook> optionalRecipeBookOfUser = ebean.createQuery(RecipeBook.class)
+                .where()
+                .eq("id", id)
+                .eq("user.id", userId)
+                .findOneOrEmpty();
+
+        if (!optionalRecipeBookOfUser.isPresent()) {
+            throw new NotFoundException("Not found recipe books with id " + id + " for user " + userId);
+        }
+
+        ebean.createSqlUpdate("delete from recipe_book_recipe where recipe_book_id = :recipe_book_id and " +
+                        "recipe_id in (:recipe_ids)")
+                .setParameter("recipe_book_id", id)
+                .setParameter("recipe_ids", recipeIds)
+                .execute();
+    }
+
+    @Override
     public Integer futureCountOf(Long id, Long userId, List<Long> recipeIdsToAdd) {
         RecipeBook recipeBook = single(id, userId);
         return countFutureRecipeIds(recipeBook, recipeIdsToAdd);

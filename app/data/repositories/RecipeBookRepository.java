@@ -14,6 +14,7 @@ public interface RecipeBookRepository {
     void update(Long id, String name, Long userId);
     void delete(Long id, Long userId);
     void addRecipes(Long id, Long userId, List<Long> recipeIds);
+    void removeRecipes(Long id, Long userId, List<Long> recipeIds);
     Integer futureCountOf(Long id, Long userId, List<Long> recipeIdsToAdd);
     void updateRecipes(Long id, Long userId, List<Long> recipeIds);
     void checkRecipeBooksOfUser(List<Long> recipeBookIds, Long userId);

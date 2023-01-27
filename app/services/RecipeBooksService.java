@@ -6,7 +6,7 @@ import data.entities.RecipeBook;
 import data.repositories.RecipeBookRepository;
 import data.repositories.exceptions.ForbiddenExeption;
 import dto.RecipeBookCreateUpdateDto;
-import dto.RecipeBookRecipesCreateUpdateDto;
+import dto.RecipeBookRecipesCreateUpdateRemoveDto;
 import lombokized.dto.RecipeBookDto;
 import lombokized.dto.RecipeBookWithRecipesDto;
 import play.Logger;
@@ -85,7 +85,7 @@ public class RecipeBooksService {
         }, dbExecContext);
     }
 
-    public CompletionStage<Void> addRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateDto dto) {
+    public CompletionStage<Void> addRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateRemoveDto dto) {
         logger.info("addRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
         return runAsync(() -> {
             Integer futureCountOfRecipeBooks = repository.futureCountOf(id, userId, dto.recipeIds);
@@ -93,6 +93,12 @@ public class RecipeBooksService {
 
             repository.addRecipes(id, userId, dto.recipeIds);
         }, dbExecContext);
+    }
+
+    public CompletionStage<Void> removeRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateRemoveDto dto) {
+        logger.info("removeRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
+
+        return runAsync(() -> repository.removeRecipes(id, userId, dto.recipeIds), dbExecContext);
     }
 
     public CompletionStage<RecipeBookWithRecipesDto> recipesOf(Long userId, Long id) {
@@ -103,7 +109,7 @@ public class RecipeBooksService {
         }, dbExecContext);
     }
 
-    public CompletionStage<Void> updateRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateDto dto) {
+    public CompletionStage<Void> updateRecipes(Long userId, Long id, RecipeBookRecipesCreateUpdateRemoveDto dto) {
         logger.info("updateRecipes(): userId = {}, id = {}, dto = {}", userId, id, dto);
         return runAsync(() -> {
             repository.updateRecipes(id, userId, dto.recipeIds);

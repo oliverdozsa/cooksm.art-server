@@ -3,10 +3,10 @@ package dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeBookRecipesCreateUpdateDto {
+public class RecipeBookRecipesCreateUpdateRemoveDto {
     public List<Long> recipeIds;
 
-    public RecipeBookRecipesCreateUpdateDto() {
+    public RecipeBookRecipesCreateUpdateRemoveDto() {
         recipeIds = new ArrayList<>();
     }
 

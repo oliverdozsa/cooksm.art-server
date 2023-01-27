@@ -76,6 +76,8 @@ POST    /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.addReci
 GET     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.recipesOf(id: Long, request: Request)
 + jwtFilter
 PUT     /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.updateRecipes(id: Long, request: Request)
++ jwtFilter
+DELETE  /recipebooks/:id/recipes    controllers.v1.RecipeBooksController.removeRecipes(id: Long, request: Request)
 
 # Shopping list
 + jwtFilter
