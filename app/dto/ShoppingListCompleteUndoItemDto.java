@@ -3,22 +3,21 @@ package dto;
 import play.data.validation.Constraints;
 
 public class ShoppingListCompleteUndoItemDto {
-    @Constraints.MinLength(2)
-    @Constraints.MaxLength(100)
-    public String name;
+    @Constraints.Required
+    private Long itemId;
 
-    public String getName() {
-        return name;
+    public Long getItemId() {
+        return itemId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
     }
 
     @Override
     public String toString() {
         return "ShoppingListCompleteUndoItemDto{" +
-                "name='" + name + '\'' +
+                "itemId=" + itemId +
                 '}';
     }
 }

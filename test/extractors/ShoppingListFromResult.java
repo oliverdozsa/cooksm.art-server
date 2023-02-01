@@ -18,6 +18,14 @@ public class ShoppingListFromResult {
         return itemNames.of(result);
     }
 
+    public static List<Long> categoryIdsOfShoppingListOf(Result result) {
+        ListOfValuesFromResult<Long> itemCategoryIds = new ListOfValuesFromResult<Long>()
+                .select("$.items")
+                .converting(n -> n.get("categoryId").asLong());
+
+        return itemCategoryIds.of(result);
+    }
+
     public static Long idOfShoppingListOf(Result result) {
         JsonNode shoppingListJson = toJson(result);
         return shoppingListJson.get("id").asLong();
@@ -37,13 +45,13 @@ public class ShoppingListFromResult {
         return shoppingListIds.of(result);
     }
 
-    public static Map<String, Boolean> itemStatesOf(Result result) {
+    public static Map<Long, Boolean> itemStatesOf(Result result) {
         JsonNode shoppingListJson = toJson(result);
 
-        Map<String, Boolean> itemStates = new HashMap<>();
+        Map<Long, Boolean> itemStates = new HashMap<>();
 
         shoppingListJson.get("items").forEach(itemJson -> {
-            itemStates.put(itemJson.get("name").asText(), itemJson.get("isCompleted").asBoolean());
+            itemStates.put(itemJson.get("id").asLong(), itemJson.get("isCompleted").asBoolean());
         });
 
         return itemStates;

@@ -1,11 +1,6 @@
 package controllers.v1;
 
-import dto.ShoppingListAddRemoveItemsDto;
-import dto.ShoppingListCompleteUndoItemDto;
-import dto.ShoppingListCreateDto;
-import dto.ShoppingListRenameDto;
-import lombokized.dto.ShoppingListDto;
-import lombokized.dto.ShoppingListListElementDto;
+import dto.*;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -17,7 +12,6 @@ import security.VerifiedJwt;
 import services.ShoppingListService;
 
 import javax.inject.Inject;
-import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
@@ -110,7 +104,7 @@ public class ShoppingListController {
     public CompletionStage<Result> addItems(Long id, Http.Request request) {
         logger.info("addItems(): id = {}", id);
 
-        Form<ShoppingListAddRemoveItemsDto> addRemoveItemsForm = formFactory.form(ShoppingListAddRemoveItemsDto.class)
+        Form<ShoppingListAddItemsDto> addRemoveItemsForm = formFactory.form(ShoppingListAddItemsDto.class)
                 .bindFromRequest(request);
 
         if (addRemoveItemsForm.hasErrors()) {
@@ -128,17 +122,17 @@ public class ShoppingListController {
     public CompletionStage<Result> removeItems(Long id, Http.Request request) {
         logger.info("removeItems(): id = {}", id);
 
-        Form<ShoppingListAddRemoveItemsDto> addRemoveItemsForm = formFactory.form(ShoppingListAddRemoveItemsDto.class)
+        Form<ShoppingListRemoveItemsDto> removeItemsForm = formFactory.form(ShoppingListRemoveItemsDto.class)
                 .bindFromRequest(request);
 
-        if (addRemoveItemsForm.hasErrors()) {
-            logger.warn("removeItems(): form has errors! errors = {}", addRemoveItemsForm.errorsAsJson());
-            return completedFuture(badRequest(addRemoveItemsForm.errorsAsJson()));
+        if (removeItemsForm.hasErrors()) {
+            logger.warn("removeItems(): form has errors! errors = {}", removeItemsForm.errorsAsJson());
+            return completedFuture(badRequest(removeItemsForm.errorsAsJson()));
         }
 
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
 
-        return service.removeItems(jwt.getUserId(), id, addRemoveItemsForm.get())
+        return service.removeItems(jwt.getUserId(), id, removeItemsForm.get())
                 .thenApply(v -> (Result) noContent())
                 .exceptionally(mapExceptionWithUnpack);
     }

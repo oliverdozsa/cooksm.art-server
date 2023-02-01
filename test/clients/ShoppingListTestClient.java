@@ -2,15 +2,11 @@ package clients;
 
 import com.typesafe.config.Config;
 import controllers.v1.routes;
-import dto.ShoppingListAddRemoveItemsDto;
-import dto.ShoppingListCompleteUndoItemDto;
-import dto.ShoppingListCreateDto;
-import dto.ShoppingListRenameDto;
+import dto.*;
 import play.Application;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import security.SecurityUtils;
 import utils.JwtTestUtils;
 
 import static play.mvc.Http.HttpVerbs.GET;
@@ -71,7 +67,7 @@ public class ShoppingListTestClient {
         return route(application, request);
     }
 
-    public Result addItems(Long userId, Long shoppingListId, ShoppingListAddRemoveItemsDto addItemsRequest) {
+    public Result addItems(Long userId, Long shoppingListId, ShoppingListAddItemsDto addItemsRequest) {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(POST)
                 .bodyJson(Json.toJson(addItemsRequest))
@@ -83,7 +79,7 @@ public class ShoppingListTestClient {
         return route(application, request);
     }
 
-    public Result removeItems(Long userId, Long shoppingListId, ShoppingListAddRemoveItemsDto removeItemsRequest) {
+    public Result removeItems(Long userId, Long shoppingListId, ShoppingListRemoveItemsDto removeItemsRequest) {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(POST)
                 .bodyJson(Json.toJson(removeItemsRequest))
@@ -110,9 +106,9 @@ public class ShoppingListTestClient {
         return route(application, request);
     }
 
-    public Result completeAnItem(Long userId, Long shoppingListId, String item) {
+    public Result completeAnItem(Long userId, Long shoppingListId, Long itemId) {
         ShoppingListCompleteUndoItemDto dto = new ShoppingListCompleteUndoItemDto();
-        dto.setName(item);
+        dto.setItemId(itemId);
 
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(POST)
@@ -125,9 +121,9 @@ public class ShoppingListTestClient {
         return route(application, request);
     }
 
-    public Result undoAnItem(Long userId, Long shoppingListId, String item) {
+    public Result undoAnItem(Long userId, Long shoppingListId, Long itemId) {
         ShoppingListCompleteUndoItemDto dto = new ShoppingListCompleteUndoItemDto();
-        dto.setName(item);
+        dto.setItemId(itemId);
 
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(POST)

@@ -127,7 +127,7 @@ public class DtoMapper {
     }
 
     private static ShoppingListItemDto toDto(ShoppingListItem entity) {
-        return new ShoppingListItemDto(entity.getName(), entity.isCompleted());
+        return new ShoppingListItemDto(entity.getId(), entity.getName(), entity.isCompleted(), entity.getCategory().getId());
     }
 
     private static RecipeInRecipeBookSummaryDto toSummaryDto(Recipe recipe) {

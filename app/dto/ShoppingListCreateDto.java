@@ -2,6 +2,7 @@ package dto;
 
 import play.data.validation.Constraints;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -12,7 +13,8 @@ public class ShoppingListCreateDto {
     public String name;
 
     @Size(max = 150)
-    public List<@Constraints.MinLength(2) @Constraints.MaxLength(100) String> items;
+    @Valid
+    public List<ShoppingListItemRequestDto> items;
 
     public String getName() {
         return name;
@@ -22,11 +24,11 @@ public class ShoppingListCreateDto {
         this.name = name;
     }
 
-    public List<String> getItems() {
+    public List<ShoppingListItemRequestDto> getItems() {
         return items;
     }
 
-    public void setItems(List<String> items) {
+    public void setItems(List<ShoppingListItemRequestDto> items) {
         this.items = items;
     }
 

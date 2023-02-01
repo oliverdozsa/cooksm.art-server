@@ -24,23 +24,31 @@ shopping_list:
     user_id: 1
     name: User 1's 2nd List
 
+shopping_list_item_category:
+  - id: 1
+    name: other
+
 shopping_list_item:
   - id: 1
     shopping_list_id: 1
     name: list_1_item_1
     is_completed: false
+    category_id: 1
 
   - id: 2
     shopping_list_id: 1
     name: list_1_item_2
     is_completed: true
+    category_id: 1
 
   - id: 3
     shopping_list_id: 1
     name: list_1_item_3
     is_completed: false
+    category_id: 1
 
   - id: 4
     shopping_list_id: 3
     name: list_3_item_1
     is_completed: false
+    category_id: 1

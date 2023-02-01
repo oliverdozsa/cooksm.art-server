@@ -3,10 +3,7 @@ package services;
 import data.DatabaseExecutionContext;
 import data.entities.ShoppingList;
 import data.repositories.ShoppingListRepository;
-import dto.ShoppingListAddRemoveItemsDto;
-import dto.ShoppingListCompleteUndoItemDto;
-import dto.ShoppingListCreateDto;
-import dto.ShoppingListRenameDto;
+import dto.*;
 import lombokized.dto.ShoppingListDto;
 import lombokized.dto.ShoppingListListElementDto;
 import play.Logger;
@@ -58,28 +55,28 @@ public class ShoppingListService {
         return runAsync(() -> repository.rename(userId, shoppingListId, renameDto.getNewName()), dbExecContext);
     }
 
-    public CompletionStage<Void> addItems(Long userId, Long shoppingListId, ShoppingListAddRemoveItemsDto addRemoveItemsDto) {
+    public CompletionStage<Void> addItems(Long userId, Long shoppingListId, ShoppingListAddItemsDto addItemsDto) {
         logger.info("addItems(): userId = {}, shoppingListId = {}, addRemoveItemsDto = {}",
-                userId, shoppingListId, addRemoveItemsDto);
-        return runAsync(() -> repository.addItems(userId, shoppingListId, addRemoveItemsDto.getItems()), dbExecContext);
+                userId, shoppingListId, addItemsDto);
+        return runAsync(() -> repository.addItems(userId, shoppingListId, addItemsDto.getItems()), dbExecContext);
     }
 
-    public CompletionStage<Void> removeItems(Long userId, Long shoppingListId, ShoppingListAddRemoveItemsDto addRemoveItemsDto) {
-        logger.info("userId = {}, shoppingListId = {}, addRemoveItemsDto = {}",
-                userId, shoppingListId, addRemoveItemsDto);
-        return runAsync(() -> repository.removeItems(userId, shoppingListId, addRemoveItemsDto.getItems()), dbExecContext);
+    public CompletionStage<Void> removeItems(Long userId, Long shoppingListId, ShoppingListRemoveItemsDto removeItemsDto) {
+        logger.info("userId = {}, shoppingListId = {}, removeItemsDto = {}",
+                userId, shoppingListId, removeItemsDto);
+        return runAsync(() -> repository.removeItems(userId, shoppingListId, removeItemsDto.getItemIds()), dbExecContext);
     }
 
     public CompletionStage<Void> completeItem(Long userId, Long shoppingListId, ShoppingListCompleteUndoItemDto completeRequest) {
         logger.info("completeItem(): userId = {}, shoppingListId = {}, completeRequest = {}",
                 userId, shoppingListId, completeRequest);
-        return runAsync(() -> repository.completeAnItem(userId, shoppingListId, completeRequest.getName()), dbExecContext);
+        return runAsync(() -> repository.completeAnItem(userId, shoppingListId, completeRequest.getItemId()), dbExecContext);
     }
 
     public CompletionStage<Void> undoItem(Long userId, Long shoppingListId, ShoppingListCompleteUndoItemDto undoRequest) {
         logger.info("undoItem(): userId = {}, shoppingListId = {}, undoRequest = {}",
                 userId, shoppingListId, undoRequest);
-        return runAsync(() -> repository.undoAnItem(userId, shoppingListId, undoRequest.getName()), dbExecContext);
+        return runAsync(() -> repository.undoAnItem(userId, shoppingListId, undoRequest.getItemId()), dbExecContext);
     }
 
     private static List<ShoppingListListElementDto> toDtoList(List<ShoppingList> entities) {

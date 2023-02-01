@@ -3,13 +3,15 @@ package data.repositories.imp;
 import com.typesafe.config.Config;
 import data.entities.ShoppingList;
 import data.entities.ShoppingListItem;
+import data.entities.ShoppingListItemCategory;
 import data.entities.User;
 import data.repositories.ShoppingListRepository;
-import data.repositories.exceptions.BusinessLogicViolationException;
 import data.repositories.exceptions.ForbiddenExeption;
 import data.repositories.exceptions.NotFoundException;
+import dto.ShoppingListItemRequestDto;
 import io.ebean.Ebean;
 import io.ebean.EbeanServer;
+import io.ebean.SqlUpdate;
 import play.Logger;
 import play.db.ebean.EbeanConfig;
 
@@ -36,8 +38,8 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
     }
 
     @Override
-    public Long create(Long userId, String name, List<String> items) {
-        logger.info("create(): userId = {}, name = {}, items = {}", userId, name, items);
+    public Long create(Long userId, String name, List<ShoppingListItemRequestDto> itemDtos) {
+        logger.info("create(): userId = {}, name = {}, items = {}", userId, name, itemDtos);
 
         assertEntityExists(ebean, User.class, userId);
 
@@ -52,9 +54,9 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
         User user = ebean.find(User.class, userId);
         shoppingList.setUser(user);
 
-        if (items != null) {
-            List<ShoppingListItem> itemEntities = items.stream()
-                    .map(i -> fromItemNameInShoppingList(i, shoppingList))
+        if (itemDtos != null) {
+            List<ShoppingListItem> itemEntities = itemDtos.stream()
+                    .map(i -> fromItemDtoInShoppingList(i, shoppingList))
                     .collect(Collectors.toList());
             shoppingList.setItems(itemEntities);
         }
@@ -106,24 +108,27 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
     }
 
     @Override
-    public void addItems(Long userId, Long shoppingListId, List<String> newItems) {
+    public void addItems(Long userId, Long shoppingListId, List<ShoppingListItemRequestDto> newItems) {
         logger.info("addItems(): userId = {}, shoppingListId = {}, newItems = {}",
                 userId, shoppingListId, newItems);
 
-        assertEntityExists(ebean, User.class, userId);
-        assertEntityExists(ebean, ShoppingList.class, shoppingListId);
-
         ShoppingList shoppingList = findShoppingListOfUser(userId, shoppingListId);
-        Set<String> alreadyExistingItems = shoppingList.getItems().stream()
+
+        Set<Long> uniqueCategoryIdsFromRequest = newItems.stream()
+                .map(i -> i.categoryId)
+                .collect(Collectors.toSet());
+        checkIfCategoriesExist(uniqueCategoryIdsFromRequest);
+
+        Set<String> alreadyExistingItemNames = shoppingList.getItems().stream()
                 .map(ShoppingListItem::getName)
                 .collect(Collectors.toSet());
 
         List<ShoppingListItem> newAndNotAlreadyExistingItems = newItems.stream()
-                .filter(i -> !alreadyExistingItems.contains(i))
-                .map(i -> fromItemNameInShoppingList(i, shoppingList))
+                .filter(i -> !alreadyExistingItemNames.contains(i.getName()))
+                .map(i -> fromItemDtoInShoppingList(i, shoppingList))
                 .collect(Collectors.toList());
 
-        if (alreadyExistingItems.size() >= itemsPerShoppingListLimit && newAndNotAlreadyExistingItems.size() > 0) {
+        if (alreadyExistingItemNames.size() >= itemsPerShoppingListLimit && newAndNotAlreadyExistingItems.size() > 0) {
             throw new ForbiddenExeption("Can't add more items; shopping list (" + shoppingListId + ") " +
                     "already has maximum allowed items (" + itemsPerShoppingListLimit + ")");
         }
@@ -133,60 +138,52 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
     }
 
     @Override
-    public void removeItems(Long userId, Long shoppingListId, List<String> itemsToRemove) {
+    public void removeItems(Long userId, Long shoppingListId, List<Long> itemsToRemove) {
         logger.info("removeItems(): userId = {}, shoppingListId = {}, itemsToRemove = {}",
                 userId, shoppingListId, itemsToRemove);
 
-        assertEntityExists(ebean, User.class, userId);
-        assertEntityExists(ebean, ShoppingList.class, shoppingListId);
+        findShoppingListOfUser(userId, shoppingListId);
 
-        ShoppingList shoppingList = findShoppingListOfUser(userId, shoppingListId);
-        Set<String> itemsToKeep = shoppingList.getItems().stream()
-                .map(ShoppingListItem::getName)
-                .collect(Collectors.toSet());
+        SqlUpdate sqlUpdate = ebean.createSqlUpdate("delete from shopping_list_item where shopping_list_id = :shopping_list_id and " +
+                " id in (:item_ids)");
 
-        itemsToRemove.forEach(itemToRemove -> {
-            if (!itemsToKeep.contains(itemToRemove)) {
-                throw new NotFoundException("Not found item to remove: " + itemToRemove + " in shopping list: " + shoppingListId);
-            }
+        sqlUpdate.setParameter("shopping_list_id", shoppingListId);
+        sqlUpdate.setParameter("item_ids", itemsToRemove);
 
-            itemsToKeep.remove(itemToRemove);
-        });
-
-        List<ShoppingListItem> itemsToDelete = shoppingList.getItems().stream()
-                .filter(item -> !itemsToKeep.contains(item.getName()))
-                .collect(Collectors.toList());
-        ebean.deleteAll(itemsToDelete);
+        sqlUpdate.execute();
     }
 
     @Override
-    public void completeAnItem(Long userId, Long shoppingListId, String item) {
-        logger.info("completeAnItem(): userId = {}, shoppingListId = {}, item = {}",
-                userId, shoppingListId, item);
+    public void completeAnItem(Long userId, Long shoppingListId, Long itemId) {
+        logger.info("completeAnItem(): userId = {}, shoppingListId = {}, itemId = {}",
+                userId, shoppingListId, itemId);
 
-        ShoppingListItem itemToComplete = findItemOfShoppingListOfUserWithName(userId, shoppingListId, item);
+        ShoppingListItem itemToComplete = findItemOfShoppingListOfUserWithId(userId, shoppingListId, itemId);
 
         itemToComplete.setCompleted(true);
         ebean.save(itemToComplete);
     }
 
     @Override
-    public void undoAnItem(Long userId, Long shoppingListId, String item) {
-        logger.info("undoAnItem(): userId = {}, shoppingListId = {}, item = {}",
-                userId, shoppingListId, item);
+    public void undoAnItem(Long userId, Long shoppingListId, Long itemId) {
+        logger.info("undoAnItem(): userId = {}, shoppingListId = {}, itemId = {}",
+                userId, shoppingListId, itemId);
 
-        ShoppingListItem itemToUndo = findItemOfShoppingListOfUserWithName(userId, shoppingListId, item);
+        ShoppingListItem itemToUndo = findItemOfShoppingListOfUserWithId(userId, shoppingListId, itemId);
 
         itemToUndo.setCompleted(false);
         ebean.save(itemToUndo);
     }
 
-    private static ShoppingListItem fromItemNameInShoppingList(String name, ShoppingList shoppingList) {
-        ShoppingListItem item = new ShoppingListItem();
-        item.setName(name);
-        item.setShoppingList(shoppingList);
+    private ShoppingListItem fromItemDtoInShoppingList(ShoppingListItemRequestDto itemDto, ShoppingList shoppingListEntity) {
+        ShoppingListItemCategory categoryEntity = ebean.find(ShoppingListItemCategory.class, itemDto.getCategoryId());
 
-        return item;
+        ShoppingListItem itemEntity = new ShoppingListItem();
+        itemEntity.setName(itemDto.getName());
+        itemEntity.setCategory(categoryEntity);
+        itemEntity.setShoppingList(shoppingListEntity);
+
+        return itemEntity;
     }
 
     private ShoppingList findShoppingListOfUser(Long userId, Long shoppingListId) {
@@ -203,21 +200,19 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
         return shoppingList;
     }
 
-    private ShoppingListItem findItemOfShoppingListOfUserWithName(Long userId, Long shoppingListId, String item) {
-        assertEntityExists(ebean, User.class, userId);
-        assertEntityExists(ebean, ShoppingList.class, shoppingListId);
+    private ShoppingListItem findItemOfShoppingListOfUserWithId(Long userId, Long shoppingListId, Long itemId) {
+        Optional<ShoppingListItem> shoppingListItemOptional = ebean.createQuery(ShoppingListItem.class)
+                .where()
+                .eq("shoppingList.user.id", userId)
+                .eq("shoppingList.id", shoppingListId)
+                .eq("id", itemId)
+                .findOneOrEmpty();
 
-        ShoppingList shoppingList = findShoppingListOfUser(userId, shoppingListId);
-
-        Optional<ShoppingListItem> itemMaybe = shoppingList.getItems().stream()
-                .filter(i -> i.getName().equals(item))
-                .findFirst();
-
-        if (!itemMaybe.isPresent()) {
-            throw new NotFoundException("Not found item: " + item + " in shopping list.");
+        if (!shoppingListItemOptional.isPresent()) {
+            throw new NotFoundException("Not found item with ID: " + itemId + " in shopping list.");
         }
 
-        return itemMaybe.get();
+        return shoppingListItemOptional.get();
     }
 
     private int countAUsersShoppingLists(Long userId) {
@@ -225,5 +220,19 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
                 .where()
                 .eq("user.id", userId)
                 .findCount();
+    }
+
+    private void checkIfCategoriesExist(Set<Long> categoryIdsToCheck) {
+        Set<Long> categoryIdsFromDb = ebean.createQuery(ShoppingListItemCategory.class)
+                .where()
+                .in("id", categoryIdsToCheck)
+                .findList()
+                .stream()
+                .map(ShoppingListItemCategory::getId)
+                .collect(Collectors.toSet());
+
+        if(!categoryIdsFromDb.equals(categoryIdsToCheck)) {
+            throw new NotFoundException("Not found every category from these: " + categoryIdsToCheck);
+        }
     }
 }

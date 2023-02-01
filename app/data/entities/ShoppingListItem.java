@@ -27,6 +27,10 @@ public class ShoppingListItem {
     @JoinColumn(name = "shopping_list_id")
     private ShoppingList shoppingList;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "category_id")
+    private ShoppingListItemCategory category;
+
     public Long getId() {
         return id;
     }
@@ -57,5 +61,13 @@ public class ShoppingListItem {
 
     public void setShoppingList(ShoppingList shoppingList) {
         this.shoppingList = shoppingList;
+    }
+
+    public ShoppingListItemCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(ShoppingListItemCategory category) {
+        this.category = category;
     }
 }
