@@ -405,7 +405,7 @@ public class UserSearchesControllerTest {
                 "}";
 
         int maxSearches = ruleChainForTests.getApplication()
-                .config().getInt("receptnekem.usersearches.maxperuser");
+                .config().getInt("cooksm.art.usersearches.maxperuser");
 
         for (int i = 0; i < maxSearches; i++) {
             Result result = client.create(queryStr, 1L);

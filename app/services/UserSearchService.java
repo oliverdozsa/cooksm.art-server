@@ -37,7 +37,7 @@ public class UserSearchService {
         this.recipeSearchService = recipeSearchService;
         this.recipeBookRepository = recipeBookRepository;
         this.dbExecContext = dbExecContext;
-        maxPerUser = config.getInt("receptnekem.usersearches.maxperuser");
+        maxPerUser = config.getInt("cooksm.art.usersearches.maxperuser");
     }
 
     public CompletionStage<List<UserSearchDto>> all(Long userId) {

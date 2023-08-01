@@ -48,7 +48,7 @@ public class IngredientTagsService {
         this.ingredientNameRepository = ingredientNameRepository;
         this.dbExecContext = dbExecContext;
         this.languageService = languageService;
-        this.maxPerUser = config.getInt("receptnekem.userdefinedtags.maxperuser");
+        this.maxPerUser = config.getInt("cooksm.art.userdefinedtags.maxperuser");
     }
 
     public CompletionStage<Page<IngredientTagDto>> page(IngredientTagQueryParams queryParams) {

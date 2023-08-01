@@ -1,4 +1,4 @@
-name := """openrecipes.lombokized"""
+name := """cooksm.art.lombokized"""
 
 version := "1.0-SNAPSHOT"
 

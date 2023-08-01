@@ -130,7 +130,7 @@ public class IngredientTagsControllerTest_CreateTest {
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testUserDefined_Create_LimitReached() {
         // When
-        Integer maxPerUser = ruleChainForTests.getApplication().config().getInt("receptnekem.userdefinedtags.maxperuser");
+        Integer maxPerUser = ruleChainForTests.getApplication().config().getInt("cooksm.art.userdefinedtags.maxperuser");
 
         int i;
         for(i = 0; i < maxPerUser; i++) {

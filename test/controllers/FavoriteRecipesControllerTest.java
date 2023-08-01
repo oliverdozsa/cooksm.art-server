@@ -116,7 +116,7 @@ public class FavoriteRecipesControllerTest {
     @DataSet(value = "datasets/yml/favoriterecipes-max-reached.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_MaxReached() {
         // Given
-        int max = ruleChainForTests.getApplication().config().getInt("receptnekem.favoriterecipes.maxperuser");
+        int max = ruleChainForTests.getApplication().config().getInt("cooksm.art.favoriterecipes.maxperuser");
         for (int i = 0; i < max; i++) {
             Recipe recipe = createRecipeInDb("test-recipe-" + i, 1L);
             createFavoriteRecipeInDb(recipe.getId(), 1L);

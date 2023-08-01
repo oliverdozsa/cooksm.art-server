@@ -8,7 +8,7 @@ public class VerifiedJwtImp implements VerifiedJwt {
     private final Long userId;
 
     public VerifiedJwtImp(DecodedJWT jwt, Config config) {
-        String userIdClaim = config.getString("receptnekem.jwt.useridclaim");
+        String userIdClaim = config.getString("cooksm.art.jwt.useridclaim");
         userId = jwt.getClaim(userIdClaim).asLong();
     }
 

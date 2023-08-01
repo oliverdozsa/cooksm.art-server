@@ -12,7 +12,7 @@ public class LanguageService {
 
     @Inject
     public LanguageService(Config config) {
-        defaultLanguageId = config.getLong("openrecipes.default.languageid");
+        defaultLanguageId = config.getLong("cooksm.art.default.languageid");
     }
 
     public Long getLanguageIdOrDefault(Long id) {

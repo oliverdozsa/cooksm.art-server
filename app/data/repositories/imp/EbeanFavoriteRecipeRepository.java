@@ -27,7 +27,7 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     @Inject
     public EbeanFavoriteRecipeRepository(EbeanConfig dbConfig, Config config) {
         ebean = Ebean.getServer(dbConfig.defaultServer());
-        maxPerUser = config.getInt("receptnekem.favoriterecipes.maxperuser");
+        maxPerUser = config.getInt("cooksm.art.favoriterecipes.maxperuser");
     }
 
     @Override

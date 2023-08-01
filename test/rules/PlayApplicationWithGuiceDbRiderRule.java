@@ -48,7 +48,7 @@ public class PlayApplicationWithGuiceDbRiderRule implements TestRule {
     private void startPlay() {
         application = appBuilder.build();
         Helpers.start(application);
-        emProvider = EntityManagerProvider.instance("openrecipesPU");
+        emProvider = EntityManagerProvider.instance("cooksmartPU");
         dbUnitRule = DBUnitRule.instance(emProvider.connection());
     }
 

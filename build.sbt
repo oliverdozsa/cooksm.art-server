@@ -1,5 +1,5 @@
-name := """receptnekem"""
-organization := "hu.receptnekem"
+name := """cooksm.art"""
+organization := "art.cooksm"
 
 version := "1.0-SNAPSHOT"
 

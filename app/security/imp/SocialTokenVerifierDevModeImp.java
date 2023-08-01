@@ -41,7 +41,7 @@ public class SocialTokenVerifierDevModeImp implements SocialTokenVerifier {
     }
 
     private VerifiedUserInfo createDevUserInfo() {
-        return new VerifiedFacebookUserInfo("Recept Nekem", "dev@receptnekem.hu", "123456", "some-pic");
+        return new VerifiedFacebookUserInfo("Cook Smart", "dev@cooksm.art", "123456", "some-pic");
     }
 
     private static class DevVerifierException extends TokenVerificationException {
@@ -53,7 +53,7 @@ public class SocialTokenVerifierDevModeImp implements SocialTokenVerifier {
     private void deleteDevUserIfPresent() {
         User user = ebean.createQuery(User.class)
                 .where()
-                .eq("email", "dev@receptnekem.hu")
+                .eq("email", "dev@cooksm.art")
                 .findOne();
 
         if (user != null) {

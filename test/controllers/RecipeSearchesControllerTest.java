@@ -176,7 +176,7 @@ public class RecipeSearchesControllerTest {
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidNotMutuallyExclusive() {
         boolean isMutualExclusiveCheckDisabled = ruleChainForTests
-                .getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+                .getApplication().config().getBoolean("cooksm.art.disable.mutual.exclusion.check");
         assumeFalse("Mutual exclusion check is disabled.", isMutualExclusiveCheckDisabled);
 
         // When
@@ -201,7 +201,7 @@ public class RecipeSearchesControllerTest {
     @DataSet(value = "datasets/yml/recipesearches.yml", disableConstraints = true, cleanBefore = true)
     public void testCreate_InvalidNotMutuallyExclusive_Disabled() {
         boolean isMutualExclusiveCheckDisabled = ruleChainForTests
-                .getApplication().config().getBoolean("receptnekem.disable.mutual.exclusion.check");
+                .getApplication().config().getBoolean("cooksm.art.disable.mutual.exclusion.check");
         assumeTrue("Mutual exclusion check is enabled.", isMutualExclusiveCheckDisabled);
 
         // When
@@ -346,7 +346,7 @@ public class RecipeSearchesControllerTest {
         count.set(0);
 
         // Fill DB with max number of searches.
-        int maxSearches = application.config().getInt("receptnekem.recipesearches.maxquerycount");
+        int maxSearches = application.config().getInt("cooksm.art.recipesearches.maxquerycount");
         createdIds = new ArrayList<>();
         for (int i = 0; i < maxSearches; i++) {
             Long id = repository.create("someQuery", true).getId();

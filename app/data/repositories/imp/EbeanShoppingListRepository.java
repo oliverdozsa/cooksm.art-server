@@ -33,8 +33,8 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
     @Inject
     public EbeanShoppingListRepository(EbeanConfig dbConfig, Config config) {
         ebean = Ebean.getServer(dbConfig.defaultServer());
-        perUserLimit = config.getInt("receptnekem.shoppinglist.maxperuser");
-        itemsPerShoppingListLimit = config.getInt("receptnekem.shoppinglist.maxitems");
+        perUserLimit = config.getInt("cooksm.art.shoppinglist.maxperuser");
+        itemsPerShoppingListLimit = config.getInt("cooksm.art.shoppinglist.maxitems");
     }
 
     @Override

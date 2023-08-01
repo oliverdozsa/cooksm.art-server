@@ -187,7 +187,7 @@ public class SecurityControllerTest {
 
     private String createExpiredJwt() {
         String secret = ruleChainForTests.getApplication().config().getString("play.http.secret.key");
-        String issuer = ruleChainForTests.getApplication().config().getString("receptnekem.jwt.issuer");
+        String issuer = ruleChainForTests.getApplication().config().getString("cooksm.art.jwt.issuer");
         Date past = Date.from(Instant.now().minus(70, ChronoUnit.MINUTES));
         Algorithm algorithm = Algorithm.HMAC256(secret);
 

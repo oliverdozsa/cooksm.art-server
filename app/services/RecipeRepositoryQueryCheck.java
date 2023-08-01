@@ -14,7 +14,7 @@ public class RecipeRepositoryQueryCheck {
 
     @Inject
     public RecipeRepositoryQueryCheck(Config config) {
-        SHOULD_DISABLE_CHECK = config.getBoolean("receptnekem.disable.mutual.exclusion.check");
+        SHOULD_DISABLE_CHECK = config.getBoolean("cooksm.art.disable.mutual.exclusion.check");
     }
 
     public void check(QueryTypeNumber query) {

@@ -66,7 +66,7 @@ public class RecipesControllerTest {
     @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIngredients_IncludedExcludedNotMutEx() {
         boolean isMutualExclusionCheckDisabled = ruleChainForTests.getApplication().config()
-                .getBoolean("receptnekem.disable.mutual.exclusion.check");
+                .getBoolean("cooksm.art.disable.mutual.exclusion.check");
         assumeFalse("Mutual exclusion check is disabled.", isMutualExclusionCheckDisabled);
 
         // When
@@ -87,7 +87,7 @@ public class RecipesControllerTest {
     @DataSet(value = "datasets/yml/recipes.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIngredients_IncludedExcludedNotMutEx_MutexDisabled() {
         boolean isMutualExclusionCheckDisabled = ruleChainForTests.getApplication().config()
-                .getBoolean("receptnekem.disable.mutual.exclusion.check");
+                .getBoolean("cooksm.art.disable.mutual.exclusion.check");
         assumeTrue("Mutual exclusion check is enabled.", isMutualExclusionCheckDisabled);
 
         // When

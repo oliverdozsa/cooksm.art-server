@@ -128,7 +128,7 @@ public class RecipeBooksControllerTest_AddRecipesTest {
 
     private void addMaxRecipesTo(Long id, Long userId) {
         Config config = ruleChainForTests.getApplication().config();
-        int maxPerBook = config.getInt("receptnekem.recipebooks.maxrecipesperbook");
+        int maxPerBook = config.getInt("cooksm.art.recipebooks.maxrecipesperbook");
 
         List<Long> recipeIds = createNumberOfRecipesInDb(maxPerBook);
         addRecipesInSplits(recipeIds, id, userId);

@@ -47,7 +47,7 @@ public class RecipeSearchService {
         this.config = config;
         this.queryCheck = queryCheck;
 
-        validityDays = config.getInt("receptnekem.recipesearches.validity.days");
+        validityDays = config.getInt("cooksm.art.recipesearches.validity.days");
         initGetHelper();
         initCreateHelper();
     }
@@ -112,8 +112,8 @@ public class RecipeSearchService {
 
     private void initCreateHelper() {
         createHelper = new RecipeSearchServiceCreateUpdateHelper();
-        createHelper.maxQuerySizeChars = config.getInt("receptnekem.recipesearches.maxquerysize");
-        createHelper.maxQueryCount = config.getInt("receptnekem.recipesearches.maxquerycount");
+        createHelper.maxQuerySizeChars = config.getInt("cooksm.art.recipesearches.maxquerysize");
+        createHelper.maxQueryCount = config.getInt("cooksm.art.recipesearches.maxquerycount");
         createHelper.ingredientNameRepository = ingredientNameRepository;
         createHelper.ingredientTagRepository = ingredientTagRepository;
         createHelper.languageService = languageService;

@@ -34,8 +34,8 @@ public class RecipeBooksService {
 
     @Inject
     public RecipeBooksService(Config config) {
-        maxPerUser = config.getInt("receptnekem.recipebooks.maxperuser");
-        maxRecipesPerBook = config.getInt("receptnekem.recipebooks.maxrecipesperbook");
+        maxPerUser = config.getInt("cooksm.art.recipebooks.maxperuser");
+        maxRecipesPerBook = config.getInt("cooksm.art.recipebooks.maxrecipesperbook");
     }
 
     public CompletionStage<Long> create(RecipeBookCreateUpdateDto dto, Long userId) {

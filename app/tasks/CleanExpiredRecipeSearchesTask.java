@@ -19,7 +19,7 @@ public class CleanExpiredRecipeSearchesTask {
     public CleanExpiredRecipeSearchesTask(ActorSystem actorSystem, ExecutionContext executionContext, Config config, RecipeSearchService service) {
         this.actorSystem = actorSystem;
         this.executionContext = executionContext;
-        intervalSecs = config.getInt("receptnekem.recipesearches.clean.interval.secs");
+        intervalSecs = config.getInt("cooksm.art.recipesearches.clean.interval.secs");
         this.service = service;
         this.initialize();
     }

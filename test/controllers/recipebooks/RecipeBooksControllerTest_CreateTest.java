@@ -115,7 +115,7 @@ public class RecipeBooksControllerTest_CreateTest {
 
     private void createMaxRecipeBooks(Long userId) {
         Config config = ruleChainForTests.getApplication().config();
-        int maxPerUser = config.getInt("receptnekem.recipebooks.maxperuser");
+        int maxPerUser = config.getInt("cooksm.art.recipebooks.maxperuser");
 
         for (int i = 0; i < maxPerUser; i++) {
             String name = "recipe-book-" + (i + 1) + "-user-" + userId;

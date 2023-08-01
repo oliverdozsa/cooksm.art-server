@@ -27,7 +27,7 @@ public class JwtCenterImp implements JwtCenter {
     @Inject
     public JwtCenterImp(Config config) {
         this.config = config;
-        issuer = config.getString("receptnekem.jwt.issuer");
+        issuer = config.getString("cooksm.art.jwt.issuer");
 
         String secret = config.getString("play.http.secret.key");
         algorithm = Algorithm.HMAC256(secret);
@@ -50,8 +50,8 @@ public class JwtCenterImp implements JwtCenter {
 
     @Override
     public String create(Long userId) {
-        String claim = config.getString("receptnekem.jwt.useridclaim");
-        int expiryMins = config.getInt("receptnekem.jwt.expiry.mins");
+        String claim = config.getString("cooksm.art.jwt.useridclaim");
+        int expiryMins = config.getInt("cooksm.art.jwt.expiry.mins");
         return JWT.create()
                 .withIssuer(issuer)
                 .withClaim(claim, userId)

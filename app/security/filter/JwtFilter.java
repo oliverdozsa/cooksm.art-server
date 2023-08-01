@@ -60,10 +60,10 @@ public class JwtFilter extends Filter {
         super(mat);
         this.jwtCenter = jwtCenter;
 
-        jwtFilterTag = config.getString("receptnekem.jwt.filtertag");
-        headerAuthorization = config.getString("receptnekem.jwt.header.authorization");
-        bearer = config.getString("receptnekem.jwt.header.bearer");
-        jwtOptionalFilterTag = config.getString("receptnekem.jwt.optionalfiltertag");
+        jwtFilterTag = config.getString("cooksm.art.jwt.filtertag");
+        headerAuthorization = config.getString("cooksm.art.jwt.header.authorization");
+        bearer = config.getString("cooksm.art.jwt.header.bearer");
+        jwtOptionalFilterTag = config.getString("cooksm.art.jwt.optionalfiltertag");
     }
 
     @Override

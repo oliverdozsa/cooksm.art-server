@@ -14,8 +14,8 @@ public class JwtTestUtils {
         Date date = new Date(new Date().getTime() + timeOffset);
 
         return JWT.create()
-                .withIssuer(config.getString("receptnekem.jwt.issuer"))
-                .withClaim(config.getString("receptnekem.jwt.useridclaim"), userId)
+                .withIssuer(config.getString("cooksm.art.jwt.issuer"))
+                .withClaim(config.getString("cooksm.art.jwt.useridclaim"), userId)
                 .withExpiresAt(date)
                 .sign(Algorithm.HMAC256(config.getString("play.http.secret.key")));
     }

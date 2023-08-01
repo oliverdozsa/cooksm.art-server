@@ -172,7 +172,7 @@ public class ShoppingListControllerTest {
         createRequest.setItems(Arrays.asList(item1, item2));
 
         int perUserLimit = ruleChainForTests.getApplication().config()
-                .getInt("receptnekem.shoppinglist.maxperuser");
+                .getInt("cooksm.art.shoppinglist.maxperuser");
 
         // When
         Result result;
@@ -199,7 +199,7 @@ public class ShoppingListControllerTest {
         createRequest.setName("A shopping list");
 
         int itemsLimit = ruleChainForTests.getApplication().config()
-                .getInt("receptnekem.shoppinglist.maxitems");
+                .getInt("cooksm.art.shoppinglist.maxitems");
 
         createRequest.setItems(createNewItems(itemsLimit + 1));
 
@@ -428,7 +428,7 @@ public class ShoppingListControllerTest {
         ShoppingListAddItemsDto addItemsRequest = new ShoppingListAddItemsDto();
 
         int itemsLimit = ruleChainForTests.getApplication().config()
-                .getInt("receptnekem.shoppinglist.maxitems");
+                .getInt("cooksm.art.shoppinglist.maxitems");
 
         addItemsRequest.setItems(createNewItems(itemsLimit + 1));
         Result result = client.addItems(1L, 1L, addItemsRequest);
