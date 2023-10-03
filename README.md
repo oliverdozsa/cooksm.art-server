@@ -1,10 +1,22 @@
-[![Build Status](https://travis-ci.org/oliverdozsa/openrecipes.svg?branch=master)](https://travis-ci.org/oliverdozsa/openrecipes)
-[![Coverage Status](https://coveralls.io/repos/github/oliverdozsa/openrecipes/badge.svg?branch=master)](https://coveralls.io/github/oliverdozsa/openrecipes?branch=master)
-[![Maintainability](https://api.codeclimate.com/v1/badges/980006d0a210ddc592ac/maintainability)](https://codeclimate.com/github/oliverdozsa/openrecipes/maintainability)
+# CookSmart - Client
+This is the server repository of cooksm.art. The client repository is located [here](https://github.com/oliverdozsa/cooksm.art-client)
 
-# openrecipes
-This is a play framework (java) starter project for recipe search web applications. Uses ebean ORM, Lombok for easier 
-DTO handling. JPA and database-rider are used for easy DB seeding during tests.
+## What is this?
+It's a recipe search engine with focus on the ingredients to use or to avoid.
 
-## API
-Can be found [here](https://oliverdozsa.github.io/openrecipes-api/).
+## Features
+* Search based on ingredients to use
+* Exclude ingredients
+* Fuzzy search
+
+## Demo
+TBD
+
+## Future plans
+* User login through social providers (Google / Facebook)
+* Favorite recipes
+* Multi-language support
+* Save recipes into a list
+
+## Technical details
+The server is a [Play Framework](https://github.com/playframework/playframework) application.
