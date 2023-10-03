@@ -1,3 +1,5 @@
+![tests](https://github.com/oliverdozsa/cooksm.art-server/actions/workflows/scala.yml/badge.svg)
+
 # CookSmart - Client
 This is the server repository of cooksm.art. The client repository is located [here](https://github.com/oliverdozsa/cooksm.art-client)
 
