@@ -13,7 +13,7 @@ lazy val lombokized = project
 scalaVersion := "2.12.2"
 
 libraryDependencies += guice
-libraryDependencies += "org.postgresql" % "postgresql" % "9.4-1201-jdbc41"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.6.0"
 libraryDependencies += "com.h2database" % "h2" % "1.4.192"
 libraryDependencies ++= Seq(evolutions, jdbc)
 libraryDependencies += "com.auth0" % "java-jwt" % "3.8.2"
