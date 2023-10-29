@@ -1,6 +1,5 @@
 package clients;
 
-import com.typesafe.config.Config;
 import controllers.v1.routes;
 import play.Application;
 import play.mvc.Http;

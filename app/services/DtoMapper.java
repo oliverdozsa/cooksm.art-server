@@ -18,7 +18,7 @@ public class DtoMapper {
     }
 
     public static SourcePageDto toDto(SourcePage entity) {
-        return new SourcePageDto(entity.getId(), entity.getName());
+        return new SourcePageDto(entity.getId(), entity.getName(), entity.getLanguage().getIsoName());
     }
 
     public static RecipeDto toDto(Recipe recipe, Long languageId) {
