@@ -22,4 +22,9 @@ public class RecipesFromResult {
         JsonNode json = toJson(result);
         return json.get("id").asLong();
     }
+
+    public static String singleRecipeImageUrlOf(Result result) {
+        JsonNode json = toJson(result);
+        return json.get("imageUrl").asText();
+    }
 }

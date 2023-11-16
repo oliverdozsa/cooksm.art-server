@@ -249,6 +249,7 @@ recipe:
     date_added: 2017-10-09 04:02:00
     numofings: 0
     source_page_id: 3
+    image_url: recipe_3_img_url
 
   - id: 4
     name: recipe_4

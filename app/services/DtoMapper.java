@@ -41,7 +41,8 @@ public class DtoMapper {
                 recipe.getNumofings(),
                 toDto(recipe.getSourcePage()),
                 ingredientNameDtos,
-                recipe.getTime().ordinal()
+                recipe.getTime().ordinal(),
+                recipe.getImageUrl()
         );
     }
 

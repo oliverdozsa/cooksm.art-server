@@ -13,4 +13,5 @@ public class RecipeDto {
     private final SourcePageDto sourcePage;
     private final List<IngredientNameDto> ingredients;
     private final Integer time;
+    private final String imageUrl;
 }

@@ -29,6 +29,10 @@ public class Recipe {
     @Enumerated(EnumType.ORDINAL)
     private Time time;
 
+    @Lob
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @OneToMany(mappedBy = "recipe", fetch = FetchType.EAGER)
     private List<RecipeIngredient> ingredients;
 
@@ -109,6 +113,14 @@ public class Recipe {
 
     public void setSourcePage(SourcePage sourcePage) {
         this.sourcePage = sourcePage;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public enum Time {

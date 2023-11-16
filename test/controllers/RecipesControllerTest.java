@@ -15,8 +15,7 @@ import rules.RuleChainForTests;
 import java.time.Instant;
 
 import static extractors.DataFromResult.*;
-import static extractors.RecipesFromResult.recipeIdsOf;
-import static extractors.RecipesFromResult.singleRecipeIdOf;
+import static extractors.RecipesFromResult.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -370,6 +369,7 @@ public class RecipesControllerTest {
 
         // Then
         assertThat(singleRecipeIdOf(result), equalTo(3L));
+        assertThat(singleRecipeImageUrlOf(result), equalTo("recipe_3_img_url"));
     }
 
     @Test
