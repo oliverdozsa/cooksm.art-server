@@ -78,4 +78,10 @@ public class IngredientNamesControllerTest {
         assertThat(statusOf(result), equalTo(OK));
         assertThat(alternativeIngredientNamesOf(result, 0), empty());
     }
+
+    // Given
+    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
+    public void testIngredientNames_Translate() {
+
+    }
 }
