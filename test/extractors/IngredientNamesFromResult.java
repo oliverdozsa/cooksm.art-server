@@ -13,4 +13,20 @@ public class IngredientNamesFromResult {
 
         return values.of(result);
     }
+
+    public static List<String> ingredientNamesOf(Result result) {
+        ListOfValuesFromResult<String> values = new ListOfValuesFromResult<String>()
+                .select("$.items")
+                .converting(n -> n.get("name").asText());
+
+        return values.of(result);
+    }
+
+    public static List<Long> ingredientNameIdsOf(Result result) {
+        ListOfValuesFromResult<Long> values = new ListOfValuesFromResult<Long>()
+                .select("$.items")
+                .converting(n -> n.get("name").asLong());
+
+        return values.of(result);
+    }
 }

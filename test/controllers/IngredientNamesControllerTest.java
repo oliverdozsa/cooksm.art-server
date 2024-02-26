@@ -9,9 +9,12 @@ import org.junit.rules.RuleChain;
 import play.mvc.Result;
 import rules.RuleChainForTests;
 
+import java.util.List;
+
 import static extractors.DataFromResult.itemsSizeOf;
 import static extractors.DataFromResult.statusOf;
 import static extractors.IngredientNamesFromResult.alternativeIngredientNamesOf;
+import static extractors.IngredientNamesFromResult.ingredientNameIdsOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -79,9 +82,16 @@ public class IngredientNamesControllerTest {
         assertThat(alternativeIngredientNamesOf(result, 0), empty());
     }
 
-    // Given
-    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = "datasets/yml/ingredientnames-translate.yml", disableConstraints = true, cleanBefore = true)
     public void testIngredientNames_Translate() {
+        // Given
+        Result result = client.page("languageId=1&nameLike=hu");
+        List<Long> ingredientNamesIds = ingredientNameIdsOf(result);
 
+        assertThat(ingredientNamesIds, containsInAnyOrder(1, 3, 5));
+
+        // TODO
+        // When
+        // Then
     }
 }

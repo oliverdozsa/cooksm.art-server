@@ -45,25 +45,17 @@ ingredient_name:
 
 ingredient_alt_name:
   - id: 1
-    name: ingr_1_alt_1
+    name: ingr_1_hu_alt_1
     ingredient_name_id: 1
 
   - id: 2
-    name: ingr_1_alt_2
+    name: ingr_1_hu_alt_2
     ingredient_name_id: 1
 
   - id: 3
-    name: ingr_1_alt_3
-    ingredient_name_id: 1
+    name: ingr_2_hu_alt_3
+    ingredient_name_id: 3
 
   - id: 4
-    name: ingr_2_alt_1
-    ingredient_name_id: 2
-
-  - id: 5
-    name: ingr_2_alt_2
-    ingredient_name_id: 2
-
-  - id: 6
-    name: ingr_3_alt_1
-    ingredient_name_id: 3
+    name: ingr_2_en_alt_1
+    ingredient_name_id: 4

@@ -21,4 +21,9 @@ public class IngredientNamesTestClient {
 
         return route(application, request);
     }
+
+    public Result translate(String queryParams) {
+        // TODO
+        return null;
+    }
 }
