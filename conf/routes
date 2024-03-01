@@ -1,10 +1,11 @@
-GET    /ingredientnames               controllers.v1.IngredientNamesController.pageNames(request: Request)
+GET    /ingredientnames                     controllers.v1.IngredientNamesController.pageNames(request: Request)
+GET    /ingredientsnamesbyingedientids     controllers.v1.IngredientNamesController.byIngredientIds(request: Request)
 + jwtOptionalFilter
-GET    /recipes                       controllers.v1.RecipesController.pageRecipes(request: Request)
-GET    /recipes/:id                   controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
+GET    /recipes                             controllers.v1.RecipesController.pageRecipes(request: Request)
+GET    /recipes/:id                         controllers.v1.RecipesController.singleRecipe(id: Long, language: Long ?= 0)
 + jwtFilter
-GET    /recipes/:id/recipebooks       controllers.v1.RecipesController.recipeBooksOf(id: Long, request: Request)
-GET    /sourcepages                   controllers.v1.SourcePagesController.sourcePages()
+GET    /recipes/:id/recipebooks             controllers.v1.RecipesController.recipeBooksOf(id: Long, request: Request)
+GET    /sourcepages                         controllers.v1.SourcePagesController.sourcePages()
 
 # Ingredient tags
 + jwtOptionalFilter

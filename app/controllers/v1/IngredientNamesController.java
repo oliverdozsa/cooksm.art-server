@@ -3,6 +3,7 @@ package controllers.v1;
 import data.DatabaseExecutionContext;
 import lombokized.dto.IngredientNameDto;
 import lombokized.dto.PageDto;
+import lombokized.queryparams.IngredientNameByIngredientIdsQueryParams;
 import lombokized.queryparams.IngredientNameQueryParams;
 import data.entities.IngredientName;
 import data.repositories.IngredientNameRepository;
@@ -52,8 +53,25 @@ public class IngredientNamesController extends Controller {
             logger.info("pageNames(): params = {}", params);
 
             return supplyAsync(() -> {
-                Page<IngredientName> ingredientNamePage =  repository.page(params.getNameLike(), params.getLanguageId(), params.getLimit(), params.getOffset());
+                Page<IngredientName> ingredientNamePage = repository.page(params.getNameLike(), params.getLanguageId(), params.getLimit(), params.getOffset());
                 return toResult(ingredientNamePage);
+            }, dbExecContext);
+        }
+    }
+
+    public CompletionStage<Result> byIngredientIds(Http.Request request) {
+        Form<IngredientNameByIngredientIdsQueryParams> form = formFactory.form(IngredientNameByIngredientIdsQueryParams.class)
+                .bindFromRequest(request);
+
+        if (form.hasErrors()) {
+            logger.warn("byIngredientIds(): form has errors! errors = {}", form.errorsAsJson().toPrettyString());
+            return completedFuture(badRequest(form.errorsAsJson()));
+        } else {
+            IngredientNameByIngredientIdsQueryParams queryParams = form.get();
+            logger.info("byIngredientIds(): queryParams = {}", queryParams);
+            return supplyAsync(() -> {
+                List<IngredientName> entities = repository.byIngredientIds(queryParams.getIngredientIds(), queryParams.getLanguageId());
+                return toResult(entities);
             }, dbExecContext);
         }
     }
@@ -65,5 +83,13 @@ public class IngredientNamesController extends Controller {
                 .collect(Collectors.toList());
 
         return ok(toJson(new PageDto<>(dtos, page.getTotalCount())));
+    }
+
+    private Result toResult(List<IngredientName> ingredientNames) {
+        List<IngredientNameDto> dtos = ingredientNames.stream()
+                .map(DtoMapper::toDto)
+                .collect(Collectors.toList());
+
+        return ok(toJson(dtos));
     }
 }

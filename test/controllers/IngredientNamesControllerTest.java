@@ -9,13 +9,17 @@ import org.junit.rules.RuleChain;
 import play.mvc.Result;
 import rules.RuleChainForTests;
 
+import java.util.List;
+import java.util.Map;
+
 import static extractors.DataFromResult.itemsSizeOf;
 import static extractors.DataFromResult.statusOf;
-import static extractors.IngredientNamesFromResult.alternativeIngredientNamesOf;
+import static extractors.IngredientNamesFromResult.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static play.test.Helpers.OK;
+import static play.test.Helpers.contentAsString;
 
 public class IngredientNamesControllerTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
@@ -79,9 +83,31 @@ public class IngredientNamesControllerTest {
         assertThat(alternativeIngredientNamesOf(result, 0), empty());
     }
 
-    // Given
-    @DataSet(value = "datasets/yml/ingredientnames.yml", disableConstraints = true, cleanBefore = true)
+    @DataSet(value = "datasets/yml/ingredientnames-translate.yml", disableConstraints = true, cleanBefore = true)
+    @Test
     public void testIngredientNames_Translate() {
+        // Given
+        Result result = client.page("languageId=1&nameLike=hu");
+        assertThat(ingredientIdsOf(result), containsInAnyOrder(1L, 2L, 3L));
+        assertThat(ingredientNamesOf(result), containsInAnyOrder("hu_1", "hu_2", "hu_3"));
+        Map<String, List<String>> alternativeNamesByIngredientNames = alternativesOfIngredientNames(result);
 
+        assertThat(alternativeNamesByIngredientNames.get("hu_1"),
+                containsInAnyOrder("ingr_1_hu_alt_1", "ingr_1_hu_alt_2"));
+
+        assertThat(alternativeNamesByIngredientNames.get("hu_2"),
+                containsInAnyOrder("ingr_2_hu_alt_3"));
+
+        // When
+        result = client.byIngredientIds("languageId=2&ingredientIds[0]=1&ingredientIds[1]=2&ingredientIds[2]=3");
+
+        // Then
+        assertThat(ingredientIdsAsListOf(result), containsInAnyOrder(1L, 2L, 3L));
+        assertThat(ingredientNamesAsListOf(result), containsInAnyOrder("en_1", "en_2", "en_3"));
+
+        alternativeNamesByIngredientNames = alternativesOfIngredientNamesAsList(result);
+
+        assertThat(alternativeNamesByIngredientNames.get("en_2"),
+                containsInAnyOrder("ingr_2_en_alt_4"));
     }
 }
