@@ -22,8 +22,10 @@ public class IngredientNamesTestClient {
         return route(application, request);
     }
 
-    public Result translate(String queryParams) {
-        // TODO
-        return null;
+    public Result byIngredientIds(String queryParams) {
+        Http.RequestBuilder request = new Http.RequestBuilder().method(GET).uri(
+                routes.IngredientNamesController.byIngredientIds().url() + "?" + queryParams);
+
+        return route(application, request);
     }
 }

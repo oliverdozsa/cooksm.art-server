@@ -36,7 +36,7 @@ ingredient_name:
     ingredient_id: 3
     name: hu_3
 
-  - id: 5
+  - id: 6
     language_id: 2
     ingredient_id: 3
     name: en_3
@@ -57,5 +57,5 @@ ingredient_alt_name:
     ingredient_name_id: 3
 
   - id: 4
-    name: ingr_2_en_alt_1
+    name: ingr_2_en_alt_4
     ingredient_name_id: 4
