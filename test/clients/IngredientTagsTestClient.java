@@ -8,6 +8,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 import utils.JwtTestUtils;
 
+import java.util.List;
+
 import static play.test.Helpers.*;
 
 public class IngredientTagsTestClient {
@@ -39,8 +41,11 @@ public class IngredientTagsTestClient {
         return route(application, request);
     }
 
-    public Result single(Long userId, Long id) {
-        return single(userId, id, 0L);
+    public Result singleWithoutUser(Long id, Long languageId) {
+        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
+                .uri(routes.IngredientTagsController.single(id, languageId).url());
+
+        return route(application, request);
     }
 
     public Result create(IngredientTagCreateUpdateDto dto, Long userId) {
@@ -82,13 +87,24 @@ public class IngredientTagsTestClient {
         return route(application, request);
     }
 
-    public Result userDefinedOnly(Long userId) {
+    public Result userDefinedOnly(Long userId, Long languageId) {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
-                .uri(routes.IngredientTagsController.userDefined().url());
+                .uri(routes.IngredientTagsController.userDefined(languageId).url());
         String jwt = JwtTestUtils.createToken(userId, application.config());
         JwtTestUtils.addJwtTokenTo(request, jwt);
 
+        return route(application, request);
+    }
+
+    public Result getByIds(Long languageId, List<Long> tagIds) {
+        StringBuilder tagIdsQueryString = new StringBuilder();
+        for (int i = 0; i < tagIds.size(); i++) {
+            tagIdsQueryString.append("&tagIds[" + i + "]=" + tagIds.get(i));
+        }
+
+        Http.RequestBuilder request = new Http.RequestBuilder().method(GET)
+                .uri(routes.IngredientTagsController.byIds().url() + "?" + "languageId=" + languageId + tagIdsQueryString);
         return route(application, request);
     }
 

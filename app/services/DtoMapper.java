@@ -5,6 +5,7 @@ import lombokized.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DtoMapper {
@@ -53,10 +54,15 @@ public class DtoMapper {
         );
     }
 
-    public static IngredientTagDto toDto(IngredientTag entity) {
+    public static IngredientTagDto toDto(IngredientTag entity, Long languageId) {
         List<Long> ingredientsIds =
                 entity.getIngredients().stream().map(Ingredient::getId).collect(Collectors.toList());
-        return new IngredientTagDto(entity.getId(), entity.getName(), ingredientsIds);
+
+        IngredientTagName tagName = entity.getNames().stream().filter(n -> n.getLanguage().getId().equals(languageId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Tag name with the given language not found! language = " + languageId));
+
+        return new IngredientTagDto(entity.getId(), tagName.getName(), ingredientsIds);
     }
 
     public static List<IngredientNameDto> toIngredientNameDtoList(List<IngredientName> ingredientNames) {
@@ -65,9 +71,9 @@ public class DtoMapper {
         return dtoList;
     }
 
-    public static List<IngredientTagDto> toIngredientTagDtoList(List<IngredientTag> ingredientTags) {
+    public static List<IngredientTagDto> toIngredientTagDtoList(List<IngredientTag> ingredientTags, Long languageId) {
         List<IngredientTagDto> dtoList = new ArrayList<>();
-        ingredientTags.forEach(e -> dtoList.add(toDto(e)));
+        ingredientTags.forEach(e -> dtoList.add(toDto(e, languageId)));
         return dtoList;
     }
 
@@ -93,8 +99,12 @@ public class DtoMapper {
         return new GlobalSearchDto(entity.getName(), encodedId, entity.getUrlFriendlyName());
     }
 
-    public static IngredientTagResolvedDto toDto(IngredientTag tag, List<IngredientNameDto> names) {
-        return new IngredientTagResolvedDto(tag.getId(), tag.getName(), names);
+    public static IngredientTagResolvedDto toDto(IngredientTag tag, List<IngredientNameDto> names, Long languageId) {
+        IngredientTagName tagName = tag.getNames().stream().filter(n -> n.getLanguage().getId().equals(languageId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Tag name with the given language not found! language = " + languageId));
+
+        return new IngredientTagResolvedDto(tag.getId(), tagName.getName(), names);
     }
 
     public static RecipeBookDto toDto(RecipeBook entity) {

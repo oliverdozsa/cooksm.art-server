@@ -44,6 +44,7 @@ public class IngredientTagsControllerTest_CreateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "someName";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(1L, 2L);
 
         Result result = client.create(dto, 1L);
@@ -68,6 +69,7 @@ public class IngredientTagsControllerTest_CreateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "s";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(1L, 2L);
 
         Result result = client.create(dto, 1L);
@@ -83,6 +85,7 @@ public class IngredientTagsControllerTest_CreateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "someName";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(1L, 2L);
 
         Result result = client.create(dto, 1L);
@@ -102,6 +105,7 @@ public class IngredientTagsControllerTest_CreateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "someName";
+        dto.languageId = 1L;
         dto.ingredientIds = Collections.emptyList();
 
         Result result = client.create(dto, 1L);
@@ -117,6 +121,7 @@ public class IngredientTagsControllerTest_CreateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "someName";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(1L, 42L);
 
         Result result = client.create(dto, 1L);
@@ -136,6 +141,7 @@ public class IngredientTagsControllerTest_CreateTest {
         for(i = 0; i < maxPerUser; i++) {
             IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
             dto.name = "someName" + i;
+            dto.languageId = 1L;
             dto.ingredientIds = Arrays.asList(1L, 2L);
 
             Result result = client.create(dto, 3L);
@@ -145,6 +151,7 @@ public class IngredientTagsControllerTest_CreateTest {
 
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "someName" + i;
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(1L, 2L);
 
         Result result = client.create(dto, 3L);
@@ -160,6 +167,7 @@ public class IngredientTagsControllerTest_CreateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "someName";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(1L, 1L, 2L, 2L);
 
         Result result = client.create(dto, 1L);

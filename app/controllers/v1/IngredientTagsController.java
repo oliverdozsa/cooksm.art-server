@@ -5,6 +5,7 @@ import dto.IngredientTagCreateUpdateDto;
 import lombokized.dto.IngredientTagDto;
 import lombokized.dto.IngredientTagResolvedDto;
 import lombokized.queryparams.IngredientTagQueryParams;
+import lombokized.queryparams.IngredientTagsByIdsQueryParams;
 import lombokized.repositories.Page;
 import play.Logger;
 import play.data.Form;
@@ -128,12 +129,30 @@ public class IngredientTagsController extends Controller {
                 .exceptionally(mapExceptionWithUnpack);
     }
 
-    public CompletionStage<Result> userDefined(Http.Request request) {
+    public CompletionStage<Result> userDefined(Long languageId, Http.Request request) {
         VerifiedJwt jwt = SecurityUtils.getFromRequest(request);
 
         logger.info("userDefined(): userId = {}", jwt.getUserId());
 
-        return service.userDefined(jwt.getUserId())
+        return service.userDefined(jwt.getUserId(), languageId)
+                .thenApplyAsync(this::toResult)
+                .exceptionally(mapExceptionWithUnpack);
+    }
+
+    public CompletionStage<Result> byIds(Http.Request request) {
+        Form<IngredientTagsByIdsQueryParams> form = formFactory.form(IngredientTagsByIdsQueryParams.class)
+                .bindFromRequest(request);
+
+        if (form.hasErrors()) {
+            logger.warn("byIds(): form has errors! errors = {}", form.errorsAsJson().toPrettyString());
+            return completedFuture(badRequest(form.errorsAsJson()));
+        }
+
+        IngredientTagsByIdsQueryParams queryParams = form.get();
+
+        logger.info("byIds(): queryParams = {}", queryParams);
+
+        return service.byIds(queryParams.getLanguageId(), queryParams.getTagIds())
                 .thenApplyAsync(this::toResult)
                 .exceptionally(mapExceptionWithUnpack);
     }

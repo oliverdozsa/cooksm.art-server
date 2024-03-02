@@ -3,10 +3,7 @@ package services;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
 import data.DatabaseExecutionContext;
-import data.entities.Ingredient;
-import data.entities.IngredientName;
-import data.entities.IngredientTag;
-import data.entities.UserSearch;
+import data.entities.*;
 import data.repositories.IngredientNameRepository;
 import data.repositories.IngredientTagRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
@@ -57,7 +54,7 @@ public class IngredientTagsService {
 
         return supplyAsync(() -> {
             Page<IngredientTag> ingredientTagPage = repository.page(repositoryParams);
-            return toPageDto(ingredientTagPage);
+            return toPageDto(ingredientTagPage, queryParams.getLanguageId());
         }, dbExecContext);
     }
 
@@ -66,7 +63,7 @@ public class IngredientTagsService {
         return supplyAsync(() -> {
             IngredientTagRepositoryParams.Page repositoryParams = toPageParams(queryParams, userId);
             Page<IngredientTag> ingredientTagPage = repository.page(repositoryParams);
-            return toPageDto(ingredientTagPage);
+            return toPageDto(ingredientTagPage, queryParams.getLanguageId());
         }, dbExecContext);
     }
 
@@ -76,12 +73,12 @@ public class IngredientTagsService {
             Integer numOfTagsOfUser = repository.count(userId);
 
             checkTagCountLimitReached(numOfTagsOfUser);
-            checkTagWithNameExists(userId, dto.name);
+            checkTagWithNameExists(userId, dto.name, dto.languageId);
 
             List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
             checkAllIngredientIdsExist(uniqueIngredientIds);
 
-            IngredientTag createdIngredientTag = repository.create(userId, dto.name, uniqueIngredientIds, languageService.getDefault());
+            IngredientTag createdIngredientTag = repository.create(userId, dto.name, uniqueIngredientIds, dto.languageId);
             return createdIngredientTag.getId();
 
         }, dbExecContext);
@@ -92,7 +89,7 @@ public class IngredientTagsService {
         return supplyAsync(() -> {
             IngredientTag ingredientTag = repository.byId(id, userId);
             List<IngredientName> ingredientNames = namesOfTag(ingredientTag, languageId);
-            return createResolvedDto(ingredientTag, ingredientNames);
+            return createResolvedDto(ingredientTag, ingredientNames, languageId);
         }, dbExecContext);
     }
 
@@ -102,7 +99,7 @@ public class IngredientTagsService {
             List<Long> uniqueIngredientIds = new ArrayList<>(new HashSet<>(dto.ingredientIds));
             checkAllIngredientIdsExist(dto.ingredientIds);
 
-            repository.update(id, userId, dto.name, uniqueIngredientIds, languageService.getDefault());
+            repository.update(id, userId, dto.name, uniqueIngredientIds, dto.languageId);
         }, dbExecContext);
     }
 
@@ -119,11 +116,19 @@ public class IngredientTagsService {
         }, dbExecContext);
     }
 
-    public CompletionStage<List<IngredientTagDto>> userDefined(Long userId) {
-        logger.info("userDefined(): userId = {}", userId);
+    public CompletionStage<List<IngredientTagDto>> userDefined(Long userId, Long languageId) {
+        logger.info("userDefined(): userId = {}, languageId = {}", userId, languageId);
         return supplyAsync(() -> {
             List<IngredientTag> userDefinedIngredientTags = repository.userDefinedOnly(userId);
-            return toDtoList(userDefinedIngredientTags);
+            return toDtoList(userDefinedIngredientTags, languageId);
+        }, dbExecContext);
+    }
+
+    public CompletionStage<List<IngredientTagDto>> byIds(Long languageId, List<Long> ids) {
+        logger.info("byIds(): langaugeId = {}, ids = {}", languageId, ids);
+        return supplyAsync(() -> {
+            List<IngredientTagName> tagNames = repository.byIds(languageId, ids);
+            return tagNamesToDtoList(tagNames, languageId);
         }, dbExecContext);
     }
 
@@ -143,14 +148,14 @@ public class IngredientTagsService {
         return builder.build();
     }
 
-    private Page<IngredientTagDto> toPageDto(Page<IngredientTag> page) {
-        List<IngredientTagDto> items = toDtoList(page.getItems());
+    private Page<IngredientTagDto> toPageDto(Page<IngredientTag> page, Long languageId) {
+        List<IngredientTagDto> items = toDtoList(page.getItems(), languageId);
         return new Page<>(items, page.getTotalCount());
     }
 
-    private List<IngredientTagDto> toDtoList(List<IngredientTag> entities) {
+    private List<IngredientTagDto> toDtoList(List<IngredientTag> entities, Long languageId) {
         return entities.stream()
-                .map(DtoMapper::toDto)
+                .map(t -> DtoMapper.toDto(t, languageId))
                 .collect(Collectors.toList());
     }
 
@@ -160,10 +165,11 @@ public class IngredientTagsService {
         }
     }
 
-    private void checkTagWithNameExists(Long userId, String name) {
-        IngredientTag ingredientTag = repository.byNameOfUser(userId, name);
+    private void checkTagWithNameExists(Long userId, String name, Long languageId) {
+        IngredientTag ingredientTag = repository.byNameOfUser(userId, name, languageId);
         if (ingredientTag != null) {
-            throw new BusinessLogicViolationException("User has a tag with the same name! name = " + name);
+            throw new BusinessLogicViolationException("User has a tag with the same name with same language! name = " + name +
+                    ", languageId = " + languageId);
         }
     }
 
@@ -187,7 +193,7 @@ public class IngredientTagsService {
         return null;
     }
 
-    private IngredientTagResolvedDto createResolvedDto(IngredientTag tag, List<IngredientName> names) {
+    private IngredientTagResolvedDto createResolvedDto(IngredientTag tag, List<IngredientName> names, Long languageId) {
         if (tag == null) {
             throw new NotFoundException("Not found tag!");
         }
@@ -196,7 +202,8 @@ public class IngredientTagsService {
                 .map(DtoMapper::toDto)
                 .collect(Collectors.toList());
 
-        return DtoMapper.toDto(tag, namesDto);
+        Long usedLanguage = languageService.getLanguageIdOrDefault(languageId);
+        return DtoMapper.toDto(tag, namesDto, usedLanguage);
     }
 
     private BusinessLogicViolationException createConlictingUserSearchesException(Long id, List<UserSearch> searches) {
@@ -208,5 +215,16 @@ public class IngredientTagsService {
 
         return new BusinessLogicViolationException(json,
                 "There are user searches containing the user defined tag: " + id + "!");
+    }
+
+    private List<IngredientTagDto> tagNamesToDtoList(List<IngredientTagName> tagNames, Long languageId) {
+        List<IngredientTagDto> tagDtos = new ArrayList<>();
+        tagNames.forEach(n -> {
+            IngredientTagDto tagDto = DtoMapper.toDto(n.getTag(), languageId);
+            tagDto = new IngredientTagDto(tagDto.getId(), n.getName(), tagDto.getIngredients());
+            tagDtos.add(tagDto);
+        });
+
+        return tagDtos;
     }
 }

@@ -141,31 +141,24 @@ ingredient_name:
 
 ingredient_tag:
   - id: 1
-    name: ingredient_tag_1
     user_id: null
 
   - id: 2
-    name: ingredient_tag_2
     user_id: null
 
   - id: 3
-    name: ingredient_tag_3
     user_id: null
 
   - id: 4
-    name: ingredient_tag_4
     user_id: null
 
   - id: 5
-    name: ingredient_tag_5
     user_id: null
 
   - id: 6
-    name: ingredient_tag_6
     user_id: null
 
   - id: 7
-    name: ingredient_tag_7
     user_id: null
 
 ingredient_tag_ingredient:
@@ -464,3 +457,39 @@ recipe_book_recipe:
 
   - recipe_book_id: 7
     recipe_id: 4
+
+ingredient_tag_name:
+  - id: 1
+    tag_id: 1
+    name: ingredient_tag_1
+    language_id: 1
+
+  - id: 2
+    tag_id: 2
+    name: ingredient_tag_2
+    language_id: 1
+
+  - id: 3
+    tag_id: 3
+    name: ingredient_tag_3
+    language_id: 1
+
+  - id: 4
+    tag_id: 4
+    name: ingredient_tag_4
+    language_id: 1
+
+  - id: 5
+    tag_id: 5
+    name: ingredient_tag_5
+    language_id: 1
+
+  - id: 6
+    tag_id: 6
+    name: ingredient_tag_6
+    language_id: 1
+
+  - id: 7
+    tag_id: 7
+    name: ingredient_tag_7
+    language_id: 1

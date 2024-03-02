@@ -1,11 +1,7 @@
 package data.repositories.imp;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import data.entities.Ingredient;
-import data.entities.IngredientTag;
-import data.entities.Language;
-import data.entities.User;
-import data.entities.UserSearch;
+import data.entities.*;
 import data.repositories.IngredientTagRepository;
 import data.repositories.exceptions.NotFoundException;
 import io.ebean.Ebean;
@@ -20,6 +16,7 @@ import queryparams.RecipesQueryParams;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +34,8 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
     public Page<IngredientTag> page(IngredientTagRepositoryParams.Page params) {
         logger.info("page(): params = {}", params);
         Query<IngredientTag> query = ebean.createQuery(IngredientTag.class);
-        query.where().ilike("name", "%" + params.getNameLike() + "%");
-        query.where().eq("language.id", params.getLanguageId());
+        query.where().ilike("names.name", "%" + params.getNameLike() + "%");
+        query.where().eq("names.language.id", params.getLanguageId());
         query.setFirstRow(params.getOffset());
         query.setMaxRows(params.getLimit());
 
@@ -64,12 +61,13 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
     }
 
     @Override
-    public IngredientTag byNameOfUser(Long userId, String name) {
+    public IngredientTag byNameOfUser(Long userId, String name, Long languageId) {
         logger.info("byNameOfUser(): userId = {}, name = {}", userId, name);
         return ebean.createQuery(IngredientTag.class)
                 .where()
-                .eq("name", name)
+                .eq("names.name", name)
                 .eq("user.id", userId)
+                .eq("names.language.id", userId)
                 .findOne();
     }
 
@@ -96,8 +94,11 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         IngredientTag entity = new IngredientTag();
         entity.setUser(user);
         entity.setIngredients(ingredients);
-        entity.setLanguage(language);
-        entity.setName(name);
+
+        IngredientTagName tagName = new IngredientTagName();
+        tagName.setLanguage(language);
+        tagName.setName(name);
+        entity.setNames(Arrays.asList(tagName));
 
         ebean.save(entity);
         return entity;
@@ -131,19 +132,23 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
                 .where()
                 .eq("id", id)
                 .eq("user.id", userId)
+                .eq("names.language.id", languageId)
                 .findOne();
 
         if (entity == null) {
-            logger.warn("update(): not found user defined tag with id = {}, userId = {}", id, userId);
+            logger.warn("update(): not found user defined tag with id = {}, userId = {}, language = {}", id, userId, languageId);
             throwNotFoundException(id, userId);
         }
 
         List<Ingredient> ingredients = ingredientByIds(ingredientIds);
+        entity.setIngredients(ingredients);
+
         Language language = ebean.find(Language.class, languageId);
 
-        entity.setName(name);
-        entity.setIngredients(ingredients);
-        entity.setLanguage(language);
+        IngredientTagName tagName = new IngredientTagName();
+        tagName.setLanguage(language);
+        tagName.setName(name);
+        entity.setNames(Arrays.asList(tagName));
 
         ebean.update(entity);
     }
@@ -204,6 +209,17 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
         return ebean.createQuery(IngredientTag.class)
                 .where()
                 .eq("user.id", userId)
+                .findList();
+    }
+
+    @Override
+    public List<IngredientTagName> byIds(Long languageId, List<Long> ids) {
+        logger.info("byIds(): languageId = {}, ids = {}", languageId, ids);
+
+        return ebean.createQuery(IngredientTagName.class)
+                .where()
+                .in("tag.id", ids)
+                .eq("language.id", languageId)
                 .findList();
     }
 

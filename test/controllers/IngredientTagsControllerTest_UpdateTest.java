@@ -41,6 +41,7 @@ public class IngredientTagsControllerTest_UpdateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(3L, 4L);
 
         Result result = client.update(10L, dto, 1L);
@@ -48,7 +49,7 @@ public class IngredientTagsControllerTest_UpdateTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        result = client.single(1L, 10L);
+        result = client.single(1L, 10L, 1L);
 
         assertThat(statusOf(result), equalTo(OK));
         assertThat(singleIngredientTagNameOf(result), equalTo("user_1_ingredient_tag_1_updated"));
@@ -91,6 +92,7 @@ public class IngredientTagsControllerTest_UpdateTest {
     public void testUserDefined_UpdateWithDuplicateIngredientIds() {
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(3L, 3L, 4L, 4L);
 
         Result result = client.update(10L, dto, 1L);
@@ -98,7 +100,7 @@ public class IngredientTagsControllerTest_UpdateTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        result = client.single(1L, 10L);
+        result = client.single(1L, 10L, 1L);
 
         assertThat(statusOf(result), equalTo(OK));
         assertThat(singleIngredientTagNameOf(result), equalTo("user_1_ingredient_tag_1_updated"));
@@ -128,6 +130,7 @@ public class IngredientTagsControllerTest_UpdateTest {
         // When
         IngredientTagCreateUpdateDto dto = new IngredientTagCreateUpdateDto();
         dto.name = "user_1_ingredient_tag_1_updated";
+        dto.languageId = 1L;
         dto.ingredientIds = Arrays.asList(3L, 4L);
 
         Result result = client.update(14L, dto, 1L);

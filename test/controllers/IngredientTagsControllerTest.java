@@ -14,8 +14,10 @@ import static extractors.IngredientTagsFromResult.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static play.mvc.Http.Status.NOT_FOUND;
-import static play.test.Helpers.BAD_REQUEST;
-import static play.test.Helpers.OK;
+import static play.test.Helpers.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 public class IngredientTagsControllerTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
@@ -147,11 +149,25 @@ public class IngredientTagsControllerTest {
     @DataSet(value = {"datasets/yml/ingredienttags.yml", "datasets/yml/ingredienttags-user-defined.yml"}, disableConstraints = true, cleanBefore = true)
     public void testListTags_UserDefinedOny() {
         // When
-        Result result = client.userDefinedOnly(1L);
+        Result result = client.userDefinedOnly(1L,1L);
 
         // Then
         assertThat(statusOf(result), equalTo(OK));
         assertThat(sizeAsJsonOf(result), equalTo(3));
         assertThat(idsOfUserDefinedOnlyTagsOf(result), containsInAnyOrder(10L, 11L, 12L));
+    }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/ingredienttags.yml", disableConstraints = true, cleanBefore = true)
+    public void testGetByIds() {
+        // When
+        Result result = client.getByIds(2L, Arrays.asList(1L, 3L));
+
+        // Then
+        Map<Long, String> namesByTagsIds = ingredientTagNamesByTagIds(result);
+        assertThat(namesByTagsIds.keySet(), containsInAnyOrder(1L, 3L));
+        assertThat(namesByTagsIds.get(1L), equalTo("ingredient_1_tag_1_en"));
+        assertThat(namesByTagsIds.get(3L), equalTo("ingredient_2_tag_2_en"));
     }
 }

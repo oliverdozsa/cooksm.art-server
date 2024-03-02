@@ -39,7 +39,7 @@ public class IngredientTagsControllerTest_DeleteTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
 
-        result = client.single(1L, 10L);
+        result = client.single(1L, 10L, 1L);
         assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 

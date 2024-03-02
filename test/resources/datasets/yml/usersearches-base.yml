@@ -62,20 +62,12 @@ ingredient_name:
 
 ingredient_tag:
   - id: 1
-    name: ingredient_tag_1
-    language_id: 1
 
   - id: 2
-    name: ingredient_tag_2
-    language_id: 1
 
   - id: 4
-    name: ingredient_tag_4
-    language_id: 1
 
   - id: 6
-    name: ingredient_tag_6
-    language_id: 1
 
 ingredient_tag_ingredient:
   - ingredient_id: 8
@@ -98,4 +90,25 @@ source_page:
 
   - id: 3
     name: src_pg_3
+    language_id: 1
+
+ingredient_tag_name:
+  - id: 1
+    tag_id: 1
+    name: ingredient_tag_1
+    language_id: 1
+
+  - id: 2
+    tag_id: 2
+    name: ingredient_tag_2
+    language_id: 1
+
+  - id: 4
+    tag_id: 4
+    name: ingredient_tag_4
+    language_id: 1
+
+  - id: 6
+    tag_id: 6
+    name: ingredient_tag_6
     language_id: 1

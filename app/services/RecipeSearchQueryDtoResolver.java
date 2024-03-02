@@ -108,21 +108,21 @@ class RecipeSearchQueryDtoResolver {
     private void collectIncludedIngredientTags() {
         if (queryParams.inIngTags != null) {
             List<IngredientTag> ingredientTags = ingredientTagRepository.byIds(queryParams.inIngTags);
-            includedIngredientTags = toIngredientTagDtoList(ingredientTags);
+            includedIngredientTags = toIngredientTagDtoList(ingredientTags, usedLanguageId);
         }
     }
 
     private void collectExcludedIngredientTags() {
         if (queryParams.exIngTags != null) {
             List<IngredientTag> ingredientTags = ingredientTagRepository.byIds(queryParams.exIngTags);
-            excludedIngredientTags = toIngredientTagDtoList(ingredientTags);
+            excludedIngredientTags = toIngredientTagDtoList(ingredientTags, usedLanguageId);
         }
     }
 
     private void collectAdditionalIngredientTags() {
         if (queryParams.addIngTags != null) {
             List<IngredientTag> ingredientTags = ingredientTagRepository.byIds(queryParams.addIngTags);
-            additionalIngredientTags = toIngredientTagDtoList(ingredientTags);
+            additionalIngredientTags = toIngredientTagDtoList(ingredientTags, usedLanguageId);
         }
     }
 

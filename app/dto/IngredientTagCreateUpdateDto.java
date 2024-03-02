@@ -10,12 +10,16 @@ public class IngredientTagCreateUpdateDto {
     public String name;
 
     @Constraints.Required
+    public Long languageId;
+
+    @Constraints.Required
     public List<Long> ingredientIds;
 
     @Override
     public String toString() {
         return "IngredientTagCreateUpdateDto{" +
                 "name='" + name + '\'' +
+                ", languageId='" + languageId + '\'' +
                 ", ingredientIds=" + ingredientIds +
                 '}';
     }

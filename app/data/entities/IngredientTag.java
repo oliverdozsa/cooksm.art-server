@@ -15,13 +15,6 @@ public class IngredientTag {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
-    private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "language_id")
-    private Language language;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -36,20 +29,15 @@ public class IngredientTag {
             })
     private List<Ingredient> ingredients;
 
+    @OneToMany(mappedBy = "tag", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private List<IngredientTagName> names;
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<Ingredient> getIngredients() {
@@ -60,19 +48,19 @@ public class IngredientTag {
         this.ingredients = ingredients;
     }
 
-    public Language getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(Language language) {
-        this.language = language;
-    }
-
     public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<IngredientTagName> getNames() {
+        return names;
+    }
+
+    public void setNames(List<IngredientTagName> names) {
+        this.names = names;
     }
 }
