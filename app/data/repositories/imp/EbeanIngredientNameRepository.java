@@ -3,12 +3,10 @@ package data.repositories.imp;
 import data.entities.Ingredient;
 import data.entities.IngredientName;
 import data.repositories.IngredientNameRepository;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
 import lombokized.repositories.Page;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -20,8 +18,8 @@ public class EbeanIngredientNameRepository implements IngredientNameRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanIngredientNameRepository.class);
 
     @Inject
-    public EbeanIngredientNameRepository(EbeanConfig config) {
-        this.ebean = Ebean.getServer(config.defaultServer());
+    public EbeanIngredientNameRepository(EbeanServer ebean) {
+        this.ebean = ebean;
     }
 
     @Override

@@ -3,12 +3,10 @@ package data.repositories.imp;
 import data.DatabaseExecutionContext;
 import data.entities.SourcePage;
 import data.repositories.SourcePageRepository;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
 import lombokized.repositories.Page;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 
@@ -19,8 +17,8 @@ public class EbeanSourcePageRepository implements SourcePageRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanSourcePageRepository.class);
 
     @Inject
-    public EbeanSourcePageRepository(EbeanConfig dbConfig, DatabaseExecutionContext executionContext) {
-        this.ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanSourcePageRepository(EbeanServer ebean, DatabaseExecutionContext executionContext) {
+        this.ebean = ebean;
         this.executionContext = executionContext;
     }
 

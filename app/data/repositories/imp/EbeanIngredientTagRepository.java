@@ -10,7 +10,6 @@ import io.ebean.Query;
 import lombokized.repositories.IngredientTagRepositoryParams;
 import lombokized.repositories.Page;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 import play.libs.Json;
 import queryparams.RecipesQueryParams;
 
@@ -26,8 +25,8 @@ public class EbeanIngredientTagRepository implements IngredientTagRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanIngredientTagRepository.class);
 
     @Inject
-    public EbeanIngredientTagRepository(EbeanConfig config) {
-        this.ebean = Ebean.getServer(config.defaultServer());
+    public EbeanIngredientTagRepository(EbeanServer ebean) {
+        this.ebean = ebean;
     }
 
     @Override

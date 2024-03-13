@@ -9,11 +9,9 @@ import data.repositories.ShoppingListRepository;
 import data.repositories.exceptions.ForbiddenExeption;
 import data.repositories.exceptions.NotFoundException;
 import dto.ShoppingListItemRequestDto;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.SqlUpdate;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -31,8 +29,8 @@ public class EbeanShoppingListRepository implements ShoppingListRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanShoppingListRepository.class);
 
     @Inject
-    public EbeanShoppingListRepository(EbeanConfig dbConfig, Config config) {
-        ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanShoppingListRepository(EbeanServer ebean, Config config) {
+        this.ebean = ebean;
         perUserLimit = config.getInt("cooksm.art.shoppinglist.maxperuser");
         itemsPerShoppingListLimit = config.getInt("cooksm.art.shoppinglist.maxitems");
     }

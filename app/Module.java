@@ -2,6 +2,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import data.repositories.*;
 import data.repositories.imp.*;
+import io.ebean.EbeanServer;
 import security.JwtCenter;
 import security.SocialTokenVerifier;
 import security.imp.JwtCenterImp;
@@ -16,6 +17,7 @@ import services.*;
 public class Module extends AbstractModule {
     @Override
     protected void configure() {
+        bind(EbeanServer.class).toProvider(EbeanServerProvider.class);
         bind(IngredientNameRepository.class).to(EbeanIngredientNameRepository.class).asEagerSingleton();
         bind(RecipeRepository.class).to(EbeanRecipeRepository.class).asEagerSingleton();
         bind(SourcePageRepository.class).to(EbeanSourcePageRepository.class).asEagerSingleton();

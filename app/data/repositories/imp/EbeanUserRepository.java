@@ -3,11 +3,9 @@ package data.repositories.imp;
 import data.entities.User;
 import data.repositories.UserRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import lombokized.dto.UserCreateUpdateDto;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
@@ -23,8 +21,8 @@ public class EbeanUserRepository implements UserRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanUserRepository.class);
 
     @Inject
-    public EbeanUserRepository(EbeanConfig ebeanConfig, ValidatorFactory validatorFactory) {
-        this.ebean = Ebean.getServer(ebeanConfig.defaultServer());
+    public EbeanUserRepository(EbeanServer ebean, ValidatorFactory validatorFactory) {
+        this.ebean = ebean;
         this.validator = validatorFactory.getValidator();
     }
 

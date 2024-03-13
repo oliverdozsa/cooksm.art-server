@@ -3,14 +3,12 @@ package data.repositories.imp;
 import data.entities.Recipe;
 import data.entities.RecipeBook;
 import data.repositories.RecipeRepository;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
 import io.ebean.RawSql;
 import io.ebean.RawSqlBuilder;
 import lombokized.repositories.Page;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 
@@ -27,8 +25,8 @@ public class EbeanRecipeRepository implements RecipeRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanRecipeRepository.class);
 
     @Inject
-    public EbeanRecipeRepository(EbeanConfig dbConfig) {
-        this.ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanRecipeRepository(EbeanServer ebean) {
+        this.ebean = ebean;
     }
 
     @Override

@@ -4,7 +4,6 @@ import io.ebean.EbeanServer;
 import data.repositories.exceptions.NotFoundException;
 
 import java.util.Collection;
-import java.util.List;
 
 class EbeanRepoUtils {
     public static <E> void assertEntityExists(EbeanServer ebean, Class<E> entityClass, Object id) {

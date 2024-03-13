@@ -20,8 +20,8 @@ public class EbeanRecipeSearchRepository implements RecipeSearchRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanRecipeSearchRepository.class);
 
     @Inject
-    public EbeanRecipeSearchRepository(EbeanConfig dbConfig) {
-        this.ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanRecipeSearchRepository(EbeanServer ebean) {
+        this.ebean = ebean;
         initCount(ebean);
         logger.info("EbeanRecipeSearchRepository(): count = {}", count.get());
     }

@@ -6,12 +6,10 @@ import data.entities.UserSearch;
 import data.repositories.RecipeSearchRepository;
 import data.repositories.UserSearchRepository;
 import data.repositories.exceptions.NotFoundException;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
 import io.ebean.Query;
 import lombokized.repositories.Page;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -23,8 +21,8 @@ public class EbeanUserSearchRepository implements UserSearchRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanUserSearchRepository.class);
 
     @Inject
-    public EbeanUserSearchRepository(EbeanConfig ebeanConfig, RecipeSearchRepository recipeSearchRepository) {
-        ebean = Ebean.getServer(ebeanConfig.defaultServer());
+    public EbeanUserSearchRepository(EbeanServer ebean, RecipeSearchRepository recipeSearchRepository) {
+        this.ebean = ebean;
         this.recipeSearchRepository = recipeSearchRepository;
     }
 

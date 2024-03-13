@@ -5,11 +5,10 @@ import data.entities.RecipeBook;
 import data.entities.User;
 import data.repositories.RecipeBookRepository;
 import data.repositories.exceptions.NotFoundException;
-import io.ebean.Ebean;
+
 import io.ebean.EbeanServer;
 import io.ebean.SqlUpdate;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.time.Instant;
@@ -30,8 +29,8 @@ public class EbeanRecipeBookRepository implements RecipeBookRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanRecipeBookRepository.class);
 
     @Inject
-    public EbeanRecipeBookRepository(EbeanConfig dbConfig) {
-        ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanRecipeBookRepository(EbeanServer ebean) {
+        this.ebean = ebean;
     }
 
     @Override

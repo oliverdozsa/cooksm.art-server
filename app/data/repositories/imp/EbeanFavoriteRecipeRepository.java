@@ -1,22 +1,16 @@
 package data.repositories.imp;
 
 import com.typesafe.config.Config;
-import io.ebean.Ebean;
 import io.ebean.EbeanServer;
-import data.DatabaseExecutionContext;
 import data.entities.FavoriteRecipe;
 import data.entities.Recipe;
 import data.entities.User;
 import data.repositories.FavoriteRecipeRepository;
 import data.repositories.exceptions.BusinessLogicViolationException;
 import play.Logger;
-import play.db.ebean.EbeanConfig;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
-
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     private EbeanServer ebean;
@@ -25,8 +19,8 @@ public class EbeanFavoriteRecipeRepository implements FavoriteRecipeRepository {
     private static final Logger.ALogger logger = Logger.of(EbeanFavoriteRecipeRepository.class);
 
     @Inject
-    public EbeanFavoriteRecipeRepository(EbeanConfig dbConfig, Config config) {
-        ebean = Ebean.getServer(dbConfig.defaultServer());
+    public EbeanFavoriteRecipeRepository(EbeanServer ebean, Config config) {
+        this.ebean = ebean;
         maxPerUser = config.getInt("cooksm.art.favoriterecipes.maxperuser");
     }
 
