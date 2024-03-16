@@ -227,7 +227,8 @@ class RecipeQuerySql {
 
         if (config.queryType == QueryType.NUMBER ||
                 config.queryType == QueryType.RATIO ||
-                config.useExclude) {
+                config.useExclude ||
+                config.useFavoritesOnly) {
             condition = " AND " + condition;
         }
 

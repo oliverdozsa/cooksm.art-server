@@ -123,4 +123,17 @@ public class RecipeBooksControllerTest_UseInRecipeQueries {
         assertThat(recipeIdsOf(result), hasSize(4));
         assertThat(recipeIdsOf(result), containsInAnyOrder(1L, 2L, 3L, 4L));
     }
+
+    @Test
+    // Given
+    @DataSet(value = "datasets/yml/recipebooks-query.yml", disableConstraints = true, cleanBefore = true)
+    public void testUseFavoritesAndRecipeBooksWithNoIngredientsCondition() {
+        Result result = client.page("useFavoritesOnly=true&" +
+                "recipeBooks[0]=1&" +
+                "limit=50&offset=0&" +
+                "orderBy=name&orderBySort=asc", 1L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(OK));
+    }
 }
