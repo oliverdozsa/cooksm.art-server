@@ -10,15 +10,18 @@ It's a recipe search engine with focus on the ingredients to use or to avoid.
 * Search based on ingredients to use
 * Exclude ingredients
 * Fuzzy search
-
-## Demo
-TBD
-
-## Future plans
-* User login through social providers (Google / Facebook)
+* User login through social providers
+    * Google ✅
+    * Facebook ⏳
 * Favorite recipes
 * Multi-language support
-* Save recipes into a list
+* Save recipes into a list (recipe books)
+
+## Demo
+https://cooksm.art
+
+## Future plans
+* ...
 
 ## Technical details
 The server is a [Play Framework](https://github.com/playframework/playframework) application. It's nothing fancy; it uses relational database for storage and search.
