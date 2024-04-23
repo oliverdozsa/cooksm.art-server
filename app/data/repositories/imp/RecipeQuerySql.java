@@ -15,6 +15,7 @@ class RecipeQuerySql {
         String havingCondition = createHavingCondition(config);
         String useFavoritesCondition = createUseFavoritesCondition(config);
         String useRecipeBooksCondition = createRecipeBooksCondition(config);
+        String useNameLikeCondition = createNameLikeCondition(config);
 
         return "" +
                 "" +
@@ -32,6 +33,7 @@ class RecipeQuerySql {
                 excludedCondition + " " +
                 useFavoritesCondition + " " +
                 useRecipeBooksCondition + " " +
+                useNameLikeCondition + " " +
                 groupByCondition + " " +
                 havingCondition;
     }
@@ -43,6 +45,7 @@ class RecipeQuerySql {
         public boolean useAdditionalIngrs;
         public boolean useFavoritesOnly;
         public boolean useRecipeBooks;
+        public boolean useNameLike;
 
         public Configuration(boolean selectOtherFields, boolean useExclude, QueryType queryType) {
             this.selectOtherFields = selectOtherFields;
@@ -74,7 +77,7 @@ class RecipeQuerySql {
                     "  HAVING " +
                     "    COUNT(ie.ingredient_id) > 0) " +
                     "  AS req " +
-                    "ON recipe.id = req.id";
+                    "ON recipe.id = req.id ";
         }
 
         return excludedJoin;
@@ -159,7 +162,8 @@ class RecipeQuerySql {
                 QueryType.NUMBER.equals(config.queryType) ||
                 config.useExclude ||
                 config.useFavoritesOnly ||
-                config.useRecipeBooks) {
+                config.useRecipeBooks ||
+                config.useNameLike) {
             whereClause = "WHERE ";
         }
 
@@ -229,6 +233,24 @@ class RecipeQuerySql {
                 config.queryType == QueryType.RATIO ||
                 config.useExclude ||
                 config.useFavoritesOnly) {
+            condition = " AND " + condition;
+        }
+
+        return condition;
+    }
+
+    private static String createNameLikeCondition(Configuration config) {
+        if(!config.useNameLike) {
+            return "";
+        }
+
+        String condition = " recipe.name % :nameLike";
+
+        if (config.queryType == QueryType.NUMBER ||
+                config.queryType == QueryType.RATIO ||
+                config.useExclude ||
+                config.useFavoritesOnly ||
+                config.useRecipeBooks) {
             condition = " AND " + condition;
         }
 

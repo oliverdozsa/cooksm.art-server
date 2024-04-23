@@ -8,6 +8,7 @@ import io.ebean.Query;
 import io.ebean.RawSql;
 import io.ebean.RawSqlBuilder;
 import lombokized.repositories.Page;
+import play.Environment;
 import play.Logger;
 
 import javax.inject.Inject;
@@ -19,21 +20,23 @@ import static lombokized.repositories.RecipeRepositoryParams.*;
 
 public class EbeanRecipeRepository implements RecipeRepository {
     private EbeanServer ebean;
+    private final Environment environment;
     private static final int DEFAULT_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 50;
 
     private static final Logger.ALogger logger = Logger.of(EbeanRecipeRepository.class);
 
     @Inject
-    public EbeanRecipeRepository(EbeanServer ebean) {
+    public EbeanRecipeRepository(EbeanServer ebean, Environment environment) {
         this.ebean = ebean;
+        this.environment = environment;
     }
 
     @Override
     public Page<Recipe> pageOfQueryTypeNumber(QueryTypeNumber params) {
         logger.info("pageOfQueryTypeNumber()");
         RecipeQuerySql.Configuration configuration = createConfig(params);
-        String sqlString = RecipeQuerySql.create(configuration);
+        String sqlString = createRecipeQueryBaseSqlWith(configuration);
 
         sqlString = replaceByQueryTypeNumberParameters(sqlString, params);
         Query<Recipe> query = prepare(sqlString, params.getCommon());
@@ -50,7 +53,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
     public Page<Recipe> pageOfQueryTypeRatio(QueryTypeRatio params) {
         logger.info("pageOfQueryTypeRatio()");
         RecipeQuerySql.Configuration configuration = createConfig(params);
-        String sqlString = RecipeQuerySql.create(configuration);
+        String sqlString = createRecipeQueryBaseSqlWith(configuration);
 
         sqlString = replaceQueryTypeRatioParams(sqlString, params);
 
@@ -72,8 +75,9 @@ public class EbeanRecipeRepository implements RecipeRepository {
                 RecipeQuerySql.QueryType.NONE);
         setUseFavoritesOnly(config, params);
         setUseRecipeBooks(config, params);
+        setUseNameLike(config, params);
 
-        String sqlString = RecipeQuerySql.create(config);
+        String sqlString = createRecipeQueryBaseSqlWith(config);
         Query<Recipe> query = prepare(sqlString, params);
 
         return new Page<>(query.findList(), query.findCount());
@@ -161,11 +165,14 @@ public class EbeanRecipeRepository implements RecipeRepository {
            E.g. sorting by number of ingredient is not a unique sorting as many recipes have the same number
            of ingredients.
         */
+        String orderByClause = "";
         if (params.getOrderBy() != null && params.getOrderBySort() != null) {
-            query.orderBy(params.getOrderBy() + " " + params.getOrderBySort() + ", id");
+            orderByClause = params.getOrderBy() + " " + params.getOrderBySort() + ", id";
         } else {
-            query.orderBy("id");
+            orderByClause = "id";
         }
+
+        query.orderBy(orderByClause);
     }
 
     private void setSourcePagesCondition(Query<Recipe> query, Common params) {
@@ -181,9 +188,15 @@ public class EbeanRecipeRepository implements RecipeRepository {
     }
 
     private void setNameLikeCondition(Query<Recipe> query, Common params) {
-        // Name like
-        if (params.getNameLike() != null) {
+        if(params.getNameLike() == null || params.getNameLike().isEmpty()) {
+            return;
+        }
+
+        if(environment.isTest()) {
+            // H2 does not have similarity operator
             query.where().ilike("name", "%" + params.getNameLike() + "%");
+        } else {
+            query.setParameter("nameLike", params.getNameLike());
         }
     }
 
@@ -266,6 +279,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
         );
         setUseFavoritesOnly(configuration, params);
         setUseRecipeBooks(configuration, params);
+        setUseNameLike(configuration, params);
 
         return configuration;
     }
@@ -282,6 +296,12 @@ public class EbeanRecipeRepository implements RecipeRepository {
         }
     }
 
+    private static void setUseNameLike(RecipeQuerySql.Configuration config, Common params) {
+        if(params.getNameLike() != null && params.getNameLike().length() > 0) {
+            config.useNameLike = true;
+        }
+    }
+
     private String replaceAdditionalIngredients(String currentSql, AdditionalIngredients additionals){
         String replaced = currentSql;
         Integer goodAdditionalIngredients = additionals.getGoodAdditionalIngredients();
@@ -290,5 +310,13 @@ public class EbeanRecipeRepository implements RecipeRepository {
         replaced = replaced.replace(":goodAdditionalIngredientRelation", relation);
 
         return replaced;
+    }
+
+    private String createRecipeQueryBaseSqlWith(RecipeQuerySql.Configuration config) {
+        if(environment.isTest()) {
+            config.useNameLike = false;
+        }
+
+        return RecipeQuerySql.create(config);
     }
 }
