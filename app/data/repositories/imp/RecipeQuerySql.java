@@ -244,7 +244,7 @@ class RecipeQuerySql {
             return "";
         }
 
-        String condition = " recipe.name % :nameLike";
+        String condition = " recipe.name <-> :nameLike < 0.5";
 
         if (config.queryType == QueryType.NUMBER ||
                 config.queryType == QueryType.RATIO ||
