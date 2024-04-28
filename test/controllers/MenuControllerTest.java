@@ -2,7 +2,7 @@ package controllers;
 
 import clients.MenuTestClient;
 import com.github.database.rider.core.api.dataset.DataSet;
-import data.entities.MenuItem;
+import com.typesafe.config.Config;
 import dto.MenuCreateUpdateDto;
 import lombokized.dto.MenuItemDto;
 import org.junit.Before;
@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static extractors.DataFromResult.statusOf;
-import static extractors.MenuFromResult.itemsOf;
-import static extractors.MenuFromResult.nameOf;
+import static extractors.DataFromResult.totalCountOf;
+import static extractors.MenuFromResult.*;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -205,22 +205,53 @@ public class MenuControllerTest {
 
         // Then
         assertThat(statusOf(result), equalTo(OK));
-        fail("Assert that other data is OK.");
+        List<Long> menuIds = menuIdsOf(result);
+        assertThat(totalCountOf(result), equalTo(1));
+        assertThat(menuIds.get(0), equalTo(1));
     }
 
     @Test
     public void testTooManyMenusCreated() {
-        fail("Implement too many menus created scenario.");
+        // Given
+        Config config = ruleChainForTests.getApplication().config();
+        int maxItems = config.getInt("cooksm.art.menu.maxperuser");
+
+        for(int i = 0; i < maxItems; i++) {
+            MenuCreateUpdateDto menu = createAMenu();
+            Result result = client.create(menu, 3L);
+            assertThat(statusOf(result), equalTo(CREATED));
+        }
+
+        // When
+        MenuCreateUpdateDto menu = createAMenu();
+        Result result = client.create(menu, 3L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(FORBIDDEN));
     }
 
     @Test
     public void testTooManyRecipesInAMenu() {
-        fail("Implement too many recipes created in a menu scenario.");
+        // Given
+        MenuCreateUpdateDto menuWithTooManyItems = createMenuWithTooManyItems();
+
+        // When
+        Result result = client.create(menuWithTooManyItems, 3L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
     public void testTooManyRecipesInAMenuDuringUpdate() {
-        fail("Implement too many recipes created in a menu during update scenario.");
+        // Given
+        MenuCreateUpdateDto menuWithTooManyItems = createMenuWithTooManyItems();
+
+        // When
+        Result result = client.update(1L, menuWithTooManyItems, 3L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
     }
 
     private MenuCreateUpdateDto createAMenu() {
@@ -288,5 +319,22 @@ public class MenuControllerTest {
         menu.items.add(item4);
 
         return menu;
+    }
+
+    private MenuCreateUpdateDto createMenuWithTooManyItems() {
+        Config config = ruleChainForTests.getApplication().config();
+        int maxItems = config.getInt("cooksm.art.menu.maxitems");
+
+        MenuCreateUpdateDto menuWithTooManyItems = createAMenu();
+        menuWithTooManyItems.items.clear();
+
+        for(int i = 0; i < maxItems + 1; i++) {
+            MenuCreateUpdateDto.Item item = new MenuCreateUpdateDto.Item();
+            item.order = i + 1;
+            item.group = i % 5 + 1;
+            menuWithTooManyItems.items.add(item);
+        }
+
+        return menuWithTooManyItems;
     }
 }

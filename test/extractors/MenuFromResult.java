@@ -29,4 +29,12 @@ public class MenuFromResult {
 
         return items.of(result);
     }
+
+    public static List<Long> menuIdsOf(Result result) {
+        ListOfValuesFromResult<Long> values = new ListOfValuesFromResult<Long>()
+                .select("$.items")
+                .converting(n -> n.get("id").asLong());
+
+        return values.of(result);
+    }
 }
