@@ -95,47 +95,47 @@ menu_item:
   - id: 1
     menu_id: 1
     recipe_id: 1
-    group: 1
-    order: 1
+    item_group: 1
+    item_order: 1
 
   - id: 2
     menu_id: 1
     recipe_id: 2
-    group: 1
-    order: 2
+    item_group: 1
+    item_order: 2
 
   - id: 3
     menu_id: 1
     recipe_id: 3
-    group: 2
-    order: 1
+    item_group: 2
+    item_order: 1
 
   - id: 4
     menu_id: 1
     recipe_id: 4
-    group: 2
-    order: 2
+    item_group: 2
+    item_order: 2
 
   - id: 5
     menu_id: 2
     recipe_id: 4
-    group: 1
-    order: 1
+    item_group: 1
+    item_order: 1
 
   - id: 6
     menu_id: 2
     recipe_id: 3
-    group: 1
-    order: 2
+    item_group: 1
+    item_order: 2
 
   - id: 7
     menu_id: 2
     recipe_id: 2
-    group: 2
-    order: 1
+    item_group: 2
+    item_order: 1
 
   - id: 8
     menu_id: 2
     recipe_id: 1
-    group: 2
-    order: 2
+    item_group: 2
+    item_order: 2

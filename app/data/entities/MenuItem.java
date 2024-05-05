@@ -18,10 +18,10 @@ public class MenuItem {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @Column(name = "order")
+    @Column(name = "item_order")
     private Integer order;
 
-    @Column(name = "group")
+    @Column(name = "item_group")
     private Integer group;
 
     public Long getId() {
@@ -54,5 +54,13 @@ public class MenuItem {
 
     public void setOrder(Integer order) {
         this.order = order;
+    }
+
+    public Integer getGroup() {
+        return group;
+    }
+
+    public void setGroup(Integer group) {
+        this.group = group;
     }
 }

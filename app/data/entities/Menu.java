@@ -1,6 +1,7 @@
 package data.entities;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,8 +15,12 @@ public class Menu {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "menu", fetch = FetchType.EAGER)
-    private List<MenuItem> menuItems;
+    @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY)
+    private List<MenuItem> menuItems = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public Long getId() {
         return id;
@@ -39,5 +44,13 @@ public class Menu {
 
     public void setMenuItems(List<MenuItem> menuItems) {
         this.menuItems = menuItems;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

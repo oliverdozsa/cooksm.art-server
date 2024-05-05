@@ -1,6 +1,7 @@
 package controllers;
 
 import clients.MenuTestClient;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.typesafe.config.Config;
 import dto.MenuCreateUpdateDto;
@@ -18,13 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static extractors.DataFromResult.statusOf;
-import static extractors.DataFromResult.totalCountOf;
 import static extractors.MenuFromResult.*;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static play.mvc.Http.Status.*;
 
 public class MenuControllerTest {
@@ -65,7 +64,7 @@ public class MenuControllerTest {
         Result result = client.create(menu, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -122,16 +121,16 @@ public class MenuControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(NO_CONTENT));
         assertThat(nameOf(result), equalTo("A New Menu"));
-        List<MenuItemDto> menuItems = itemsOf(result);
+        List<JsonNode> menuItems = itemsOf(result);
 
         assertThat(menuItems.size(), equalTo(5));
-        MenuItemDto newlyAddedItem = menuItems.stream()
-                .filter(i -> i.getRecipeDto().getId() == 5L)
+        JsonNode newlyAddedItem = menuItems.stream()
+                .filter(i -> i.get("recipeDto").get("id").asLong() == 5L)
                 .findFirst()
                 .get();
 
-        assertThat(newlyAddedItem.getGroup(), equalTo(1));
-        assertThat(newlyAddedItem.getOrder(), equalTo(1));
+        assertThat(newlyAddedItem.get("group").asInt(), equalTo(1));
+        assertThat(newlyAddedItem.get("order").asInt(), equalTo(1));
 
     }
 
@@ -160,7 +159,7 @@ public class MenuControllerTest {
         Result result = client.update(2L, menuToReplace, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -173,13 +172,13 @@ public class MenuControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(OK));
         assertThat(nameOf(result), equalTo("Alice's Menu"));
-        List<MenuItemDto> items = itemsOf(result);
-        List<MenuItemDto> sortedItems = items.stream()
-                .sorted(Comparator.comparing(i -> i.getRecipeDto().getId()))
+        List<JsonNode> items = itemsOf(result);
+        List<JsonNode> sortedItems = items.stream()
+                .sorted(Comparator.comparing(i -> i.get("recipeDto").get("id").asLong()))
                 .collect(Collectors.toList());
 
-        List<Integer> groups = sortedItems.stream().map(MenuItemDto::getGroup).collect(Collectors.toList());
-        List<Integer> orders = sortedItems.stream().map(MenuItemDto::getOrder).collect(Collectors.toList());
+        List<Integer> groups = sortedItems.stream().map(i -> i.get("group").asInt()).collect(Collectors.toList());
+        List<Integer> orders = sortedItems.stream().map(i -> i.get("order").asInt()).collect(Collectors.toList());
 
         assertThat(groups, contains(1, 1, 2, 2));
         assertThat(orders, contains(1, 2, 1, 2));
@@ -206,8 +205,8 @@ public class MenuControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(OK));
         List<Long> menuIds = menuIdsOf(result);
-        assertThat(totalCountOf(result), equalTo(1));
-        assertThat(menuIds.get(0), equalTo(1));
+        assertThat(menuIds.size(), equalTo(1));
+        assertThat(menuIds.get(0), equalTo(1L));
     }
 
     @Test
@@ -249,6 +248,20 @@ public class MenuControllerTest {
 
         // When
         Result result = client.update(1L, menuWithTooManyItems, 3L);
+
+        // Then
+        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+    }
+
+    @Test
+    @DataSet(value = "datasets/yml/menu.yml", disableConstraints = true, cleanBefore = true)
+    public void testItemsAreNotUniqueWhenCreating() {
+        // Given
+        MenuCreateUpdateDto menu = createAMenu();
+        menu.items.add(menu.items.get(0));
+
+        // When
+        Result result = client.create(menu, 1L);
 
         // Then
         assertThat(statusOf(result), equalTo(BAD_REQUEST));
