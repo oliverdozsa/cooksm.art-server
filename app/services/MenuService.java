@@ -1,7 +1,9 @@
 package services;
 
+import com.typesafe.config.Config;
 import data.DatabaseExecutionContext;
 import data.repositories.MenuRepository;
+import data.repositories.exceptions.BusinessLogicViolationException;
 import dto.MenuCreateUpdateDto;
 import lombokized.dto.MenuDto;
 import lombokized.dto.MenuTitleDto;
@@ -24,11 +26,25 @@ public class MenuService {
     @Inject
     private LanguageService languageService;
 
+    private final int maxItemsPerMenu;
+
     private static final Logger.ALogger logger = Logger.of(MenuService.class);
+
+    @Inject
+    public MenuService(Config config) {
+        maxItemsPerMenu = config.getInt("cooksm.art.menu.maxitems");
+    }
 
     public CompletionStage<Long> create(MenuCreateUpdateDto menu, Long userId) {
         logger.info("create(): menu = {}, userId = {}", menu);
-        return supplyAsync(() -> repository.create(menu, userId).getId(), dbExecContext);
+        return supplyAsync(() -> {
+            if(menu.items.size() > maxItemsPerMenu) {
+                String logMessage = "Too many items in menu. Max. allowed: " + maxItemsPerMenu;
+                logger.warn(logMessage);
+                throw new BusinessLogicViolationException(logMessage);
+            }
+            return repository.create(menu, userId).getId();
+        }, dbExecContext);
     }
 
     public CompletionStage<Void> delete(Long menuId, Long userId) {
@@ -38,7 +54,14 @@ public class MenuService {
 
     public CompletionStage<Void> update(Long menuId, MenuCreateUpdateDto menu, Long userId) {
         logger.info("update(): menuId = {}, menu = {}, userId = {}", menuId, menu, userId);
-        return runAsync(() -> repository.update(menuId, menu, userId), dbExecContext);
+        return runAsync(() -> {
+            if(menu.items.size() > maxItemsPerMenu) {
+                String logMessage = "Too many items in menu. Max. allowed: " + maxItemsPerMenu;
+                logger.warn(logMessage);
+                throw new BusinessLogicViolationException(logMessage);
+            }
+            repository.update(menuId, menu, userId);
+        }, dbExecContext);
     }
 
     public CompletionStage<MenuDto> single(Long menuId, Long languageId, Long userId) {

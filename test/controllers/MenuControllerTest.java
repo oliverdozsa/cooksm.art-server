@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static play.mvc.Http.Status.*;
+import static play.test.Helpers.contentAsString;
 
 public class MenuControllerTest {
     private final RuleChainForTests ruleChainForTests = new RuleChainForTests();
@@ -64,7 +65,7 @@ public class MenuControllerTest {
         Result result = client.create(menu, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -75,9 +76,9 @@ public class MenuControllerTest {
         Result result = client.delete(1L, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NO_CONTENT));
         result = client.delete(1L, 1L);
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -88,7 +89,7 @@ public class MenuControllerTest {
         Result result = client.delete(2L, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -99,7 +100,7 @@ public class MenuControllerTest {
         Result result = client.delete(42L, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -111,26 +112,29 @@ public class MenuControllerTest {
 
         MenuCreateUpdateDto.Item newItem = new MenuCreateUpdateDto.Item();
         newItem.recipeId = 5L;
-        newItem.group = 1;
-        newItem.order = 1;
+        newItem.group = 3;
+        newItem.order = 4;
         menuToReplace.items.add(newItem);
 
         // When
         Result result = client.update(1L, menuToReplace, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NO_CONTENT));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NO_CONTENT));
+
+        result = client.getById(1L, 1L);
+        assertThat(contentAsString(result), statusOf(result), equalTo(OK));
         assertThat(nameOf(result), equalTo("A New Menu"));
         List<JsonNode> menuItems = itemsOf(result);
 
-        assertThat(menuItems.size(), equalTo(5));
+        assertThat("Updated menu size should be 5", menuItems.size(), equalTo(5));
         JsonNode newlyAddedItem = menuItems.stream()
                 .filter(i -> i.get("recipeDto").get("id").asLong() == 5L)
                 .findFirst()
                 .get();
 
-        assertThat(newlyAddedItem.get("group").asInt(), equalTo(1));
-        assertThat(newlyAddedItem.get("order").asInt(), equalTo(1));
+        assertThat(newlyAddedItem.get("group").asInt(), equalTo(3));
+        assertThat(newlyAddedItem.get("order").asInt(), equalTo(4));
 
     }
 
@@ -145,7 +149,7 @@ public class MenuControllerTest {
         Result result = client.update(2L, menuToReplace, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -159,7 +163,7 @@ public class MenuControllerTest {
         Result result = client.update(2L, menuToReplace, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -170,7 +174,7 @@ public class MenuControllerTest {
         Result result = client.getById(1L, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(OK));
+        assertThat(contentAsString(result), statusOf(result), equalTo(OK));
         assertThat(nameOf(result), equalTo("Alice's Menu"));
         List<JsonNode> items = itemsOf(result);
         List<JsonNode> sortedItems = items.stream()
@@ -192,7 +196,7 @@ public class MenuControllerTest {
         Result result = client.getById(2L, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(NOT_FOUND));
+        assertThat(contentAsString(result), statusOf(result), equalTo(NOT_FOUND));
     }
 
     @Test
@@ -203,13 +207,14 @@ public class MenuControllerTest {
         Result result = client.getAllOf(1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(OK));
+        assertThat(contentAsString(result), statusOf(result), equalTo(OK));
         List<Long> menuIds = menuIdsOf(result);
         assertThat(menuIds.size(), equalTo(1));
         assertThat(menuIds.get(0), equalTo(1L));
     }
 
     @Test
+    @DataSet(value = "datasets/yml/menu.yml", disableConstraints = true, cleanBefore = true)
     public void testTooManyMenusCreated() {
         // Given
         Config config = ruleChainForTests.getApplication().config();
@@ -217,19 +222,20 @@ public class MenuControllerTest {
 
         for(int i = 0; i < maxItems; i++) {
             MenuCreateUpdateDto menu = createAMenu();
-            Result result = client.create(menu, 3L);
-            assertThat(statusOf(result), equalTo(CREATED));
+            Result result = client.create(menu, 4L);
+            assertThat(contentAsString(result), statusOf(result), equalTo(CREATED));
         }
 
         // When
         MenuCreateUpdateDto menu = createAMenu();
-        Result result = client.create(menu, 3L);
+        Result result = client.create(menu, 4L);
 
         // Then
-        assertThat(statusOf(result), equalTo(FORBIDDEN));
+        assertThat(contentAsString(result), statusOf(result), equalTo(FORBIDDEN));
     }
 
     @Test
+    @DataSet(value = "datasets/yml/menu.yml", disableConstraints = true, cleanBefore = true)
     public void testTooManyRecipesInAMenu() {
         // Given
         MenuCreateUpdateDto menuWithTooManyItems = createMenuWithTooManyItems();
@@ -238,10 +244,11 @@ public class MenuControllerTest {
         Result result = client.create(menuWithTooManyItems, 3L);
 
         // Then
-        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(contentAsString(result), statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
+    @DataSet(value = "datasets/yml/menu.yml", disableConstraints = true, cleanBefore = true)
     public void testTooManyRecipesInAMenuDuringUpdate() {
         // Given
         MenuCreateUpdateDto menuWithTooManyItems = createMenuWithTooManyItems();
@@ -250,7 +257,7 @@ public class MenuControllerTest {
         Result result = client.update(1L, menuWithTooManyItems, 3L);
 
         // Then
-        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(contentAsString(result), statusOf(result), equalTo(BAD_REQUEST));
     }
 
     @Test
@@ -264,7 +271,7 @@ public class MenuControllerTest {
         Result result = client.create(menu, 1L);
 
         // Then
-        assertThat(statusOf(result), equalTo(BAD_REQUEST));
+        assertThat(contentAsString(result), statusOf(result), equalTo(BAD_REQUEST));
     }
 
     private MenuCreateUpdateDto createAMenu() {

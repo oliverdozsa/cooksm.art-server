@@ -15,6 +15,10 @@ users:
     email: charlie@example.com
     full_name: Charlie
 
+  - id: 4
+    email: daniel@example.com
+    full_name: Danlie
+
 ingredient:
   - id: 1
   - id: 2

@@ -1,10 +1,12 @@
 package data.repositories.imp;
 
+import com.typesafe.config.Config;
 import data.entities.Menu;
 import data.entities.MenuItem;
 import data.entities.Recipe;
 import data.entities.User;
 import data.repositories.MenuRepository;
+import data.repositories.exceptions.ForbiddenExeption;
 import data.repositories.exceptions.NotFoundException;
 import dto.MenuCreateUpdateDto;
 import io.ebean.Ebean;
@@ -22,12 +24,14 @@ import static data.repositories.imp.EbeanRepoUtils.assertEntityExists;
 
 public class EbeanMenuRepository implements MenuRepository {
     private EbeanServer ebean;
+    private final int maxMenusPerUser;
 
     private static final Logger.ALogger logger = Logger.of(EbeanMenuRepository.class);
 
     @Inject
-    public EbeanMenuRepository(EbeanServer ebean) {
+    public EbeanMenuRepository(EbeanServer ebean, Config config) {
         this.ebean = ebean;
+        maxMenusPerUser = config.getInt("cooksm.art.menu.maxperuser");
     }
 
     @Override
@@ -39,6 +43,13 @@ public class EbeanMenuRepository implements MenuRepository {
                 .collect(Collectors.toSet());
         assertEntityExists(ebean, User.class, userId);
         assertEntitiesExist(ebean, Recipe.class, "id", recipeIds);
+
+        int countOfMenusOfUer = ebean.createQuery(Menu.class).where()
+                .eq("user.id", userId)
+                .findCount();
+        if (countOfMenusOfUer >= maxMenusPerUser) {
+            throw new ForbiddenExeption("Already have max. num of menus. Max allowed: " + maxMenusPerUser);
+        }
 
         Menu menu = new Menu();
         menu.setUser(ebean.find(User.class, userId));
@@ -59,6 +70,15 @@ public class EbeanMenuRepository implements MenuRepository {
     public void update(Long menuId, MenuCreateUpdateDto request, Long userId) {
         logger.info("update(): menuId = {}, request = {}, userId = {}", menuId, request, userId);
         Menu menu = getOrNotFoundMenuFor(menuId, userId);
+
+        List<Long> itemsToRemove = menu.getMenuItems().stream()
+                .map(MenuItem::getId)
+                .collect(Collectors.toList());
+        ebean.createQuery(MenuItem.class)
+                .where()
+                .in("id", itemsToRemove)
+                .delete();
+
         populateMenuFrom(request, menu);
         ebean.save(menu);
     }

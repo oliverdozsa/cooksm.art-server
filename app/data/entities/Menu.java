@@ -15,7 +15,7 @@ public class Menu {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private List<MenuItem> menuItems = new ArrayList<>();
 
     @ManyToOne
