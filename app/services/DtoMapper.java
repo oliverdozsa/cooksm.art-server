@@ -5,7 +5,6 @@ import lombokized.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DtoMapper {
@@ -137,6 +136,24 @@ public class DtoMapper {
         return new RecipeBooksOfRecipeDto(ids);
     }
 
+    public static MenuDto toDto(Menu entity, Long languageId) {
+        List<MenuItemDto> menuItemDtos = entity.getMenuItems().stream()
+                .map(i -> DtoMapper.toDto(i, languageId))
+                .collect(Collectors.toList());
+
+        return new MenuDto(entity.getId(), entity.getName(), menuItemDtos);
+    }
+
+    public static List<MenuTitleDto> toMenuTitleDtos(List<Menu> menus) {
+        return menus.stream()
+                .map(DtoMapper::toMenuTitleDto)
+                .collect(Collectors.toList());
+    }
+
+    private static MenuTitleDto toMenuTitleDto(Menu menu) {
+        return new MenuTitleDto(menu.getId(), menu.getName());
+    }
+
     private static ShoppingListItemDto toDto(ShoppingListItem entity) {
         return new ShoppingListItemDto(entity.getId(), entity.getName(), entity.isCompleted(), entity.getCategory().getId());
     }
@@ -145,5 +162,10 @@ public class DtoMapper {
         return new RecipeInRecipeBookSummaryDto(
                 recipe.getId(), recipe.getName(), recipe.getUrl()
         );
+    }
+
+    private static MenuItemDto toDto(MenuItem entity, Long languageId) {
+        RecipeDto recipeDto = toDto(entity.getRecipe(), languageId);
+        return new MenuItemDto(recipeDto, entity.getGroup(), entity.getOrder());
     }
 }

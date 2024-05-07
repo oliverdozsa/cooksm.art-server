@@ -100,3 +100,19 @@ POST    /shoppinglist/:id/remove    controllers.v1.ShoppingListController.remove
 POST    /shoppinglist/:id/complete  controllers.v1.ShoppingListController.completeItem(id: Long, request: Request)
 + jwtFilter
 POST    /shoppinglist/:id/undo      controllers.v1.ShoppingListController.undoItem(id: Long, request: Request)
+
+# Menu
++ jwtFilter
+POST    /menu                       controllers.v1.MenuController.create(request: Request)
+
++ jwtFilter
+GET     /menu/all                   controllers.v1.MenuController.getAll(request: Request)
+
++ jwtFilter
+DELETE  /menu/:id                   controllers.v1.MenuController.delete(id: Long, request: Request)
+
++ jwtFilter
+PUT     /menu/:id                   controllers.v1.MenuController.update(id: Long, request: Request)
+
++ jwtFilter
+GET     /menu/:id                   controllers.v1.MenuController.getById(id: Long, language: Long ?= 0, request: Request)

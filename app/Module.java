@@ -42,5 +42,7 @@ public class Module extends AbstractModule {
         bind(RecipeBooksService.class).asEagerSingleton();
         bind(ShoppingListRepository.class).to(EbeanShoppingListRepository.class).asEagerSingleton();
         bind(ShoppingListService.class).asEagerSingleton();
+        bind(MenuService.class).asEagerSingleton();
+        bind(MenuRepository.class).to(EbeanMenuRepository.class).asEagerSingleton();
     }
 }

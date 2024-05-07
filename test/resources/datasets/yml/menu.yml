@@ -1,0 +1,145 @@
+language:
+  - id: 1
+    iso_name: hu
+
+users:
+  - id: 1
+    email: alice@example.com
+    full_name: Alice
+
+  - id: 2
+    email: bob@example.com
+    full_name: Bob
+
+  - id: 3
+    email: charlie@example.com
+    full_name: Charlie
+
+  - id: 4
+    email: daniel@example.com
+    full_name: Danlie
+
+ingredient:
+  - id: 1
+  - id: 2
+  - id: 3
+
+ingredient_name:
+  - id: 1
+    name: ingredient_1
+    ingredient_id: 1
+    language_id: 1
+
+  - id: 2
+    name: ingredient_2
+    ingredient_id: 1
+    language_id: 1
+
+  - id: 3
+    name: ingredient_3
+    ingredient_id: 1
+    language_id: 1
+
+source_page:
+  - id: 1
+    name: src_pg_1
+    language_id: 1
+
+recipe:
+  - id: 1
+    name: recipe_1
+    url: recipe_1_url
+    time: 0
+    date_added: 2017-10-09 04:02:00
+    numofings: 0
+    source_page_id: 1
+
+  - id: 2
+    name: recipe_2
+    url: recipe_2_url
+    time: 0
+    date_added: 2017-10-09 04:03:00
+    numofings: 0
+    source_page_id: 1
+
+  - id: 3
+    name: recipe_3
+    url: recipe_3_url
+    time: 0
+    date_added: 2017-10-09 04:05:00
+    numofings: 0
+    source_page_id: 1
+
+  - id: 4
+    name: recipe_4
+    url: recipe_4_url
+    time: 0
+    date_added: 2017-10-09 04:06:00
+    numofings: 0
+    source_page_id: 1
+
+  - id: 5
+    name: recipe_4
+    url: recipe_5_url
+    time: 0
+    date_added: 2017-10-09 04:07:00
+    numofings: 0
+    source_page_id: 1
+
+menu:
+  - id: 1
+    user_id: 1
+    name: Alice's Menu
+
+  - id: 2
+    user_id: 3
+    name: Bob's Menu
+
+menu_item:
+  - id: 1
+    menu_id: 1
+    recipe_id: 1
+    item_group: 1
+    item_order: 1
+
+  - id: 2
+    menu_id: 1
+    recipe_id: 2
+    item_group: 1
+    item_order: 2
+
+  - id: 3
+    menu_id: 1
+    recipe_id: 3
+    item_group: 2
+    item_order: 1
+
+  - id: 4
+    menu_id: 1
+    recipe_id: 4
+    item_group: 2
+    item_order: 2
+
+  - id: 5
+    menu_id: 2
+    recipe_id: 4
+    item_group: 1
+    item_order: 1
+
+  - id: 6
+    menu_id: 2
+    recipe_id: 3
+    item_group: 1
+    item_order: 2
+
+  - id: 7
+    menu_id: 2
+    recipe_id: 2
+    item_group: 2
+    item_order: 1
+
+  - id: 8
+    menu_id: 2
+    recipe_id: 1
+    item_group: 2
+    item_order: 2
