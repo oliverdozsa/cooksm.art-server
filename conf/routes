@@ -103,16 +103,16 @@ POST    /shoppinglist/:id/undo      controllers.v1.ShoppingListController.undoIt
 
 # Menu
 + jwtFilter
-POST    /menu                       controllers.v1.MenuController.create(request: Request)
+POST    /menus                      controllers.v1.MenuController.create(request: Request)
 
 + jwtFilter
-GET     /menu/all                   controllers.v1.MenuController.getAll(request: Request)
+GET     /menus/all                  controllers.v1.MenuController.getAll(request: Request)
 
 + jwtFilter
-DELETE  /menu/:id                   controllers.v1.MenuController.delete(id: Long, request: Request)
+DELETE  /menus/:id                  controllers.v1.MenuController.delete(id: Long, request: Request)
 
 + jwtFilter
-PUT     /menu/:id                   controllers.v1.MenuController.update(id: Long, request: Request)
+PUT     /menus/:id                  controllers.v1.MenuController.update(id: Long, request: Request)
 
 + jwtFilter
-GET     /menu/:id                   controllers.v1.MenuController.getById(id: Long, language: Long ?= 0, request: Request)
+GET     /menus/:id                  controllers.v1.MenuController.getById(id: Long, language: Long ?= 0, request: Request)

@@ -129,7 +129,7 @@ public class MenuControllerTest {
 
         assertThat("Updated menu size should be 5", menuItems.size(), equalTo(5));
         JsonNode newlyAddedItem = menuItems.stream()
-                .filter(i -> i.get("recipeDto").get("id").asLong() == 5L)
+                .filter(i -> i.get("recipe").get("id").asLong() == 5L)
                 .findFirst()
                 .get();
 
@@ -178,7 +178,7 @@ public class MenuControllerTest {
         assertThat(nameOf(result), equalTo("Alice's Menu"));
         List<JsonNode> items = itemsOf(result);
         List<JsonNode> sortedItems = items.stream()
-                .sorted(Comparator.comparing(i -> i.get("recipeDto").get("id").asLong()))
+                .sorted(Comparator.comparing(i -> i.get("recipe").get("id").asLong()))
                 .collect(Collectors.toList());
 
         List<Integer> groups = sortedItems.stream().map(i -> i.get("group").asInt()).collect(Collectors.toList());
