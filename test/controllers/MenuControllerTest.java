@@ -48,6 +48,18 @@ public class MenuControllerTest {
         // Then
         assertThat(statusOf(result), equalTo(CREATED));
         assertThat(result, hasLocationHeader());
+
+        String locationUrl = result.headers().get("Location");
+        result = client.byLocation(locationUrl, 1L);
+
+        assertThat(contentAsString(result), statusOf(result), equalTo(OK));
+        assertThat(nameOf(result), equalTo("A New Menu"));
+        List<JsonNode> groups = groupsOf(result);
+        assertThat("Groups size is not 2.", groups.size(), equalTo(2));
+
+        groups.forEach(j -> {
+            assertThat("Number of recipes in group is not 2.", j.get("recipes").size(), equalTo(2));
+        });
     }
 
     @Test
@@ -167,8 +179,11 @@ public class MenuControllerTest {
         assertThat(contentAsString(result), statusOf(result), equalTo(OK));
         assertThat(nameOf(result), equalTo("Alice's Menu"));
         List<JsonNode> groups = groupsOf(result);
+        assertThat("Groups size is not 2.", groups.size(), equalTo(2));
 
-
+        groups.forEach(j -> {
+            assertThat("Number of recipes in group is not 2.", j.get("recipes").size(), equalTo(2));
+        });
     }
 
     @Test

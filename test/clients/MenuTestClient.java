@@ -77,4 +77,14 @@ public class MenuTestClient {
 
         return route(application, request);
     }
+
+    public Result byLocation(String url, Long userId) {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(GET)
+                .uri(url);
+        String jwt = JwtTestUtils.createToken(userId, application.config());
+        JwtTestUtils.addJwtTokenTo(request, jwt);
+
+        return route(application, request);
+    }
 }
