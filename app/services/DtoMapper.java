@@ -137,11 +137,11 @@ public class DtoMapper {
     }
 
     public static MenuDto toDto(Menu entity, Long languageId) {
-        List<MenuItemDto> menuItemDtos = entity.getMenuItems().stream()
-                .map(i -> DtoMapper.toDto(i, languageId))
+        List<MenuGroupDto> menuGroupDtos = entity.getGroups().stream()
+                .map(e -> DtoMapper.toMenuGroupDto(e, languageId))
                 .collect(Collectors.toList());
 
-        return new MenuDto(entity.getId(), entity.getName(), menuItemDtos);
+        return new MenuDto(entity.getId(), entity.getName(), menuGroupDtos);
     }
 
     public static List<MenuTitleDto> toMenuTitleDtos(List<Menu> menus) {
@@ -164,8 +164,10 @@ public class DtoMapper {
         );
     }
 
-    private static MenuItemDto toDto(MenuItem entity, Long languageId) {
-        RecipeDto recipeDto = toDto(entity.getRecipe(), languageId);
-        return new MenuItemDto(recipeDto, entity.getGroup(), entity.getOrder());
+    private static MenuGroupDto toMenuGroupDto(MenuGroup entity, Long languageId) {
+        List<RecipeDto> recipeDtos = entity.getRecipes().stream()
+                .map(r -> DtoMapper.toDto(r, languageId))
+                .collect(Collectors.toList());
+        return new MenuGroupDto(recipeDtos);
     }
 }

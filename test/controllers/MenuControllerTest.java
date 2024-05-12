@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.typesafe.config.Config;
 import dto.MenuCreateUpdateDto;
-import lombokized.dto.MenuItemDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,14 +13,11 @@ import play.mvc.Result;
 import rules.RuleChainForTests;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static extractors.DataFromResult.statusOf;
 import static extractors.MenuFromResult.*;
 import static matchers.ResultHasLocationHeader.hasLocationHeader;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static play.mvc.Http.Status.*;
@@ -109,12 +105,11 @@ public class MenuControllerTest {
     public void testReplace() {
         // Given
         MenuCreateUpdateDto menuToReplace = createAMenu();
+        MenuCreateUpdateDto.Group newGroup = new MenuCreateUpdateDto.Group();
+        newGroup.recipes = new ArrayList<>();
+        newGroup.recipes.add(5L);
 
-        MenuCreateUpdateDto.Item newItem = new MenuCreateUpdateDto.Item();
-        newItem.recipeId = 5L;
-        newItem.group = 3;
-        newItem.order = 4;
-        menuToReplace.items.add(newItem);
+        menuToReplace.groups.add(newGroup);
 
         // When
         Result result = client.update(1L, menuToReplace, 1L);
@@ -125,17 +120,12 @@ public class MenuControllerTest {
         result = client.getById(1L, 1L);
         assertThat(contentAsString(result), statusOf(result), equalTo(OK));
         assertThat(nameOf(result), equalTo("A New Menu"));
-        List<JsonNode> menuItems = itemsOf(result);
+        List<JsonNode> menuGroups = groupsOf(result);
 
-        assertThat("Updated menu size should be 5", menuItems.size(), equalTo(5));
-        JsonNode newlyAddedItem = menuItems.stream()
-                .filter(i -> i.get("recipe").get("id").asLong() == 5L)
-                .findFirst()
-                .get();
+        assertThat("Updated menu groups size should be 3", menuGroups.size(), equalTo(3));
+        Long newRecipeId = menuGroups.get(2).get("recipes").get(0).get("id").asLong();
 
-        assertThat(newlyAddedItem.get("group").asInt(), equalTo(3));
-        assertThat(newlyAddedItem.get("order").asInt(), equalTo(4));
-
+        assertThat(newRecipeId, equalTo(5L));
     }
 
     @Test
@@ -176,16 +166,9 @@ public class MenuControllerTest {
         // Then
         assertThat(contentAsString(result), statusOf(result), equalTo(OK));
         assertThat(nameOf(result), equalTo("Alice's Menu"));
-        List<JsonNode> items = itemsOf(result);
-        List<JsonNode> sortedItems = items.stream()
-                .sorted(Comparator.comparing(i -> i.get("recipe").get("id").asLong()))
-                .collect(Collectors.toList());
+        List<JsonNode> groups = groupsOf(result);
 
-        List<Integer> groups = sortedItems.stream().map(i -> i.get("group").asInt()).collect(Collectors.toList());
-        List<Integer> orders = sortedItems.stream().map(i -> i.get("order").asInt()).collect(Collectors.toList());
 
-        assertThat(groups, contains(1, 1, 2, 2));
-        assertThat(orders, contains(1, 2, 1, 2));
     }
 
     @Test
@@ -260,99 +243,60 @@ public class MenuControllerTest {
         assertThat(contentAsString(result), statusOf(result), equalTo(BAD_REQUEST));
     }
 
-    @Test
-    @DataSet(value = "datasets/yml/menu.yml", disableConstraints = true, cleanBefore = true)
-    public void testItemsAreNotUniqueWhenCreating() {
-        // Given
-        MenuCreateUpdateDto menu = createAMenu();
-        menu.items.add(menu.items.get(0));
-
-        // When
-        Result result = client.create(menu, 1L);
-
-        // Then
-        assertThat(contentAsString(result), statusOf(result), equalTo(BAD_REQUEST));
-    }
-
     private MenuCreateUpdateDto createAMenu() {
         MenuCreateUpdateDto menu = new MenuCreateUpdateDto();
         menu.name = "A New Menu";
 
-        MenuCreateUpdateDto.Item item1 = new MenuCreateUpdateDto.Item();
-        item1.recipeId = 1L;
-        item1.group = 1;
-        item1.order = 1;
+        MenuCreateUpdateDto.Group group1 = new MenuCreateUpdateDto.Group();
+        group1.recipes = new ArrayList<>();
+        group1.recipes.add(1L);
+        group1.recipes.add(2L);
 
-        MenuCreateUpdateDto.Item item2 = new MenuCreateUpdateDto.Item();
-        item2.recipeId = 2L;
-        item2.group = 1;
-        item2.order = 2;
+        MenuCreateUpdateDto.Group group2 = new MenuCreateUpdateDto.Group();
+        group2.recipes = new ArrayList<>();
+        group2.recipes.add(3L);
+        group2.recipes.add(4L);
 
-        MenuCreateUpdateDto.Item item3 = new MenuCreateUpdateDto.Item();
-        item3.recipeId = 3L;
-        item3.group = 2;
-        item3.order = 1;
-
-        MenuCreateUpdateDto.Item item4 = new MenuCreateUpdateDto.Item();
-        item4.recipeId = 4L;
-        item4.group = 2;
-        item4.order = 2;
-
-        menu.items = new ArrayList<>();
-        menu.items.add(item1);
-        menu.items.add(item2);
-        menu.items.add(item3);
-        menu.items.add(item4);
+        menu.groups = new ArrayList<>();
+        menu.groups.add(group1);
+        menu.groups.add(group2);
 
         return menu;
     }
 
     private MenuCreateUpdateDto createAMenuWithNotExistingRecipe() {
         MenuCreateUpdateDto menu = new MenuCreateUpdateDto();
-        menu.name = "A Bad Menu";
+        menu.name = "A New Menu";
 
-        MenuCreateUpdateDto.Item item1 = new MenuCreateUpdateDto.Item();
-        item1.recipeId = 1L;
-        item1.group = 1;
-        item1.order = 1;
+        MenuCreateUpdateDto.Group group1 = new MenuCreateUpdateDto.Group();
+        group1.recipes = new ArrayList<>();
+        group1.recipes.add(1L);
+        group1.recipes.add(2L);
 
-        MenuCreateUpdateDto.Item item2 = new MenuCreateUpdateDto.Item();
-        item2.recipeId = 2L;
-        item2.group = 1;
-        item2.order = 2;
+        MenuCreateUpdateDto.Group group2 = new MenuCreateUpdateDto.Group();
+        group2.recipes = new ArrayList<>();
+        group2.recipes.add(3L);
+        group2.recipes.add(42L);
 
-        MenuCreateUpdateDto.Item item3 = new MenuCreateUpdateDto.Item();
-        // Not existing recipe
-        item3.recipeId = 42L;
-        item3.group = 2;
-        item3.order = 1;
-
-        MenuCreateUpdateDto.Item item4 = new MenuCreateUpdateDto.Item();
-        item4.recipeId = 4L;
-        item4.group = 2;
-        item4.order = 2;
-
-        menu.items = new ArrayList<>();
-        menu.items.add(item1);
-        menu.items.add(item2);
-        menu.items.add(item3);
-        menu.items.add(item4);
+        menu.groups = new ArrayList<>();
+        menu.groups.add(group1);
+        menu.groups.add(group2);
 
         return menu;
     }
 
     private MenuCreateUpdateDto createMenuWithTooManyItems() {
         Config config = ruleChainForTests.getApplication().config();
-        int maxItems = config.getInt("cooksm.art.menu.maxitems");
+        int maxItems = config.getInt("cooksm.art.menu.maxrecipes");
 
         MenuCreateUpdateDto menuWithTooManyItems = createAMenu();
-        menuWithTooManyItems.items.clear();
+        menuWithTooManyItems.groups.clear();
+
+        MenuCreateUpdateDto.Group group = new MenuCreateUpdateDto.Group();
+        group.recipes = new ArrayList<>();
 
         for(int i = 0; i < maxItems + 1; i++) {
-            MenuCreateUpdateDto.Item item = new MenuCreateUpdateDto.Item();
-            item.order = i + 1;
-            item.group = i % 5 + 1;
-            menuWithTooManyItems.items.add(item);
+            group.recipes.add(1L);
         }
 
         return menuWithTooManyItems;

@@ -13,9 +13,9 @@ public class MenuFromResult {
         return json.get("name").asText();
     }
 
-    public static List<JsonNode> itemsOf(Result result) {
+    public static List<JsonNode> groupsOf(Result result) {
         ListOfValuesFromResult<JsonNode> items = new ListOfValuesFromResult<JsonNode>()
-                .select("$.items")
+                .select("$.groups")
                 .converting(n -> n);
 
         return items.of(result);

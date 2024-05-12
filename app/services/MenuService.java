@@ -26,20 +26,23 @@ public class MenuService {
     @Inject
     private LanguageService languageService;
 
-    private final int maxItemsPerMenu;
+    private final int maxRecipesPerMenu;
 
     private static final Logger.ALogger logger = Logger.of(MenuService.class);
 
     @Inject
     public MenuService(Config config) {
-        maxItemsPerMenu = config.getInt("cooksm.art.menu.maxitems");
+        maxRecipesPerMenu = config.getInt("cooksm.art.menu.maxrecipes");
     }
 
     public CompletionStage<Long> create(MenuCreateUpdateDto menu, Long userId) {
         logger.info("create(): menu = {}, userId = {}", menu);
         return supplyAsync(() -> {
-            if(menu.items.size() > maxItemsPerMenu) {
-                String logMessage = "Too many items in menu. Max. allowed: " + maxItemsPerMenu;
+            int totalRecipes = menu.groups.stream()
+                    .map(g -> g.recipes.size())
+                    .reduce(0, Integer::sum);
+            if (totalRecipes > maxRecipesPerMenu) {
+                String logMessage = "Too many recipes in menu. Max. allowed: " + maxRecipesPerMenu;
                 logger.warn(logMessage);
                 throw new BusinessLogicViolationException(logMessage);
             }
@@ -55,8 +58,11 @@ public class MenuService {
     public CompletionStage<Void> update(Long menuId, MenuCreateUpdateDto menu, Long userId) {
         logger.info("update(): menuId = {}, menu = {}, userId = {}", menuId, menu, userId);
         return runAsync(() -> {
-            if(menu.items.size() > maxItemsPerMenu) {
-                String logMessage = "Too many items in menu. Max. allowed: " + maxItemsPerMenu;
+            int totalRecipes = menu.groups.stream()
+                    .map(g -> g.recipes.size())
+                    .reduce(0, Integer::sum);
+            if (totalRecipes > maxRecipesPerMenu) {
+                String logMessage = "Too many recipes in menu. Max. allowed: " + maxRecipesPerMenu;
                 logger.warn(logMessage);
                 throw new BusinessLogicViolationException(logMessage);
             }

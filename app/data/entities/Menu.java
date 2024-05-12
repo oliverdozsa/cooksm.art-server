@@ -15,12 +15,12 @@ public class Menu {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<MenuItem> menuItems = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "menu", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<MenuGroup> groups = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -38,19 +38,19 @@ public class Menu {
         this.name = name;
     }
 
-    public List<MenuItem> getMenuItems() {
-        return menuItems;
-    }
-
-    public void setMenuItems(List<MenuItem> menuItems) {
-        this.menuItems = menuItems;
-    }
-
     public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<MenuGroup> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<MenuGroup> groups) {
+        this.groups = groups;
     }
 }

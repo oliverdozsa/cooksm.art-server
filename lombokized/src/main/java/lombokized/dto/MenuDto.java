@@ -8,5 +8,5 @@ import java.util.List;
 public class MenuDto {
     private final Long id;
     private final String name;
-    private final List<MenuItemDto> items;
+    private final List<MenuGroupDto> groups;
 }

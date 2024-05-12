@@ -2,7 +2,7 @@ package data.repositories.imp;
 
 import com.typesafe.config.Config;
 import data.entities.Menu;
-import data.entities.MenuItem;
+import data.entities.MenuGroup;
 import data.entities.Recipe;
 import data.entities.User;
 import data.repositories.MenuRepository;
@@ -14,10 +14,9 @@ import io.ebean.EbeanServer;
 import play.Logger;
 
 import javax.inject.Inject;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static data.repositories.imp.EbeanRepoUtils.assertEntitiesExist;
 import static data.repositories.imp.EbeanRepoUtils.assertEntityExists;
@@ -38,9 +37,11 @@ public class EbeanMenuRepository implements MenuRepository {
     public Menu create(MenuCreateUpdateDto request, Long userId) {
         logger.info("create(): request = {}, userId = {}", request, userId);
 
-        Set<Long> recipeIds = request.items.stream()
-                .map(i -> i.recipeId)
+        Set<Long> recipeIds = request.groups.stream()
+                .map(g -> g.recipes)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+
         assertEntityExists(ebean, User.class, userId);
         assertEntitiesExist(ebean, Recipe.class, "id", recipeIds);
 
@@ -71,12 +72,12 @@ public class EbeanMenuRepository implements MenuRepository {
         logger.info("update(): menuId = {}, request = {}, userId = {}", menuId, request, userId);
         Menu menu = getOrNotFoundMenuFor(menuId, userId);
 
-        List<Long> itemsToRemove = menu.getMenuItems().stream()
-                .map(MenuItem::getId)
+        List<Long> groupsToRemove = menu.getGroups().stream()
+                .map(MenuGroup::getId)
                 .collect(Collectors.toList());
-        ebean.createQuery(MenuItem.class)
+        ebean.createQuery(MenuGroup.class)
                 .where()
-                .in("id", itemsToRemove)
+                .in("id", groupsToRemove)
                 .delete();
 
         populateMenuFrom(request, menu);
@@ -115,13 +116,21 @@ public class EbeanMenuRepository implements MenuRepository {
     private void populateMenuFrom(MenuCreateUpdateDto request, Menu menu) {
         menu.setName(request.name);
 
-        request.items.forEach(requestItem -> {
-            MenuItem menuItem = new MenuItem();
-            menuItem.setGroup(requestItem.group);
-            menuItem.setOrder(requestItem.order);
-            menuItem.setRecipe(Ebean.find(Recipe.class, requestItem.recipeId));
-
-            menu.getMenuItems().add(menuItem);
+        request.groups.forEach(requestGroup -> {
+            MenuGroup entityGroup = toEntityGroup(requestGroup);
+            menu.getGroups().add(entityGroup);
         });
+    }
+
+    private MenuGroup toEntityGroup(MenuCreateUpdateDto.Group requestGroup) {
+        MenuGroup entityGroup = new MenuGroup();
+
+        List<Recipe> recipes = requestGroup.recipes.stream()
+                .map(id -> Ebean.find(Recipe.class, id))
+                .collect(Collectors.toList());
+
+        entityGroup.setRecipes(recipes);
+
+        return entityGroup;
     }
 }

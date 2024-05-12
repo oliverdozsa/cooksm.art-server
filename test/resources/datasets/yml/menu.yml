@@ -95,51 +95,40 @@ menu:
     user_id: 3
     name: Bob's Menu
 
-menu_item:
+menu_group:
   - id: 1
     menu_id: 1
-    recipe_id: 1
-    item_group: 1
-    item_order: 1
 
   - id: 2
     menu_id: 1
-    recipe_id: 2
-    item_group: 1
-    item_order: 2
 
   - id: 3
-    menu_id: 1
-    recipe_id: 3
-    item_group: 2
-    item_order: 1
+    menu_id: 2
 
   - id: 4
-    menu_id: 1
-    recipe_id: 4
-    item_group: 2
-    item_order: 2
-
-  - id: 5
     menu_id: 2
-    recipe_id: 4
-    item_group: 1
-    item_order: 1
 
-  - id: 6
-    menu_id: 2
-    recipe_id: 3
-    item_group: 1
-    item_order: 2
-
-  - id: 7
-    menu_id: 2
-    recipe_id: 2
-    item_group: 2
-    item_order: 1
-
-  - id: 8
-    menu_id: 2
+menu_group_recipe:
+  - group_id: 1
     recipe_id: 1
-    item_group: 2
-    item_order: 2
+
+  - group_id: 1
+    recipe_id: 2
+
+  - group_id: 2
+    recipe_id: 3
+
+  - group_id: 2
+    recipe_id: 4
+
+  - group_id: 3
+    recipe_id: 4
+
+  - group_id: 3
+    recipe_id: 3
+
+  - group_id: 4
+    recipe_id: 2
+
+  - group_id: 4
+    recipe_id: 1
