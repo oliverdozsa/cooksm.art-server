@@ -197,6 +197,7 @@ public class EbeanRecipeRepository implements RecipeRepository {
             query.where().ilike("name", "%" + params.getNameLike() + "%");
         } else {
             query.setParameter("nameLike", params.getNameLike());
+            query.setParameter("nameLikeForIlike", "%"+params.getNameLike()+"%");
         }
     }
 
